@@ -1,0 +1,25 @@
+.well h1 {
+    color: #115511;
+}
+
+body {
+    padding-top: 90px;
+}
+.navbar-brand, .navbar-nav > li > a {
+    line-height: 45px;
+    font-size: 150%;
+}
+#navbar-icon {
+    margin: 0.25em;
+}
+
+.btn-download {
+    width: 100%;
+    border-color: rgba(0, 0, 0, 0.1);
+    background-image: linear-gradient(to bottom,#62c462,#51a351);
+}
+
+a.btn-download {
+    color: white;
+
+}
