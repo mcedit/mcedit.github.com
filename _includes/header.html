@@ -25,18 +25,21 @@
                   <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{{ site.baseurl }}/">
-                    <img id="navbar-icon" src="images/icon_new.png">{{ site.name }}
+                    <img id="navbar-icon" src="/images/icon_new.png">{{ site.name }}
                 </a>
               </div>
               <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="{{ site.baseurl }}/">Home</a></li>
                     <li class="active visible-xs-block"><a href="{{ site.baseurl }}/links.html">Links</a></li>
-                    <li class="active"><a href="{{ site.baseurl }}/archive.html">Archive</a></li>
                     <li class="active"><a href="{{ site.baseurl }}/about.html">About</a></li>
+                    <li class="active"><a href="https://github.com/{{ site.github }}/issues">Report Issue</a></li>
                     {% if site.github != '' %}
-                      <li class="active"><a href="https://github.com/{{ site.github }}">Github</a></li>
+                      <li class="active"><a href="https://github.com/{{ site.github }}">Develop</a></li>
                     {% endif %}
+                    <li class="active"><a href="http://khroki.github.io/MCEdit-Unified/">MCEdit 1.x</a></li>
+                    <li class="active"><a href="http://www.patreon.com/mcedit2" style="color:#77FF77">Donate</a></li>
+
                 </ul>
               </div>
         </div>

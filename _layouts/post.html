@@ -8,7 +8,8 @@
         <div class="col-md-9">
           <div class="article">
             <div class="">
-                <h1><a href="{{ site.baseurl}}{{ page.url }}">{{ page.date | date: "%b %-d, %Y" }} - {{ page.title }}</a></h1>
+                <h1><a href="{{ site.baseurl}}{{ page.url }}">{{ page.title }}</a></h1>
+                <time>{{ page.date | date: "%b %-d, %Y" }}</time>
             {% if site.comments == true and page.comments == true and site.disqus != '' %}
                 <p class="author"><a href="#disqus_thread">Comments</a></p>
             {% endif %}

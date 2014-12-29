@@ -1,9 +1,18 @@
 <div class="sidebar well">
 
-<a href="http://github.com/mcedit/mcedit2/releases" class="btn btn-default btn-download">
-    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
-          style="margin-right:10px"></span>Download MCEdit</a>
+    <a href="http://github.com/mcedit/mcedit2/releases" class="btn btn-default btn-download">
+        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
+              style="margin-right:10px"></span>Download MCEdit</a>
+    <div class="latest-version">
+        Latest version: <em>Tech Demo</em>
+    </div>
+    <ul class="dl-links">
+        <li class="li-icon-windows">
+            <a href="https://github.com/mcedit/mcedit2/releases/download/v2.0-tech-demo/mcedit2-tech-demo-win-amd64.exe">Windows (64-bit only)</a>
 
+        </li>
+
+    </ul>
 </div>
 
 <div class="sidebar well">
@@ -13,8 +22,17 @@
           <li><a href="{{ site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
         {% endfor %}
     </ul>
+    <a href="{{ site.baseurl }}/archive.html">Post Archive</a>
+
 </div>
 
 <div class="sidebar well">
 {% include links-list.html %}
+</div>
+
+<div class="sidebar well">
+<div class="twitter-feed">
+      <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/codewarrior0" data-widget-id="400404263072849920">Tweets by @codewarrior0</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </div>
 </div>

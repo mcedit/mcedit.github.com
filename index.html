@@ -1,11 +1,21 @@
 ---
 layout: default
 ---
-
+<div>
+    <h1>MCEdit: World Editor for Minecraft</h1>
+    <img src="/images/icon_new.png" class="pull-left" style="margin: 5px">
+    MCEdit is a saved game editor for Minecraft. Since Minecraft saved games contain every single element of the
+    world the player is playing in, it has much more in common with 3D world, map, and terrain editors than
+    traditional saved game editors. MCEdit has been developed since 2010 with the original goal of allowing Classic
+    levels to be played in the full version of Minecraft, but has since evolved into a full featured editor and is
+    currently undergoing a thorough rewrite for version 2.0.
+</div>
+<hr>
 {% for post in paginator.posts %}
 <div class="article">
     <div class="">
-        <h1><a href="{{ site.baseurl}}{{ post.url }}">{{ post.date | date: "%b %-d, %Y" }} - {{ post.title }}</a></h1>
+        <h1><a href="{{ site.baseurl}}{{ post.url }}">{{ post.title }}</a></h1>
+        <time>{{ post.date | date: "%b %-d, %Y" }}</time>
         {% if site.comments == true and post.comments == true and site.disqus != '' %}
           <p class="author"><a href="{{ site.baseurl }}{{ post.url }}/#disqus_thread">Comments</a></p>
         {% endif %}
@@ -28,4 +38,16 @@ layout: default
   {% if paginator.next_page %}
     <a class="btn btn-default" href="{{ site.baseurl}}/page{{ paginator.next_page }}" class="next">Older</a>
   {% endif %}
+</div>
+<div class="google-ads">
+    <script type="text/javascript"><!--
+    google_ad_client = "ca-pub-2531273453064153";
+    /* MCEdit.net front page ad */
+    google_ad_slot = "9311625741";
+    google_ad_width = 336;
+    google_ad_height = 280;
+    //-->
+    </script>
+    <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
 </div>

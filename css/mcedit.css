@@ -2,15 +2,21 @@
     color: #115511;
 }
 
-body {
-    padding-top: 90px;
-}
 .navbar-brand, .navbar-nav > li > a {
-    line-height: 45px;
-    font-size: 150%;
+    font-size: 120%;
 }
+.navbar-brand {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.navbar-inverse .navbar-brand {
+    color: #DDD;
+}
+
 #navbar-icon {
     margin: 0.25em;
+    padding-right: 5px;
 }
 
 .btn-download {
@@ -22,4 +28,29 @@ body {
 a.btn-download {
     color: white;
 
+}
+/* --- download links --- */
+.latest-version {
+    margin: 12px;
+}
+.dl-links {
+    list-style: none;
+}
+
+.dl-links li {
+    line-height: 26px;
+    padding-left: 26px;
+}
+/* --- icons --- */
+
+.li-icon-windows {
+    background: url("/images/icon-windows.png") 0 2px no-repeat;
+}
+
+.li-icon-linux {
+    background-image: url("/images/icon-linux.png")
+}
+
+.li-icon-apple {
+    background-image: url("/images/icon-apple.png")
 }
