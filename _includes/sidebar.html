@@ -4,7 +4,8 @@
         <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
               style="margin-right:10px"></span>Download MCEdit</a>
     <div class="latest-version">
-        Latest version: <em>2.0.0-alpha1</em>
+        {% capture latest_version %} {% include latest-version.md %} {% endcapture %}
+        {{ latest_version | markdownify }}
     </div>
     <ul class="dl-links">
         <li class="li-icon-windows">
