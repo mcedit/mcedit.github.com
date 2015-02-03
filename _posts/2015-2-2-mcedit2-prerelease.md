@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "MCEdit 2.0 alpha 2.0.0a1 released"
+title: "MCEdit 2.0 alpha 2.0.0-alpha1 released"
 date: 2015-2-2 15:00:00 -1000
 comments: true
 ---
