@@ -1,0 +1,665 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.minecraft_server &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.minecraft_server</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   minecraft_server.py</span>
+
+<span class="sd">   Launches the Minecraft Server to generate chunks in a world.</span>
+<span class="sd">   Generates chunks directly into the world, or generates them into</span>
+<span class="sd">   a cached temporary world and copies only the requested chunks.</span>
+
+<span class="sd">   Also downloads the latest minecraft server and stores it in a</span>
+<span class="sd">   ~/.mceditlib/ServerJarStorage directory in the user&#39;s home folder.</span>
+<span class="sd">   Can check for updates and download them, and can launch user-supplied</span>
+<span class="sd">   servers once placed in the storage directory.</span>
+
+<span class="sd">   Very embarrassing code here.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">basename</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">worldeditor</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">ChunkNotPresent</span>
+<span class="kn">from</span> <span class="nn">mceditlib.directories</span> <span class="kn">import</span> <span class="n">appSupportDir</span>
+<span class="kn">from</span> <span class="nn">mceditlib.util</span> <span class="kn">import</span> <span class="n">exhaust</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Rio&#39;</span>
+
+<span class="c"># Thank you, Stackoverflow</span>
+<span class="c"># http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</span>
+<div class="viewcode-block" id="which"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.which">[docs]</a><span class="k">def</span> <span class="nf">which</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">is_exe</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span>
+
+    <span class="n">fpath</span><span class="p">,</span> <span class="n">_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fpath</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_exe</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">program</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&quot;win32&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;SYSTEMROOT&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+                <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;SYSTEMROOT&quot;</span><span class="p">]</span>
+                <span class="n">exe_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">program</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_exe</span><span class="p">(</span><span class="n">exe_file</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">exe_file</span>
+        <span class="k">if</span> <span class="s">&quot;PATH&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PATH&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">):</span>
+                <span class="n">exe_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">program</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_exe</span><span class="p">(</span><span class="n">exe_file</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">exe_file</span>
+
+    <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<span class="n">convert</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">text</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="n">text</span>
+<span class="n">alphanum_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">key</span><span class="p">:</span> <span class="p">[</span><span class="n">convert</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;([0-9]+)&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">)]</span>
+
+
+<div class="viewcode-block" id="sort_nicely"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.sort_nicely">[docs]</a><span class="k">def</span> <span class="nf">sort_nicely</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Sort the given list in the way that humans expect.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">alphanum_key</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ServerJarStorage"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage">[docs]</a><span class="k">class</span> <span class="nc">ServerJarStorage</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">defaultCacheDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">appSupportDir</span><span class="p">,</span> <span class="s">u&quot;ServerJarStorage&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cacheDir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cacheDir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cacheDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultCacheDir</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span> <span class="o">=</span> <span class="n">cacheDir</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">)</span>
+        <span class="n">readme</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">,</span> <span class="s">&quot;README.TXT&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">readme</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">readme</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">About this folder:</span>
+
+<span class="s">This folder is used by MCEdit and mceditlib to store different versions of the</span>
+<span class="s">Minecraft Server to use for terrain generation. It should have one or more</span>
+<span class="s">subfolders, one for each version of the server. Each subfolder must hold at</span>
+<span class="s">least one file named minecraft_server.jar, and the subfolder&#39;s name should</span>
+<span class="s">have the server&#39;s version plus the names of any installed mods.</span>
+
+<span class="s">There may already be a subfolder here (for example, &quot;Beta 1.7.3&quot;) if you have</span>
+<span class="s">used the Chunk Create feature in MCEdit to create chunks using the server.</span>
+
+<span class="s">Version numbers can be automatically detected. If you place one or more</span>
+<span class="s">minecraft_server.jar files in this folder, they will be placed automatically</span>
+<span class="s">into well-named subfolders the next time you run MCEdit. If a file&#39;s name</span>
+<span class="s">begins with &quot;minecraft_server&quot; and ends with &quot;.jar&quot;, it will be detected in</span>
+<span class="s">this way.</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloadVersions</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ServerJarStorage.reloadVersions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage.reloadVersions">[docs]</a>    <span class="k">def</span> <span class="nf">reloadVersions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cacheDirList</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">versions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cacheDirList</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jarfileForVersion</span><span class="p">(</span><span class="n">v</span><span class="p">))],</span> <span class="n">key</span><span class="o">=</span><span class="n">alphanum_key</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">MCServerChunkGenerator</span><span class="o">.</span><span class="n">javaExe</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">cacheDirList</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;minecraft_server&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.jar&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="s">&quot;Unclassified minecraft_server.jar found in cache dir. Discovering version number...&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cacheNewVersion</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&quot;Minecraft_Server.jar storage initialized.&quot;</span>
+        <span class="k">print</span> <span class="s">u&quot;Each server is stored in a subdirectory of {0} named with the server&#39;s version number&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&quot;Cached servers: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">versions</span>
+</div>
+<div class="viewcode-block" id="ServerJarStorage.downloadCurrentServer"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage.downloadCurrentServer">[docs]</a>    <span class="k">def</span> <span class="nf">downloadCurrentServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;Downloading the latest Minecraft Server...&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="s">&quot;http://www.minecraft.net/download/minecraft_server.jar&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error downloading server: {0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cacheNewVersion</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">allowDuplicate</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ServerJarStorage.cacheNewVersion"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage.cacheNewVersion">[docs]</a>    <span class="k">def</span> <span class="nf">cacheNewVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">allowDuplicate</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Finds the version number from the server jar at filename and copies</span>
+<span class="sd">        it into the proper subfolder of the server jar cache folder&quot;&quot;&quot;</span>
+
+        <span class="n">version</span> <span class="o">=</span> <span class="n">MCServerChunkGenerator</span><span class="o">.</span><span class="n">_serverVersionFromJarFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;Found version &quot;</span><span class="p">,</span> <span class="n">version</span>
+        <span class="n">versionDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">newVersionDir</span> <span class="o">=</span> <span class="n">versionDir</span>
+        <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newVersionDir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">allowDuplicate</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="n">newVersionDir</span> <span class="o">=</span> <span class="n">versionDir</span> <span class="o">+</span> <span class="s">&quot; (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;)&quot;</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newVersionDir</span><span class="p">)</span>
+
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newVersionDir</span><span class="p">,</span> <span class="s">&quot;minecraft_server.jar&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ServerJarStorage.jarfileForVersion"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage.jarfileForVersion">[docs]</a>    <span class="k">def</span> <span class="nf">jarfileForVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s">&quot;minecraft_server.jar&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getfilesystemencoding</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="ServerJarStorage.checksumForVersion"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage.checksumForVersion">[docs]</a>    <span class="k">def</span> <span class="nf">checksumForVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="n">jf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jarfileForVersion</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">jf</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">hashlib</span>
+            <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</div>
+    <span class="n">broken_versions</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Beta 1.9 Prerelease {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ServerJarStorage.latestVersion"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage.latestVersion">[docs]</a>    <span class="k">def</span> <span class="nf">latestVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">((</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">versions</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">broken_versions</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">alphanum_key</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ServerJarStorage.getJarfile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.ServerJarStorage.getJarfile">[docs]</a>    <span class="k">def</span> <span class="nf">getJarfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;No servers found in cache.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">downloadCurrentServer</span><span class="p">()</span>
+
+        <span class="n">version</span> <span class="o">=</span> <span class="n">version</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">latestVersion</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jarfileForVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="JavaNotFound"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.JavaNotFound">[docs]</a><span class="k">class</span> <span class="nc">JavaNotFound</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="VersionNotFound"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.VersionNotFound">[docs]</a><span class="k">class</span> <span class="nc">VersionNotFound</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="readProperties"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.readProperties">[docs]</a><span class="k">def</span> <span class="nf">readProperties</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">properties</span>
+
+</div>
+<div class="viewcode-block" id="saveProperties"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.saveProperties">[docs]</a><span class="k">def</span> <span class="nf">saveProperties</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;{0}={1}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="findJava"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.findJava">[docs]</a><span class="k">def</span> <span class="nf">findJava</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&quot;win32&quot;</span><span class="p">:</span>
+        <span class="n">javaExe</span> <span class="o">=</span> <span class="n">which</span><span class="p">(</span><span class="s">&quot;java.exe&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">javaExe</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">KEY_NAME</span> <span class="o">=</span> <span class="s">&quot;HKLM\SOFTWARE\JavaSoft\Java Runtime Environment&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s">&quot;REG&quot;</span><span class="p">,</span> <span class="s">&quot;QUERY&quot;</span><span class="p">,</span> <span class="n">KEY_NAME</span><span class="p">,</span> <span class="s">&quot;/v&quot;</span><span class="p">,</span> <span class="s">&quot;CurrentVersion&quot;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">universal_newlines</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">o</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                    <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;CurrentVersion&quot;</span><span class="p">):</span>
+                        <span class="n">words</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="n">version</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s">&quot;REG&quot;</span><span class="p">,</span> <span class="s">&quot;QUERY&quot;</span><span class="p">,</span> <span class="n">KEY_NAME</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">version</span><span class="p">,</span> <span class="s">&quot;/v&quot;</span><span class="p">,</span> <span class="s">&quot;JavaHome&quot;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">universal_newlines</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="n">o</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                        <span class="n">lines</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                            <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;JavaHome&quot;</span><span class="p">):</span>
+                                <span class="n">w</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="n">javaHome</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="n">javaExe</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">javaHome</span><span class="p">,</span> <span class="s">&quot;bin&quot;</span><span class="p">,</span> <span class="s">&quot;java.exe&quot;</span><span class="p">)</span>
+                                <span class="k">print</span> <span class="s">&quot;RegQuery: java.exe found at &quot;</span><span class="p">,</span> <span class="n">javaExe</span>
+                                <span class="k">break</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Error while locating java.exe using the Registry: &quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">javaExe</span> <span class="o">=</span> <span class="n">which</span><span class="p">(</span><span class="s">&quot;java&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">javaExe</span>
+
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator">[docs]</a><span class="k">class</span> <span class="nc">MCServerChunkGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates chunks using minecraft_server.jar. Uses a ServerJarStorage to</span>
+<span class="sd">    store different versions of minecraft_server.jar in an application support</span>
+<span class="sd">    folder.</span>
+
+<span class="sd">        from mceditlib import *</span>
+
+<span class="sd">    Example usage:</span>
+
+<span class="sd">        gen = MCServerChunkGenerator()  # with no arguments, use the newest</span>
+<span class="sd">                                        # server version in the cache, or download</span>
+<span class="sd">                                        # the newest one automatically</span>
+<span class="sd">        level = loadWorldNamed(&quot;MyWorld&quot;)</span>
+
+<span class="sd">        gen.generateChunkInLevel(level, 12, 24)</span>
+
+
+<span class="sd">    Using an older version:</span>
+
+<span class="sd">        gen = MCServerChunkGenerator(&quot;Beta 1.6.5&quot;)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">defaultJarStorage</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">javaExe</span> <span class="o">=</span> <span class="n">findJava</span><span class="p">()</span>
+    <span class="n">jarStorage</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">tempWorldCache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">jarfile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">jarStorage</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">jarStorage</span> <span class="o">=</span> <span class="n">jarStorage</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultJarStorage</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">javaExe</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">JavaNotFound</span><span class="p">(</span><span class="s">&quot;Could not find java. Please check that java is installed correctly. (Could not find java in your PATH environment variable.)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">jarfile</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">jarfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jarStorage</span><span class="o">.</span><span class="n">getJarfile</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">jarfile</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VersionNotFound</span><span class="p">(</span><span class="s">&quot;Could not find minecraft_server.jar for version {0}. Please make sure that a minecraft_server.jar is placed under {1} in a subfolder named after the server&#39;s version number.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span> <span class="ow">or</span> <span class="s">&quot;(latest)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jarStorage</span><span class="o">.</span><span class="n">cacheDir</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverJarFile</span> <span class="o">=</span> <span class="n">jarfile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverVersion</span> <span class="o">=</span> <span class="n">version</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serverVersion</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="MCServerChunkGenerator.getDefaultJarStorage"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.getDefaultJarStorage">[docs]</a>    <span class="k">def</span> <span class="nf">getDefaultJarStorage</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">defaultJarStorage</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">defaultJarStorage</span> <span class="o">=</span> <span class="n">ServerJarStorage</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">defaultJarStorage</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="MCServerChunkGenerator.clearWorldCache"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.clearWorldCache">[docs]</a>    <span class="k">def</span> <span class="nf">clearWorldCache</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">tempWorldCache</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">tempDir</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">worldCacheDir</span><span class="p">):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">worldCacheDir</span><span class="p">,</span> <span class="n">tempDir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.createReadme"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.createReadme">[docs]</a>    <span class="k">def</span> <span class="nf">createReadme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">readme</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldCacheDir</span><span class="p">,</span> <span class="s">&quot;README.TXT&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">readme</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">readme</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    About this folder:</span>
+
+<span class="s">    This folder is used by MCEdit and mceditlib to cache levels during terrain</span>
+<span class="s">    generation. Feel free to delete it for any reason.</span>
+<span class="s">    &quot;&quot;&quot;</span><span class="p">)</span>
+</div>
+    <span class="n">worldCacheDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s">&quot;mceditlib_MCServerChunkGenerator&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MCServerChunkGenerator.tempWorldForLevel"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.tempWorldForLevel">[docs]</a>    <span class="k">def</span> <span class="nf">tempWorldForLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+
+        <span class="c"># tempDir = tempfile.mkdtemp(&quot;mclevel_servergen&quot;)</span>
+        <span class="n">tempDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldCacheDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jarStorage</span><span class="o">.</span><span class="n">checksumForVersion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverVersion</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="o">.</span><span class="n">RandomSeed</span><span class="p">))</span>
+        <span class="n">propsFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempDir</span><span class="p">,</span> <span class="s">&quot;server.properties&quot;</span><span class="p">)</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">readProperties</span><span class="p">(</span><span class="n">propsFile</span><span class="p">)</span>
+
+        <span class="n">tempWorld</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempWorldCache</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">serverVersion</span><span class="p">,</span> <span class="n">level</span><span class="o">.</span><span class="n">RandomSeed</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">tempWorld</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tempDir</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">tempDir</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createReadme</span><span class="p">()</span>
+
+            <span class="n">worldName</span> <span class="o">=</span> <span class="s">&quot;world&quot;</span>
+            <span class="n">worldName</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&quot;level-name&quot;</span><span class="p">,</span> <span class="n">worldName</span><span class="p">)</span>
+
+            <span class="n">tempWorldDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempDir</span><span class="p">,</span> <span class="n">worldName</span><span class="p">)</span>
+            <span class="n">tempWorld</span> <span class="o">=</span> <span class="n">worldeditor</span><span class="o">.</span><span class="n">WorldEditor</span><span class="p">(</span><span class="n">tempWorldDir</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tempWorldDir</span><span class="p">),</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">level</span><span class="o">.</span><span class="n">RandomSeed</span><span class="p">)</span>
+            <span class="n">tempWorld</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="n">tempWorldRO</span> <span class="o">=</span> <span class="n">worldeditor</span><span class="o">.</span><span class="n">WorldEditor</span><span class="p">(</span><span class="n">tempWorldDir</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">tempWorldCache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">serverVersion</span><span class="p">,</span> <span class="n">level</span><span class="o">.</span><span class="n">RandomSeed</span><span class="p">]</span> <span class="o">=</span> <span class="n">tempWorldRO</span>
+
+        <span class="k">if</span> <span class="n">level</span><span class="o">.</span><span class="n">dimNo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s">&quot;allow-nether&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;false&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tempWorld</span> <span class="o">=</span> <span class="n">tempWorld</span><span class="o">.</span><span class="n">getDimension</span><span class="p">(</span><span class="n">level</span><span class="o">.</span><span class="n">dimNo</span><span class="p">)</span>
+
+            <span class="n">properties</span><span class="p">[</span><span class="s">&quot;allow-nether&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;true&quot;</span>
+
+        <span class="n">properties</span><span class="p">[</span><span class="s">&quot;server-port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">32767</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="mi">32700</span><span class="p">)</span>
+        <span class="n">saveProperties</span><span class="p">(</span><span class="n">propsFile</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.generateAtPosition"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.generateAtPosition">[docs]</a>    <span class="k">def</span> <span class="nf">generateAtPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generateAtPositionIter</span><span class="p">(</span><span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.generateAtPositionIter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.generateAtPositionIter">[docs]</a>    <span class="k">def</span> <span class="nf">generateAtPositionIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">simulate</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">tempWorldRW</span> <span class="o">=</span> <span class="n">worldeditor</span><span class="o">.</span><span class="n">WorldEditor</span><span class="p">(</span><span class="n">tempWorld</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">tempWorldRW</span><span class="o">.</span><span class="n">setWorldSpawnPosition</span><span class="p">((</span><span class="n">cx</span> <span class="o">*</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">cz</span> <span class="o">*</span> <span class="mi">16</span><span class="p">))</span>
+        <span class="n">tempWorldRW</span><span class="o">.</span><span class="n">saveChanges</span><span class="p">()</span>
+        <span class="n">tempWorldRW</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">tempWorldRW</span>
+
+        <span class="n">tempWorld</span><span class="o">.</span><span class="n">unload</span><span class="p">()</span>
+
+        <span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runServer</span><span class="p">(</span><span class="n">tempDir</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">line</span>
+
+<span class="c">#            Forge and FML change stderr output, causing MCServerChunkGenerator to wait endlessly.</span>
+<span class="c">#</span>
+<span class="c">#            Vanilla:</span>
+<span class="c">#              2012-11-13 11:29:19 [INFO] Done (9.962s)!</span>
+<span class="c">#</span>
+<span class="c">#            Forge/FML:</span>
+<span class="c">#              2012-11-13 11:47:13 [INFO] [Minecraft] Done (8.020s)!</span>
+
+            <span class="k">if</span> <span class="s">&quot;[INFO]&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="s">&quot;Done&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">simulate</span><span class="p">:</span>
+                    <span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">startTime</span>
+
+                    <span class="n">simSeconds</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">simSeconds</span><span class="p">):</span>
+                        <span class="c"># process tile ticks</span>
+                        <span class="k">yield</span> <span class="s">&quot;</span><span class="si">%2d</span><span class="s">/</span><span class="si">%2d</span><span class="s">: Simulating the world for a little bit...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">simSeconds</span><span class="p">)</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;stop</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="s">&quot;FAILED TO BIND&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Server failed to bind to port!&quot;</span><span class="p">)</span>
+
+        <span class="n">stdout</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s">&quot;Could not reserve enough space&quot;</span> <span class="ow">in</span> <span class="n">stdout</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">MCServerChunkGenerator</span><span class="o">.</span><span class="n">lowMemory</span><span class="p">:</span>
+            <span class="n">MCServerChunkGenerator</span><span class="o">.</span><span class="n">lowMemory</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">generateAtPositionIter</span><span class="p">(</span><span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">i</span>
+
+        <span class="p">(</span><span class="n">tempWorld</span><span class="o">.</span><span class="n">parentWorld</span> <span class="ow">or</span> <span class="n">tempWorld</span><span class="p">)</span><span class="o">.</span><span class="n">loadLevelDat</span><span class="p">()</span>  <span class="c"># reload version number</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.copyChunkAtPosition"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.copyChunkAtPosition">[docs]</a>    <span class="k">def</span> <span class="nf">copyChunkAtPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tempWorld</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">level</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tempChunkBytes</span> <span class="o">=</span> <span class="n">tempWorld</span><span class="o">.</span><span class="n">_getChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ChunkNotPresent</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ChunkNotPresent</span><span class="p">,</span> <span class="s">&quot;While generating a world in {0} using server {1} ({2!r})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tempWorld</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverJarFile</span><span class="p">,</span> <span class="n">e</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">level</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">saveChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">tempChunkBytes</span><span class="p">)</span>
+        <span class="n">level</span><span class="o">.</span><span class="n">_allChunks</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.generateChunkInLevel"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.generateChunkInLevel">[docs]</a>    <span class="k">def</span> <span class="nf">generateChunkInLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">worldeditor</span><span class="o">.</span><span class="n">WorldEditor</span><span class="p">)</span>
+
+        <span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempWorldForLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generateAtPosition</span><span class="p">(</span><span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copyChunkAtPosition</span><span class="p">(</span><span class="n">tempWorld</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</div>
+    <span class="n">minRadius</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">maxRadius</span> <span class="o">=</span> <span class="mi">20</span>
+
+<div class="viewcode-block" id="MCServerChunkGenerator.createLevel"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.createLevel">[docs]</a>    <span class="k">def</span> <span class="nf">createLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">simulate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createLevelIter</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">simulate</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.createLevelIter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.createLevelIter">[docs]</a>    <span class="k">def</span> <span class="nf">createLevelIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">simulate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">worldeditor</span><span class="o">.</span><span class="n">WorldEditor</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">worldeditor</span><span class="o">.</span><span class="n">WorldEditor</span><span class="p">)</span>
+        <span class="n">minRadius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minRadius</span>
+
+        <span class="n">genPositions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span>
+                       <span class="nb">xrange</span><span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">mincx</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxcx</span><span class="p">,</span> <span class="n">minRadius</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+                       <span class="nb">xrange</span><span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">mincz</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxcz</span><span class="p">,</span> <span class="n">minRadius</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">genPositions</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Generating at </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">),))</span>
+            <span class="n">parentDir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">level</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+            <span class="n">propsFile</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">parentDir</span><span class="p">,</span> <span class="s">&quot;server.properties&quot;</span><span class="p">)</span>
+            <span class="n">props</span> <span class="o">=</span> <span class="n">readProperties</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverJarFile</span><span class="p">),</span> <span class="s">&quot;server.properties&quot;</span><span class="p">))</span>
+            <span class="n">props</span><span class="p">[</span><span class="s">&quot;level-name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">level</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">props</span><span class="p">[</span><span class="s">&quot;server-port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">32767</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="mi">32700</span><span class="p">)</span>
+            <span class="n">saveProperties</span><span class="p">(</span><span class="n">propsFile</span><span class="p">,</span> <span class="n">props</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">generateAtPositionIter</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">parentDir</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">simulate</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">i</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">genPositions</span><span class="p">),</span> <span class="n">p</span>
+
+        <span class="n">level</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.generateChunksInLevel"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.generateChunksInLevel">[docs]</a>    <span class="k">def</span> <span class="nf">generateChunksInLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generateChunksInLevelIter</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">chunks</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.generateChunksInLevelIter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.generateChunksInLevelIter">[docs]</a>    <span class="k">def</span> <span class="nf">generateChunksInLevelIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">simulate</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempWorldForLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+        <span class="n">startLength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+        <span class="n">minRadius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minRadius</span>
+        <span class="n">maxRadius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRadius</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">):</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+            <span class="n">centercx</span><span class="p">,</span> <span class="n">centercz</span> <span class="o">=</span> <span class="n">chunks</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">centercx</span><span class="p">,</span> <span class="n">centercz</span><span class="p">))</span>
+            <span class="c"># assume the generator always generates at least an 11x11 chunk square.</span>
+            <span class="n">centercx</span> <span class="o">+=</span> <span class="n">minRadius</span>
+            <span class="n">centercz</span> <span class="o">+=</span> <span class="n">minRadius</span>
+
+            <span class="c"># boxedChunks = [cPos for cPos in chunks if inBox(cPos)]</span>
+
+            <span class="k">print</span> <span class="s">&quot;Generating {0} chunks out of {1} starting from {2}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;XXX&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">),</span> <span class="p">(</span><span class="n">centercx</span><span class="p">,</span> <span class="n">centercz</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="n">startLength</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">),</span> <span class="n">startLength</span>
+
+            <span class="c"># chunks = [c for c in chunks if not inBox(c)]</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">generateAtPositionIter</span><span class="p">(</span><span class="n">tempWorld</span><span class="p">,</span> <span class="n">tempDir</span><span class="p">,</span> <span class="n">centercx</span><span class="p">,</span> <span class="n">centercz</span><span class="p">,</span> <span class="n">simulate</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">startLength</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">),</span> <span class="n">startLength</span><span class="p">,</span> <span class="n">p</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span>
+                            <span class="nb">xrange</span><span class="p">(</span><span class="n">centercx</span> <span class="o">-</span> <span class="n">maxRadius</span><span class="p">,</span> <span class="n">centercx</span> <span class="o">+</span> <span class="n">maxRadius</span><span class="p">),</span>
+                            <span class="nb">xrange</span><span class="p">(</span><span class="n">centercz</span> <span class="o">-</span> <span class="n">maxRadius</span><span class="p">,</span> <span class="n">centercz</span> <span class="o">+</span> <span class="n">maxRadius</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">level</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+                    <span class="n">chunks</span><span class="o">.</span><span class="n">discard</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span> <span class="ow">in</span> <span class="n">chunks</span>
+                    <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">tempWorld</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">ncx</span><span class="p">,</span> <span class="n">ncz</span><span class="p">)</span> <span class="k">for</span> <span class="n">ncx</span><span class="p">,</span> <span class="n">ncz</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="n">cx</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cx</span><span class="o">+</span><span class="mi">2</span><span class="p">),</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cz</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cz</span><span class="o">+</span><span class="mi">2</span><span class="p">)))</span>
+                    <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">copyChunkAtPosition</span><span class="p">(</span><span class="n">tempWorld</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">chunks</span><span class="o">.</span><span class="n">discard</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+                    <span class="k">yield</span> <span class="n">startLength</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">),</span> <span class="n">startLength</span>
+
+            <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">):</span>
+                <span class="k">print</span> <span class="s">&quot;No chunks were generated. Aborting.&quot;</span>
+                <span class="k">break</span>
+
+        <span class="n">level</span><span class="o">.</span><span class="n">saveChanges</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MCServerChunkGenerator.runServer"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.minecraft_server.MCServerChunkGenerator.runServer">[docs]</a>    <span class="k">def</span> <span class="nf">runServer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startingDir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">startingDir</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+            <span class="n">startingDir</span> <span class="o">=</span> <span class="n">startingDir</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getfilesystemencoding</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runServer</span><span class="p">(</span><span class="n">startingDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverJarFile</span><span class="p">)</span>
+</div>
+    <span class="n">lowMemory</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_runServer</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">startingDir</span><span class="p">,</span> <span class="n">jarfile</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Starting server </span><span class="si">%s</span><span class="s"> in </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">jarfile</span><span class="p">,</span> <span class="n">startingDir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">lowMemory</span><span class="p">:</span>
+            <span class="n">memflags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">memflags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-Xmx1024M&quot;</span><span class="p">,</span> <span class="s">&quot;-Xms1024M&quot;</span><span class="p">,</span> <span class="p">]</span>
+
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">cls</span><span class="o">.</span><span class="n">javaExe</span><span class="p">,</span> <span class="s">&quot;-Djava.awt.headless=true&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">memflags</span> <span class="o">+</span> <span class="p">[</span><span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jarfile</span><span class="p">],</span>
+            <span class="n">executable</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">javaExe</span><span class="p">,</span>
+            <span class="n">cwd</span><span class="o">=</span><span class="n">startingDir</span><span class="p">,</span>
+            <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">universal_newlines</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">proc</span>
+
+    <span class="k">def</span> <span class="nf">_serverVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serverVersionFromJarFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverJarFile</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_serverVersionFromJarFile</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">jarfile</span><span class="p">):</span>
+        <span class="n">tempdir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="s">&quot;mclevel_servergen&quot;</span><span class="p">)</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_runServer</span><span class="p">(</span><span class="n">tempdir</span><span class="p">,</span> <span class="n">jarfile</span><span class="p">)</span>
+
+        <span class="n">version</span> <span class="o">=</span> <span class="s">&quot;Unknown&quot;</span>
+        <span class="c"># out, err = proc.communicate()</span>
+        <span class="c"># for line in err.split(&quot;\n&quot;):</span>
+
+        <span class="k">while</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s">&quot;Preparing start region&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="s">&quot;Starting minecraft server version&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;Starting minecraft server version&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">WindowsError</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c"># access denied, process already terminated</span>
+
+        <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">tempdir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;;)&quot;</span> <span class="ow">in</span> <span class="n">version</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;;)&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>  <span class="c"># Damnit, Jeb!</span>
+        <span class="c"># Versions like &quot;0.2.1&quot; are alphas, and versions like &quot;1.0.0&quot; without &quot;Beta&quot; are releases</span>
+        <span class="k">if</span> <span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;0&quot;</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="s">&quot;Alpha &quot;</span> <span class="o">+</span> <span class="n">version</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="s">&quot;Release &quot;</span> <span class="o">+</span> <span class="n">version</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">version</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

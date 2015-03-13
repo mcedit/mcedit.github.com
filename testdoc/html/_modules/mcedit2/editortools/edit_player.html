@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.editortools.edit_player &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="mcedit2.editortools" href="../editortools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" accesskey="U">mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.editortools.edit_player</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    player</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">mcedit2.command</span> <span class="kn">import</span> <span class="n">SimpleRevisionCommand</span>
+<span class="kn">from</span> <span class="nn">mcedit2.editortools</span> <span class="kn">import</span> <span class="n">EditorTool</span>
+<span class="kn">from</span> <span class="nn">mcedit2.nbt_treemodel</span> <span class="kn">import</span> <span class="n">NBTTreeModel</span><span class="p">,</span> <span class="n">NBTFilterProxyModel</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.load_ui</span> <span class="kn">import</span> <span class="n">load_ui</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PlayerTool"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_player.PlayerTool">[docs]</a><span class="k">class</span> <span class="nc">PlayerTool</span><span class="p">(</span><span class="n">EditorTool</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Edit Player&quot;</span>
+    <span class="n">iconName</span> <span class="o">=</span> <span class="s">&quot;edit_player&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type editorSession: EditorSession</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PlayerTool</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span> <span class="o">=</span> <span class="n">load_ui</span><span class="p">(</span><span class="s">&quot;editortools/edit_player.ui&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">movePlayerButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">movePlayerToCamera</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">viewPlayerButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showPlayerView</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">listPlayers</span><span class="p">():</span>  <span class="c"># xxx live update?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">playerListBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">playerListBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setSelectedPlayer</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedPlayer</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">for</span> <span class="n">playerUUID</span> <span class="ow">in</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">listPlayers</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setSelectedPlayer</span><span class="p">(</span><span class="n">playerUUID</span><span class="p">)</span>
+            <span class="k">break</span>
+
+<div class="viewcode-block" id="PlayerTool.setSelectedPlayer"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_player.PlayerTool.setSelectedPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">setSelectedPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedPlayer</span> <span class="o">=</span> <span class="n">player</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">getPlayer</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">NBTTreeModel</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">rootTag</span><span class="p">)</span>
+        <span class="n">proxyModel</span> <span class="o">=</span> <span class="n">NBTFilterProxyModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">proxyModel</span><span class="o">.</span><span class="n">setSourceModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">proxyModel</span><span class="o">.</span><span class="n">setDynamicSortFilter</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="n">proxyModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">sortByColumn</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AscendingOrder</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PlayerTool.movePlayerToCamera"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_player.PlayerTool.movePlayerToCamera">[docs]</a>    <span class="k">def</span> <span class="nf">movePlayerToCamera</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">viewID</span> <span class="o">==</span> <span class="s">&quot;Cam&quot;</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="n">SimpleRevisionCommand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="p">,</span> <span class="s">&quot;Move Player&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">command</span><span class="o">.</span><span class="n">begin</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selectedPlayer</span><span class="o">.</span><span class="n">Position</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">centerPoint</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">selectedPlayer</span><span class="o">.</span><span class="n">Rotation</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">yawPitch</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">selectedPlayer</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c"># xxx do in AnvilPlayerRef</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">pushCommand</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Current view is not camera view.&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PlayerTool.showPlayerView"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_player.PlayerTool.showPlayerView">[docs]</a>    <span class="k">def</span> <span class="nf">showPlayerView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">showCameraView</span><span class="p">()</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedPlayer</span><span class="o">.</span><span class="n">Position</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">yawPitch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedPlayer</span><span class="o">.</span><span class="n">Rotation</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" >mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

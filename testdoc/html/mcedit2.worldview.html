@@ -1,0 +1,1999 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.worldview package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mcedit2 package" href="mcedit2.html" />
+    <link rel="prev" title="mcedit2.widgets.nbttree package" href="mcedit2.widgets.nbttree.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.widgets.nbttree.html" title="mcedit2.widgets.nbttree package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" accesskey="U">mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mcedit2-worldview-package">
+<h1>mcedit2.worldview package<a class="headerlink" href="#mcedit2-worldview-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mcedit2.worldview.camera">
+<span id="mcedit2-worldview-camera-module"></span><h2>mcedit2.worldview.camera module<a class="headerlink" href="#module-mcedit2.worldview.camera" title="Permalink to this headline">¶</a></h2>
+<p>camera.py</p>
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraWorldViewFrame">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.camera.</tt><tt class="descname">CameraWorldViewFrame</tt><big>(</big><em>dimension</em>, <em>geometryCache</em>, <em>resourceLoader</em>, <em>shareGLWidget</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldViewFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldViewFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QWidget</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraWorldViewFrame.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAD08&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldViewFrame.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.camera.</tt><tt class="descname">CameraKeyControls</tt><big>(</big><em>worldView</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.tickCamera">
+<tt class="descname">tickCamera</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.tickCamera"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.tickCamera" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.CameraAction">
+<em class="property">class </em><tt class="descname">CameraAction</tt><big>(</big><em>controls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.CameraAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.CameraAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.CameraAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAF08&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.CameraAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Forward">
+<em class="property">class </em><tt class="descclassname">CameraKeyControls.</tt><tt class="descname">Forward</tt><big>(</big><em>controls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.camera.CameraAction</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Forward.key">
+<tt class="descname">key</tt><em class="property"> = PySide.QtCore.Qt.Key.Key_W</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Forward.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Forward.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Move Forward'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Forward.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Forward.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/move/forward'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Forward.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Forward.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Forward.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Forward.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Forward.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Forward.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Forward.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Forward.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AA948&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Forward.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Backward">
+<em class="property">class </em><tt class="descclassname">CameraKeyControls.</tt><tt class="descname">Backward</tt><big>(</big><em>controls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Backward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.camera.CameraAction</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Backward.key">
+<tt class="descname">key</tt><em class="property"> = PySide.QtCore.Qt.Key.Key_S</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Backward.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Backward.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Move Backward'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Backward.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Backward.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/move/backward'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Backward.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Backward.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Backward.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Backward.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Backward.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Backward.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Backward.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Backward.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAA48&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Backward.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Left">
+<em class="property">class </em><tt class="descclassname">CameraKeyControls.</tt><tt class="descname">Left</tt><big>(</big><em>controls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Left"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Left" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.camera.CameraAction</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Left.key">
+<tt class="descname">key</tt><em class="property"> = PySide.QtCore.Qt.Key.Key_A</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Left.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Left.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Move Left'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Left.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Left.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/move/left'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Left.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Left.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Left.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Left.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Left.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Left.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Left.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Left.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAB48&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Left.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Right">
+<em class="property">class </em><tt class="descclassname">CameraKeyControls.</tt><tt class="descname">Right</tt><big>(</big><em>controls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Right"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.camera.CameraAction</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Right.key">
+<tt class="descname">key</tt><em class="property"> = PySide.QtCore.Qt.Key.Key_D</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Right.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Right.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Move Right'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Right.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Right.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/move/right'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Right.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Right.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Right.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Right.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Right.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Right.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Right.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Right.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAD48&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Right.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Up">
+<em class="property">class </em><tt class="descclassname">CameraKeyControls.</tt><tt class="descname">Up</tt><big>(</big><em>controls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Up"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Up" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.camera.CameraAction</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Up.key">
+<tt class="descname">key</tt><em class="property"> = PySide.QtCore.Qt.Key.Key_Space</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Up.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Up.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Move Up'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Up.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Up.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/move/up'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Up.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Up.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Up.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Up.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Up.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Up.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Up.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Up.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAF48&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Up.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Down">
+<em class="property">class </em><tt class="descclassname">CameraKeyControls.</tt><tt class="descname">Down</tt><big>(</big><em>controls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Down"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Down" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.camera.CameraAction</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Down.key">
+<tt class="descname">key</tt><em class="property"> = PySide.QtCore.Qt.Key.Key_C</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Down.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Down.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Move Down'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Down.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Down.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/move/down'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Down.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Down.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Down.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Down.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Down.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraKeyControls.Down.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Down.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraKeyControls.Down.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AA748&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraKeyControls.Down.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraWorldView">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.camera.</tt><tt class="descname">CameraWorldView</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.worldview.WorldView" title="mcedit2.worldview.worldview.WorldView"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.worldview.WorldView</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.setViewDistance">
+<tt class="descname">setViewDistance</tt><big>(</big><em>val</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.setViewDistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.setViewDistance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.centerOnPoint">
+<tt class="descname">centerOnPoint</tt><big>(</big><em>pos</em>, <em>distance=20</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.centerOnPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.centerOnPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraWorldView.perspective">
+<tt class="descname">perspective</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.perspective" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.setPerspective">
+<tt class="descname">setPerspective</tt><big>(</big><em>val</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.setPerspective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.setPerspective" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.updateMatrices">
+<tt class="descname">updateMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.updateMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.updateMatrices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.updateOrthoMatrices">
+<tt class="descname">updateOrthoMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.updateOrthoMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.updateOrthoMatrices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.updatePerspectiveMatrices">
+<tt class="descname">updatePerspectiveMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.updatePerspectiveMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.updatePerspectiveMatrices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraWorldView.cameraVector">
+<tt class="descname">cameraVector</tt><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.cameraVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.cameraVector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.makeChunkIter">
+<tt class="descname">makeChunkIter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.makeChunkIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.makeChunkIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraWorldView.yawPitch">
+<tt class="descname">yawPitch</tt><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.yawPitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.yawPitch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.discardChunksOutsideViewDistance">
+<tt class="descname">discardChunksOutsideViewDistance</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.discardChunksOutsideViewDistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.discardChunksOutsideViewDistance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraWorldView.recieveChunk">
+<tt class="descname">recieveChunk</tt><big>(</big><em>chunk</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraWorldView.recieveChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.recieveChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraWorldView.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAD88&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraWorldView.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.camera.</tt><tt class="descname">CameraPanMouseAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraPanMouseAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.button">
+<tt class="descname">button</tt><em class="property"> = PySide.QtCore.Qt.MouseButton.RightButton</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.mouseDragStart">
+<tt class="descname">mouseDragStart</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.mouseDragStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.modifiers">
+<tt class="descname">modifiers</tt><em class="property"> = PySide.QtCore.Qt.KeyboardModifier.NoModifier</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.modifiers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Turn Camera'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/holdToTurn'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.buttonPressEvent">
+<tt class="descname">buttonPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraPanMouseAction.buttonPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.buttonPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.sensitivity">
+<tt class="descname">sensitivity</tt><em class="property"> = 0.15</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.sensitivity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraPanMouseAction.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.buttonReleaseEvent">
+<tt class="descname">buttonReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraPanMouseAction.buttonReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.buttonReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraPanMouseAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AA488&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraPanMouseAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.camera.</tt><tt class="descname">CameraMoveMouseAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraMoveMouseAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.button">
+<tt class="descname">button</tt><em class="property"> = PySide.QtCore.Qt.MouseButton.MiddleButton</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.mouseDragStart">
+<tt class="descname">mouseDragStart</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.mouseDragStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Move Camera'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview/camera/holdToMove'</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.buttonPressEvent">
+<tt class="descname">buttonPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraMoveMouseAction.buttonPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.buttonPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.sensitivity">
+<tt class="descname">sensitivity</tt><em class="property"> = 0.15</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.sensitivity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraMoveMouseAction.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.buttonReleaseEvent">
+<tt class="descname">buttonReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/camera.html#CameraMoveMouseAction.buttonReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.buttonReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.camera.CameraMoveMouseAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AA4C8&gt;</em><a class="headerlink" href="#mcedit2.worldview.camera.CameraMoveMouseAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.cutaway">
+<span id="mcedit2-worldview-cutaway-module"></span><h2>mcedit2.worldview.cutaway module<a class="headerlink" href="#module-mcedit2.worldview.cutaway" title="Permalink to this headline">¶</a></h2>
+<p>cutaway.py</p>
+<dl class="function">
+<dt id="mcedit2.worldview.cutaway.RecenterButton">
+<tt class="descclassname">mcedit2.worldview.cutaway.</tt><tt class="descname">RecenterButton</tt><big>(</big><em>view</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#RecenterButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.RecenterButton" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldViewFrame">
+<tt class="descclassname">mcedit2.worldview.cutaway.</tt><tt class="descname">CutawayWorldViewFrame</tt><big>(</big><em>dimension</em>, <em>textureAtlas</em>, <em>geometryCache</em>, <em>sharedGLWidget</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldViewFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldViewFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.cutaway.</tt><tt class="descname">SlicedWorldScene</tt><big>(</big><em>dimension</em>, <em>textureAtlas</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.rendering.html#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.depthLimit">
+<tt class="descname">depthLimit</tt><em class="property"> = 0</em><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.depthLimit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.advancedDepthLimit">
+<tt class="descname">advancedDepthLimit</tt><em class="property"> = 4</em><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.advancedDepthLimit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.loadRadius">
+<tt class="descname">loadRadius</tt><em class="property"> = 320</em><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.loadRadius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.pos">
+<tt class="descname">pos</tt><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.discardAllChunks">
+<tt class="descname">discardAllChunks</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.discardAllChunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.discardAllChunks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.invalidateChunk">
+<tt class="descname">invalidateChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.invalidateChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.invalidateChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.updateMeshes">
+<tt class="descname">updateMeshes</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.updateMeshes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.updateMeshes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.visibleBounds">
+<tt class="descname">visibleBounds</tt><big>(</big><em>depth=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.visibleBounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.visibleBounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.wantsChunk">
+<tt class="descname">wantsChunk</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.wantsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.wantsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.workOnChunk">
+<tt class="descname">workOnChunk</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.workOnChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.workOnChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.SlicedWorldScene.chunkInvalid">
+<tt class="descname">chunkInvalid</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#SlicedWorldScene.chunkInvalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.SlicedWorldScene.chunkInvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.cutaway.</tt><tt class="descname">CutawayWorldView</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.worldview.WorldView" title="mcedit2.worldview.worldview.WorldView"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.worldview.WorldView</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.createWorldScene">
+<tt class="descname">createWorldScene</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.createWorldScene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.createWorldScene" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.sizeInBlocks">
+<tt class="descname">sizeInBlocks</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.sizeInBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.sizeInBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.updateMatrices">
+<tt class="descname">updateMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.updateMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.updateMatrices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.slicedPoint">
+<tt class="descname">slicedPoint</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.slicedPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.slicedPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.viewCenter">
+<tt class="descname">viewCenter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.viewCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.viewCenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the world position at the center of the view.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.axis">
+<tt class="descname">axis</tt><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.dim">
+<tt class="descname">dim</tt><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.dim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.dim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.updateMeshPos">
+<tt class="descname">updateMeshPos</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.updateMeshPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.updateMeshPos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.resizeEvent">
+<tt class="descname">resizeEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.resizeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.resizeEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.augmentMouseEvent">
+<tt class="descname">augmentMouseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawayWorldView.augmentMouseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.augmentMouseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawayWorldView.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046BDAC8&gt;</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawayWorldView.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceUpAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.cutaway.</tt><tt class="descname">CutawaySliceUpAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawaySliceUpAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceUpAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceUpAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview.cutaway.slice_up'</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceUpAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceUpAction.button">
+<tt class="descname">button</tt><em class="property"> = 256</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceUpAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceUpAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Slice Up'</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceUpAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceUpAction.acceptsMouseWheel">
+<tt class="descname">acceptsMouseWheel</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceUpAction.acceptsMouseWheel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceUpAction.buttonPressEvent">
+<tt class="descname">buttonPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawaySliceUpAction.buttonPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceUpAction.buttonPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceUpAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046BD9C8&gt;</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceUpAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceDownAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.cutaway.</tt><tt class="descname">CutawaySliceDownAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawaySliceDownAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceDownAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceDownAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = u'worldview.cutaway.slice_down'</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceDownAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceDownAction.button">
+<tt class="descname">button</tt><em class="property"> = 512</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceDownAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceDownAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046BD988&gt;</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceDownAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceDownAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = u'Slice Down'</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceDownAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceDownAction.acceptsMouseWheel">
+<tt class="descname">acceptsMouseWheel</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceDownAction.acceptsMouseWheel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.cutaway.CutawaySliceDownAction.buttonPressEvent">
+<tt class="descname">buttonPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/cutaway.html#CutawaySliceDownAction.buttonPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.cutaway.CutawaySliceDownAction.buttonPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.fourup">
+<span id="mcedit2-worldview-fourup-module"></span><h2>mcedit2.worldview.fourup module<a class="headerlink" href="#module-mcedit2.worldview.fourup" title="Permalink to this headline">¶</a></h2>
+<p>fourup.py</p>
+<dl class="function">
+<dt id="mcedit2.worldview.fourup.FourUpWorldViewFrame">
+<tt class="descclassname">mcedit2.worldview.fourup.</tt><tt class="descname">FourUpWorldViewFrame</tt><big>(</big><em>dimension</em>, <em>geometryCache</em>, <em>resourceLoader</em>, <em>sharedGLWidget</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldViewFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldViewFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.fourup.</tt><tt class="descname">FourUpWorldView</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QWidget</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.requestChunk">
+<tt class="descname">requestChunk</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.requestChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.requestChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.wantsChunk">
+<tt class="descname">wantsChunk</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.wantsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.wantsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.recieveChunk">
+<tt class="descname">recieveChunk</tt><big>(</big><em>chunk</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.recieveChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.recieveChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.invalidateChunk">
+<tt class="descname">invalidateChunk</tt><big>(</big><em>(cx</em>, <em>cz)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.invalidateChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.invalidateChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.mouseBlockPos">
+<tt class="descname">mouseBlockPos</tt><em class="property"> = (x=0, y=0, z=0)</em><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.mouseBlockPos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.mouseRay">
+<tt class="descname">mouseRay</tt><em class="property"> = Ray((x=0, y=1, z=0), (x=0, y=-1, z=0))</em><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.mouseRay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.mouseBlockFace">
+<tt class="descname">mouseBlockFace</tt><em class="property"> = Face(Up)</em><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.mouseBlockFace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.viewportMoved">
+<tt class="descname">viewportMoved</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x000000000A39A998&gt;</em><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.viewportMoved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.centerPoint">
+<tt class="descname">centerPoint</tt><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.centerPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.centerPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.subViewMoved">
+<tt class="descname">subViewMoved</tt><big>(</big><em>view</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.subViewMoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.subViewMoved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.viewCenter">
+<tt class="descname">viewCenter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.viewCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.viewCenter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.centerOnPoint">
+<tt class="descname">centerOnPoint</tt><big>(</big><em>point</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.centerOnPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.centerOnPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.centerOnView">
+<tt class="descname">centerOnView</tt><big>(</big><em>centerView</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/fourup.html#FourUpWorldView.centerOnView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.centerOnView" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.cursorMoved">
+<tt class="descname">cursorMoved</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x000000000A39A1B8&gt;</em><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.cursorMoved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.fourup.FourUpWorldView.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000B7E6248&gt;</em><a class="headerlink" href="#mcedit2.worldview.fourup.FourUpWorldView.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.iso">
+<span id="mcedit2-worldview-iso-module"></span><h2>mcedit2.worldview.iso module<a class="headerlink" href="#module-mcedit2.worldview.iso" title="Permalink to this headline">¶</a></h2>
+<p>iso.py</p>
+<dl class="function">
+<dt id="mcedit2.worldview.iso.IsoWorldViewFrame">
+<tt class="descclassname">mcedit2.worldview.iso.</tt><tt class="descname">IsoWorldViewFrame</tt><big>(</big><em>world</em>, <em>geometryCache</em>, <em>resourceLoader</em>, <em>sharedGLWidget</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#IsoWorldViewFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldViewFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.iso.IsoWorldView">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.iso.</tt><tt class="descname">IsoWorldView</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#IsoWorldView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.worldview.WorldView" title="mcedit2.worldview.worldview.WorldView"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.worldview.WorldView</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.worldview.iso.IsoWorldView.cameraVector">
+<tt class="descname">cameraVector</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#IsoWorldView.cameraVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldView.cameraVector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.iso.IsoWorldView.centerOnPoint">
+<tt class="descname">centerOnPoint</tt><big>(</big><em>pos</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#IsoWorldView.centerOnPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldView.centerOnPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.iso.IsoWorldView.makeChunkIter">
+<tt class="descname">makeChunkIter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#IsoWorldView.makeChunkIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldView.makeChunkIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.iso.IsoWorldView.rotateView">
+<tt class="descname">rotateView</tt><big>(</big><em>yrot</em>, <em>xrot</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#IsoWorldView.rotateView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldView.rotateView" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.iso.IsoWorldView.updateMatrices">
+<tt class="descname">updateMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#IsoWorldView.updateMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldView.updateMatrices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.iso.IsoWorldView.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835AAC8&gt;</em><a class="headerlink" href="#mcedit2.worldview.iso.IsoWorldView.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.iso.RotateMouseAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.iso.</tt><tt class="descname">RotateMouseAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#RotateMouseAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.iso.RotateMouseAction.button">
+<tt class="descname">button</tt><em class="property"> = PySide.QtCore.Qt.MouseButton.MiddleButton</em><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.iso.RotateMouseAction.startx">
+<tt class="descname">startx</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction.startx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.iso.RotateMouseAction.starty">
+<tt class="descname">starty</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction.starty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.iso.RotateMouseAction.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#RotateMouseAction.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.iso.RotateMouseAction.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#RotateMouseAction.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.iso.RotateMouseAction.mouseReleaseEvent">
+<tt class="descname">mouseReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/iso.html#RotateMouseAction.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.iso.RotateMouseAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835AB08&gt;</em><a class="headerlink" href="#mcedit2.worldview.iso.RotateMouseAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.minimap">
+<span id="mcedit2-worldview-minimap-module"></span><h2>mcedit2.worldview.minimap module<a class="headerlink" href="#module-mcedit2.worldview.minimap" title="Permalink to this headline">¶</a></h2>
+<p>minimap.py</p>
+<dl class="class">
+<dt id="mcedit2.worldview.minimap.ViewCornersRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.minimap.</tt><tt class="descname">ViewCornersRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#ViewCornersRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.ViewCornersRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.rendering.html#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.ViewCornersRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#ViewCornersRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.ViewCornersRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.minimap.ViewCornersNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.minimap.</tt><tt class="descname">ViewCornersNode</tt><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#ViewCornersNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.ViewCornersNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.rendering.html#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.minimap.ViewCornersNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.worldview.minimap.ViewCornersNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#mcedit2.worldview.minimap.ViewCornersRenderNode" title="mcedit2.worldview.minimap.ViewCornersRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">ViewCornersRenderNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.minimap.ViewCornersNode.corners">
+<tt class="descname">corners</tt><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#ViewCornersNode.corners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.ViewCornersNode.corners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.minimap.ViewCornersNode.dimension">
+<tt class="descname">dimension</tt><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#ViewCornersNode.dimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.ViewCornersNode.dimension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.minimap.</tt><tt class="descname">MinimapWorldView</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.worldview.WorldView" title="mcedit2.worldview.worldview.WorldView"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.worldview.WorldView</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.minScale">
+<tt class="descname">minScale</tt><em class="property"> = 1.0</em><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.minScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.createCompass">
+<tt class="descname">createCompass</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.createCompass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.createCompass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.updateMatrices">
+<tt class="descname">updateMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.updateMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.updateMatrices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.currentViewMatrixChanged">
+<tt class="descname">currentViewMatrixChanged</tt><big>(</big><em>currentView</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.currentViewMatrixChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.currentViewMatrixChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.zoom">
+<tt class="descname">zoom</tt><big>(</big><em>scale</em>, <em>(mx</em>, <em>my)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.zoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.zoom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.sizeHint">
+<tt class="descname">sizeHint</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.sizeHint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.sizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046BD088&gt;</em><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.minimap.MinimapWorldView.mouseReleaseEvent">
+<tt class="descname">mouseReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/minimap.html#MinimapWorldView.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.minimap.MinimapWorldView.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.overhead">
+<span id="mcedit2-worldview-overhead-module"></span><h2>mcedit2.worldview.overhead module<a class="headerlink" href="#module-mcedit2.worldview.overhead" title="Permalink to this headline">¶</a></h2>
+<p>overhead.py</p>
+<dl class="function">
+<dt id="mcedit2.worldview.overhead.OverheadWorldViewFrame">
+<tt class="descclassname">mcedit2.worldview.overhead.</tt><tt class="descname">OverheadWorldViewFrame</tt><big>(</big><em>dimension</em>, <em>geometryCache</em>, <em>resourceLoader</em>, <em>sharedGLWidget</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/overhead.html#OverheadWorldViewFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.overhead.OverheadWorldViewFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.overhead.OverheadWorldView">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.overhead.</tt><tt class="descname">OverheadWorldView</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/overhead.html#OverheadWorldView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.overhead.OverheadWorldView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.worldview.WorldView" title="mcedit2.worldview.worldview.WorldView"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.worldview.WorldView</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.overhead.OverheadWorldView.cameraVector">
+<tt class="descname">cameraVector</tt><em class="property"> = (x=0, y=-1, z=0)</em><a class="headerlink" href="#mcedit2.worldview.overhead.OverheadWorldView.cameraVector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.overhead.OverheadWorldView.updateMatrices">
+<tt class="descname">updateMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/overhead.html#OverheadWorldView.updateMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.overhead.OverheadWorldView.updateMatrices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.overhead.OverheadWorldView.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046BD2C8&gt;</em><a class="headerlink" href="#mcedit2.worldview.overhead.OverheadWorldView.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.viewaction">
+<span id="mcedit2-worldview-viewaction-module"></span><h2>mcedit2.worldview.viewaction module<a class="headerlink" href="#module-mcedit2.worldview.viewaction" title="Permalink to this headline">¶</a></h2>
+<p>viewaction</p>
+<dl class="class">
+<dt id="mcedit2.worldview.viewaction.ViewAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewaction.</tt><tt class="descname">ViewAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtCore.QObject</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = 'Unknown Action'</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.hidden">
+<tt class="descname">hidden</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.hidden" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.acceptsMouseWheel">
+<tt class="descname">acceptsMouseWheel</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.acceptsMouseWheel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.WHEEL_UP">
+<tt class="descname">WHEEL_UP</tt><em class="property"> = 256</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.WHEEL_UP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.WHEEL_DOWN">
+<tt class="descname">WHEEL_DOWN</tt><em class="property"> = 512</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.WHEEL_DOWN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.modifiers">
+<tt class="descname">modifiers</tt><em class="property"> = PySide.QtCore.Qt.KeyboardModifier.NoModifier</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.modifiers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.button">
+<tt class="descname">button</tt><em class="property"> = PySide.QtCore.Qt.MouseButton.NoButton</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.key">
+<tt class="descname">key</tt><em class="property"> = 0</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.setBinding">
+<tt class="descname">setBinding</tt><big>(</big><em>button</em>, <em>key</em>, <em>modifiers</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.setBinding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.setBinding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.matchKeyEvent">
+<tt class="descname">matchKeyEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.matchKeyEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.matchKeyEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the mouse moves while the bound keys or buttons are pressed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the bound mouse button is pressed. By default, calls buttonPressEvent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.mouseReleaseEvent">
+<tt class="descname">mouseReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the bound mouse button is released. By default, calls buttonReleaseEvent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the bound key is pressed. By default, calls buttonPressEvent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the bound key is released. By default, calls buttonReleaseEvent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.buttonPressEvent">
+<tt class="descname">buttonPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.buttonPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.buttonPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by mousePressEvent and keyPressEvent.</p>
+<p>Implement this to handle button-press events if it doesn&#8217;t matter whether the action is bound to a key or
+mouse button.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.buttonReleaseEvent">
+<tt class="descname">buttonReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.buttonReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.buttonReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by mouseReleaseEvent and keyReleaseEvent.</p>
+<p>Implement this to handle button-release events if it doesn&#8217;t matter whether the action is bound to a key or
+mouse button.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.buttonName">
+<tt class="descname">buttonName</tt><big>(</big><em>buttons</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.buttonName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.buttonName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ViewAction.describeKeys">
+<tt class="descname">describeKeys</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ViewAction.describeKeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.describeKeys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ViewAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835A988&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ViewAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewaction.</tt><tt class="descname">UseToolMouseAction</tt><big>(</big><em>editor</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#UseToolMouseAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.button">
+<tt class="descname">button</tt><em class="property"> = PySide.QtCore.Qt.MouseButton.LeftButton</em><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = &quot;Use Tool (Don't change!)&quot;</em><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.hidden">
+<tt class="descname">hidden</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.hidden" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#UseToolMouseAction.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#UseToolMouseAction.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.mouseReleaseEvent">
+<tt class="descname">mouseReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#UseToolMouseAction.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.UseToolMouseAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835A9C8&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewaction.UseToolMouseAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.viewaction.TrackingMouseAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewaction.</tt><tt class="descname">TrackingMouseAction</tt><big>(</big><em>editor</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#TrackingMouseAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.TrackingMouseAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.TrackingMouseAction.button">
+<tt class="descname">button</tt><em class="property"> = PySide.QtCore.Qt.MouseButton.NoButton</em><a class="headerlink" href="#mcedit2.worldview.viewaction.TrackingMouseAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.TrackingMouseAction.hidden">
+<tt class="descname">hidden</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.worldview.viewaction.TrackingMouseAction.hidden" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.TrackingMouseAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = &quot;Mouse Tracking (Don't change!)&quot;</em><a class="headerlink" href="#mcedit2.worldview.viewaction.TrackingMouseAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.TrackingMouseAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.viewaction.TrackingMouseAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.TrackingMouseAction.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#TrackingMouseAction.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.TrackingMouseAction.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.TrackingMouseAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835AA08&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewaction.TrackingMouseAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewaction.</tt><tt class="descname">MoveViewMouseAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#MoveViewMouseAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction.button">
+<tt class="descname">button</tt><em class="property"> = PySide.QtCore.Qt.MouseButton.RightButton</em><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = 'Pan View'</em><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = 'worldview/general/holdToMove'</em><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction.buttonPressEvent">
+<tt class="descname">buttonPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#MoveViewMouseAction.buttonPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction.buttonPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#MoveViewMouseAction.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction.buttonReleaseEvent">
+<tt class="descname">buttonReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#MoveViewMouseAction.buttonReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction.buttonReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.MoveViewMouseAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835AA48&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewaction.MoveViewMouseAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewaction.</tt><tt class="descname">ZoomWheelAction</tt><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ZoomWheelAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.worldview.viewaction.ViewAction" title="mcedit2.worldview.viewaction.ViewAction"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.worldview.viewaction.ViewAction</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.labelText">
+<tt class="descname">labelText</tt><em class="property"> = 'Zoom View'</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.labelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.maxScale">
+<tt class="descname">maxScale</tt><em class="property"> = 16.0</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.maxScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835AA88&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.minScale">
+<tt class="descname">minScale</tt><em class="property"> = 0.015625</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.minScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.settingsKey">
+<tt class="descname">settingsKey</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.settingsKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.zooms">
+<tt class="descname">zooms</tt><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ZoomWheelAction.zooms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.zooms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.wheelEvent">
+<tt class="descname">wheelEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ZoomWheelAction.wheelEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.wheelEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewaction.ZoomWheelAction.zoom">
+<tt class="descname">zoom</tt><big>(</big><em>view</em>, <em>scale</em>, <em>(mx</em>, <em>my)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewaction.html#ZoomWheelAction.zoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewaction.ZoomWheelAction.zoom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.viewcontrols">
+<span id="mcedit2-worldview-viewcontrols-module"></span><h2>mcedit2.worldview.viewcontrols module<a class="headerlink" href="#module-mcedit2.worldview.viewcontrols" title="Permalink to this headline">¶</a></h2>
+<p>viewcontrols</p>
+<dl class="class">
+<dt id="mcedit2.worldview.viewcontrols.ModifierInputWidget">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewcontrols.</tt><tt class="descname">ModifierInputWidget</tt><big>(</big><em>inputButton</em>, <em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ModifierInputWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ModifierInputWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QWidget</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ModifierInputWidget.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>mouseEvent</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ModifierInputWidget.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ModifierInputWidget.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ModifierInputWidget.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>keyEvent</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ModifierInputWidget.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ModifierInputWidget.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keyEvent</strong> (<em>QtGui.QKeyEvent</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ModifierInputWidget.wheelEvent">
+<tt class="descname">wheelEvent</tt><big>(</big><em>wheelEvent</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ModifierInputWidget.wheelEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ModifierInputWidget.wheelEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewcontrols.ModifierInputWidget.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAB08&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ModifierInputWidget.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewcontrols.</tt><tt class="descname">ButtonModifierInput</tt><big>(</big><em>viewAction</em>, <em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ButtonModifierInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QPushButton</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput.buttonClicked">
+<tt class="descname">buttonClicked</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ButtonModifierInput.buttonClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput.buttonClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput.updateText">
+<tt class="descname">updateText</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ButtonModifierInput.updateText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput.updateText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput.key">
+<tt class="descname">key</tt><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ButtonModifierInput.key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput.modifiers">
+<tt class="descname">modifiers</tt><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ButtonModifierInput.modifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput.modifiers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput.button">
+<tt class="descname">button</tt><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ButtonModifierInput.button"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput.button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput.setBinding">
+<tt class="descname">setBinding</tt><big>(</big><em>button</em>, <em>key</em>, <em>modifiers</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ButtonModifierInput.setBinding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput.setBinding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewcontrols.ButtonModifierInput.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AAC88&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ButtonModifierInput.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.viewcontrols.ViewControls">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.viewcontrols.</tt><tt class="descname">ViewControls</tt><big>(</big><em>worldView</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ViewControls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ViewControls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QFrame</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ViewControls.toggleUnlockControls">
+<tt class="descname">toggleUnlockControls</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ViewControls.toggleUnlockControls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ViewControls.toggleUnlockControls" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ViewControls.lockUnlockControls">
+<tt class="descname">lockUnlockControls</tt><big>(</big><em>unlocked</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ViewControls.lockUnlockControls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ViewControls.lockUnlockControls" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ViewControls.getShowHideButton">
+<tt class="descname">getShowHideButton</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ViewControls.getShowHideButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ViewControls.getShowHideButton" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ViewControls.hideEvent">
+<tt class="descname">hideEvent</tt><big>(</big><em>*a</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ViewControls.hideEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ViewControls.hideEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.viewcontrols.ViewControls.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046AACC8&gt;</em><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ViewControls.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.viewcontrols.ViewControls.toggleShowHide">
+<tt class="descname">toggleShowHide</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/viewcontrols.html#ViewControls.toggleShowHide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.viewcontrols.ViewControls.toggleShowHide" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.worldruler">
+<span id="mcedit2-worldview-worldruler-module"></span><h2>mcedit2.worldview.worldruler module<a class="headerlink" href="#module-mcedit2.worldview.worldruler" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.worldview.worldruler.WorldRuler">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.worldruler.</tt><tt class="descname">WorldRuler</tt><big>(</big><em>worldView</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldruler.html#WorldRuler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldRuler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QWidget</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.worldview.worldruler.WorldRuler.paintEvent">
+<tt class="descname">paintEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldruler.html#WorldRuler.paintEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldRuler.paintEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldruler.WorldRuler.offsetChanged">
+<tt class="descname">offsetChanged</tt><big>(</big><em>view</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldruler.html#WorldRuler.offsetChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldRuler.offsetChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldruler.WorldRuler.centerPoint">
+<tt class="descname">centerPoint</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldruler.html#WorldRuler.centerPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldRuler.centerPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldruler.WorldRuler.scale">
+<tt class="descname">scale</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldruler.html#WorldRuler.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldRuler.scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldruler.WorldRuler.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046BDD48&gt;</em><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldRuler.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldruler.WorldRuler.setScale">
+<tt class="descname">setScale</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldRuler.setScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.worldview.worldruler.WorldViewRulerGrid">
+<tt class="descclassname">mcedit2.worldview.worldruler.</tt><tt class="descname">WorldViewRulerGrid</tt><big>(</big><em>view</em>, <em>rulerSize=22</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldruler.html#WorldViewRulerGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldruler.WorldViewRulerGrid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview.worldview">
+<span id="mcedit2-worldview-worldview-module"></span><h2>mcedit2.worldview.worldview module<a class="headerlink" href="#module-mcedit2.worldview.worldview" title="Permalink to this headline">¶</a></h2>
+<p>worldview.py</p>
+<dl class="function">
+<dt id="mcedit2.worldview.worldview.worldMeshVertexSize">
+<tt class="descclassname">mcedit2.worldview.worldview.</tt><tt class="descname">worldMeshVertexSize</tt><big>(</big><em>worldMesh</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#worldMeshVertexSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.worldMeshVertexSize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.worldview.WorldView">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.worldview.</tt><tt class="descname">WorldView</tt><big>(</big><em>dimension</em>, <em>textureAtlas</em>, <em>geometryCache=None</em>, <em>sharedGLWidget=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtOpenGL.QGLWidget</span></tt></p>
+<p>Superclass for the following views:</p>
+<p>IsoWorldView: Display the world using an isometric viewing angle, without perspective.
+Click and drag to pan the viewing area. Use the mouse wheel or a UI control to zoom.</p>
+<p>CameraWorldView: Display the world using a first-person viewing angle with perspective.
+Click and drag to pan the camera. Use WASD or click and drag to move the camera.</p>
+<p>CutawayWorldView: Display a single slice of the world. Click and drag to move sideways.
+Use the mouse wheel or a UI widget to move forward or backward. Use a UI widget to zoom.</p>
+<p>FourUpWorldView: Display up to four other world views at once. Default to three cutaways
+and one isometric view.</p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.viewportMoved">
+<tt class="descname">viewportMoved</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x0000000008358110&gt;</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.viewportMoved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.cursorMoved">
+<tt class="descname">cursorMoved</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x0000000008358148&gt;</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.cursorMoved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.mouseBlockPos">
+<tt class="descname">mouseBlockPos</tt><em class="property"> = (x=0, y=0, z=0)</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.mouseBlockPos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.mouseBlockFace">
+<tt class="descname">mouseBlockFace</tt><em class="property"> = Face(Up)</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.mouseBlockFace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.destroy">
+<tt class="descname">destroy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.createCompass">
+<tt class="descname">createCompass</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.createCompass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.createCompass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.createWorldScene">
+<tt class="descname">createWorldScene</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.createWorldScene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.createWorldScene" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.createSceneGraph">
+<tt class="descname">createSceneGraph</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.createSceneGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.createSceneGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.initializeGL">
+<tt class="descname">initializeGL</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.initializeGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.initializeGL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.setToolCursor">
+<tt class="descname">setToolCursor</tt><big>(</big><em>cursorNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.setToolCursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.setToolCursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.setToolOverlays">
+<tt class="descname">setToolOverlays</tt><big>(</big><em>overlayNodes</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.setToolOverlays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.setToolOverlays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.updateMatrices">
+<tt class="descname">updateMatrices</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.updateMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.updateMatrices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclasses must implement updateMatrices to set the projection and modelview matrices.</p>
+<p>Should set self.matrixNode.projection and self.matrixNode.modelview</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.updateFrustum">
+<tt class="descname">updateFrustum</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.updateFrustum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.updateFrustum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.getViewCorners">
+<tt class="descname">getViewCorners</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.getViewCorners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.getViewCorners" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns corners:</dt>
+<dd>bottom left, near
+bottom left, far
+top left, near
+top left, far
+bottom right, near
+bottom right, far
+top right, near
+top right, far</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list[QVector4D]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.getViewBounds">
+<tt class="descname">getViewBounds</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.getViewBounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.getViewBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the corners of the viewing area, intersected with the world&#8217;s bounds.
+xxx raycast to intersect with terrain height too</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.resizeGL">
+<tt class="descname">resizeGL</tt><big>(</big><em>width</em>, <em>height</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.resizeGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.resizeGL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.resizeEvent">
+<tt class="descname">resizeEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.resizeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.resizeEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.centerPoint">
+<tt class="descname">centerPoint</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.centerPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.centerPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.scaleChanged">
+<tt class="descname">scaleChanged</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x0000000008358180&gt;</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.scaleChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.scale">
+<tt class="descname">scale</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.centerOnPoint">
+<tt class="descname">centerOnPoint</tt><big>(</big><em>pos</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.centerOnPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.centerOnPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Center the view on the given position</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.viewCenter">
+<tt class="descname">viewCenter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.viewCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.viewCenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the world position at the center of the view.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.dragStart">
+<tt class="descname">dragStart</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.dragStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.keyPressEvent">
+<tt class="descname">keyPressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.keyReleaseEvent">
+<tt class="descname">keyReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.mouseMoveEvent">
+<tt class="descname">mouseMoveEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.mouseReleaseEvent">
+<tt class="descname">mouseReleaseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.wheelPos">
+<tt class="descname">wheelPos</tt><em class="property"> = 0</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.wheelPos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.wheelEvent">
+<tt class="descname">wheelEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.wheelEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.wheelEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.augmentMouseEvent">
+<tt class="descname">augmentMouseEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.augmentMouseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.augmentMouseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.augmentKeyEvent">
+<tt class="descname">augmentKeyEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.augmentKeyEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.augmentKeyEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.augmentEvent">
+<tt class="descname">augmentEvent</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.augmentEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.augmentEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.maxFPS">
+<tt class="descname">maxFPS</tt><em class="property"> = 30</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.maxFPS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.glDraw">
+<tt class="descname">glDraw</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.glDraw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.glDraw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.paintGL">
+<tt class="descname">paintGL</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.paintGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.paintGL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.fps">
+<tt class="descname">fps</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.fps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.fps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.rayAtPosition">
+<tt class="descname">rayAtPosition</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.rayAtPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.rayAtPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given coordinates in screen space, return a ray in 3D space.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>x and y are coordinates local to this QWidget</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Ray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.rayAtCenter">
+<tt class="descname">rayAtCenter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.rayAtCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.rayAtCenter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.pointsAtPositions">
+<tt class="descname">pointsAtPositions</tt><big>(</big><em>*screenPoints</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.pointsAtPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.pointsAtPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.unprojectAtHeight">
+<tt class="descname">unprojectAtHeight</tt><big>(</big><em>x</em>, <em>y</em>, <em>h</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.unprojectAtHeight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.unprojectAtHeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given coordinates in screen space, find the corresponding point in 3D space.</p>
+<p>Like rayAtPosition, but the third parameter is a height value in 3D space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.resetLoadOrder">
+<tt class="descname">resetLoadOrder</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.resetLoadOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.resetLoadOrder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.makeChunkIter">
+<tt class="descname">makeChunkIter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.makeChunkIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.makeChunkIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.requestChunk">
+<tt class="descname">requestChunk</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.requestChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.requestChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.wantsChunk">
+<tt class="descname">wantsChunk</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.wantsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.wantsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.recieveChunk">
+<tt class="descname">recieveChunk</tt><big>(</big><em>chunk</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.recieveChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.recieveChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldView.chunkInvalid">
+<tt class="descname">chunkInvalid</tt><big>(</big><em>(cx</em>, <em>cz)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldView.chunkInvalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.chunkInvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldView.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835A088&gt;</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldView.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.worldview.worldview.iterateChunks">
+<tt class="descclassname">mcedit2.worldview.worldview.</tt><tt class="descname">iterateChunks</tt><big>(</big><em>x</em>, <em>z</em>, <em>radius</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#iterateChunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.iterateChunks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yields a list of chunk positions starting from the center and going outward in a square spiral pattern.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; center block position</li>
+<li><strong>z</strong> &#8211; center block position</li>
+<li><strong>radius</strong> (<em>int</em>) &#8211; radius, in chunks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.worldview.WorldViewInfo">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.worldview.</tt><tt class="descname">WorldViewInfo</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldViewInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldViewInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.widgets.html#mcedit2.widgets.infopanel.InfoPanel" title="mcedit2.widgets.infopanel.InfoPanel"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.widgets.infopanel.InfoPanel</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldViewInfo.worldMeshVertexSize">
+<tt class="descname">worldMeshVertexSize</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldViewInfo.worldMeshVertexSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldViewInfo.worldMeshVertexSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldViewInfo.worldMeshChunks">
+<tt class="descname">worldMeshChunks</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldViewInfo.worldMeshChunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldViewInfo.worldMeshChunks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldViewInfo.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835A0C8&gt;</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldViewInfo.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.worldview.worldview.WorldCursorInfo">
+<em class="property">class </em><tt class="descclassname">mcedit2.worldview.worldview.</tt><tt class="descname">WorldCursorInfo</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldCursorInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldCursorInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.widgets.html#mcedit2.widgets.infopanel.InfoPanel" title="mcedit2.widgets.infopanel.InfoPanel"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.widgets.infopanel.InfoPanel</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldCursorInfo.blockPos">
+<tt class="descname">blockPos</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldCursorInfo.blockPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldCursorInfo.blockPos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldCursorInfo.describeBlock">
+<tt class="descname">describeBlock</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldCursorInfo.describeBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldCursorInfo.describeBlock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldCursorInfo.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835A108&gt;</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldCursorInfo.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldCursorInfo.dirs">
+<tt class="descname">dirs</tt><em class="property"> = {Face(East): (1, 0, 0), Face(West): (-1, 0, 0), Face(Up): (0, 1, 0), Face(Down): (0, -1, 0), Face(North): (0, 0, 1), Face(South): (0, 0, -1)}</em><a class="headerlink" href="#mcedit2.worldview.worldview.WorldCursorInfo.dirs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.worldview.worldview.WorldCursorInfo.describeAdjacent">
+<tt class="descname">describeAdjacent</tt><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldCursorInfo.describeAdjacent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldCursorInfo.describeAdjacent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.worldview.worldview.WorldCursorInfo.describe">
+<tt class="descname">describe</tt><big>(</big><em>pos</em><big>)</big><a class="reference internal" href="_modules/mcedit2/worldview/worldview.html#WorldCursorInfo.describe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.worldview.worldview.WorldCursorInfo.describe" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.worldview">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mcedit2.worldview" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mcedit2.worldview package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.camera">mcedit2.worldview.camera module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.cutaway">mcedit2.worldview.cutaway module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.fourup">mcedit2.worldview.fourup module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.iso">mcedit2.worldview.iso module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.minimap">mcedit2.worldview.minimap module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.overhead">mcedit2.worldview.overhead module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.viewaction">mcedit2.worldview.viewaction module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.viewcontrols">mcedit2.worldview.viewcontrols module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.worldruler">mcedit2.worldview.worldruler module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview.worldview">mcedit2.worldview.worldview module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.worldview">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mcedit2.widgets.nbttree.html"
+                        title="previous chapter">mcedit2.widgets.nbttree package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mcedit2.worldview.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.widgets.nbttree.html" title="mcedit2.widgets.nbttree package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

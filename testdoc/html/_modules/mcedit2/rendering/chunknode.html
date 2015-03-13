@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering.chunknode &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.rendering.chunknode</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ${NAME}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">scenegraph</span><span class="p">,</span> <span class="n">rendergraph</span><span class="p">,</span> <span class="n">layers</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.scenegraph</span> <span class="kn">import</span> <span class="n">NamedChildrenNode</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ChunkRenderInfo"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkRenderInfo">[docs]</a><span class="k">class</span> <span class="nc">ChunkRenderInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">maxlod</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">minlod</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldScene</span><span class="p">,</span> <span class="n">chunkPosition</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param worldScene:</span>
+<span class="sd">        :type worldScene: mcedit2.rendering.worldscene.WorldScene</span>
+<span class="sd">        :param chunkPosition:</span>
+<span class="sd">        :type chunkPosition: (int, int)</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChunkRenderInfo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span> <span class="o">=</span> <span class="n">worldScene</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detailLevel</span> <span class="o">=</span> <span class="n">worldScene</span><span class="o">.</span><span class="n">minlod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalidLayers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Layer</span><span class="o">.</span><span class="n">AllLayers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkPosition</span> <span class="o">=</span> <span class="n">chunkPosition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bufferSize</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertexNodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunkPosition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translateOffset</span> <span class="o">=</span> <span class="p">(</span><span class="n">cx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ChunkRenderInfo.getChunkVertexNodes"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkRenderInfo.getChunkVertexNodes">[docs]</a>    <span class="k">def</span> <span class="nf">getChunkVertexNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertexNodes</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ChunkRenderInfo.visibleLayers"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkRenderInfo.visibleLayers">[docs]</a>    <span class="k">def</span> <span class="nf">visibleLayers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">visibleLayers</span> <span class="c">#xxxx</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ChunkRenderInfo.done"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkRenderInfo.done">[docs]</a>    <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invalidLayers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="ChunkNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkNode">[docs]</a><span class="k">class</span> <span class="nc">ChunkNode</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="n">RenderNodeClass</span> <span class="o">=</span> <span class="n">rendergraph</span><span class="o">.</span><span class="n">TranslateRenderNode</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunkPosition</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param chunkPosition:</span>
+<span class="sd">        :type chunkPosition: (int, int)</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChunkNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkPosition</span> <span class="o">=</span> <span class="n">chunkPosition</span>
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunkPosition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translateOffset</span> <span class="o">=</span> <span class="p">(</span><span class="n">cx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ChunkGroupNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode">[docs]</a><span class="k">class</span> <span class="nc">ChunkGroupNode</span><span class="p">(</span><span class="n">NamedChildrenNode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores chunks in a group of subnodes, each storing 4x4 chunks. Reduces the number of chunk nodes whose parent</span>
+<span class="sd">     node must be redrawn when a chunk is added or removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChunkGroupNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ChunkGroupNode.getChunkArea"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.getChunkArea">[docs]</a>    <span class="k">def</span> <span class="nf">getChunkArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">az</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChild</span><span class="p">((</span><span class="n">ax</span><span class="p">,</span> <span class="n">az</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">area</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">create</span><span class="p">:</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="n">NamedChildrenNode</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">((</span><span class="n">ax</span><span class="p">,</span> <span class="n">az</span><span class="p">),</span> <span class="n">area</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">area</span>
+</div>
+<div class="viewcode-block" id="ChunkGroupNode.dropChunkArea"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.dropChunkArea">[docs]</a>    <span class="k">def</span> <span class="nf">dropChunkArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">az</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeChild</span><span class="p">((</span><span class="n">ax</span><span class="p">,</span> <span class="n">az</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ChunkGroupNode.containsChunkNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.containsChunkNode">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunkNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)):</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunkArea</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">area</span><span class="o">.</span><span class="n">getChild</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="ChunkGroupNode.getChunkNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.getChunkNode">[docs]</a>    <span class="k">def</span> <span class="nf">getChunkNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunkArea</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span><span class="o">.</span><span class="n">getChild</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ChunkGroupNode.addChunkNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.addChunkNode">[docs]</a>    <span class="k">def</span> <span class="nf">addChunkNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunkNode</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getChunkArea</span><span class="p">(</span><span class="o">*</span><span class="n">chunkNode</span><span class="o">.</span><span class="n">chunkPosition</span><span class="p">)</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">chunkNode</span><span class="o">.</span><span class="n">chunkPosition</span><span class="p">,</span> <span class="n">chunkNode</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ChunkGroupNode.discardChunkNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.discardChunkNode">[docs]</a>    <span class="k">def</span> <span class="nf">discardChunkNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunkArea</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">area</span><span class="p">:</span>
+            <span class="n">area</span><span class="o">.</span><span class="n">removeChild</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">area</span><span class="o">.</span><span class="n">_children</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dropChunkArea</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+    <span class="c">#</span>
+    <span class="c"># def invalidateChunkNode(self, cx, cz, invalidLayers=None):</span>
+    <span class="c">#     if invalidLayers is None:</span>
+    <span class="c">#         invalidLayers = set(layers.Layer.AllLayers)</span>
+    <span class="c">#     area = self.getChunkArea(cx, cz, create=False)</span>
+    <span class="c">#     if area:</span>
+    <span class="c">#         node = area.getChild((cx, cz))</span>
+    <span class="c">#         if node:</span>
+    <span class="c">#             node.invalidLayers = invalidLayers</span>
+</div>
+<div class="viewcode-block" id="ChunkGroupNode.chunkPositions"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">area</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">area</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">name</span>
+</div>
+<div class="viewcode-block" id="ChunkGroupNode.clear"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunknode.ChunkGroupNode.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChunkGroupNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

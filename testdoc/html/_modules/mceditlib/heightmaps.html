@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.heightmaps &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.heightmaps</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    heightmaps.py</span>
+
+<span class="sd">    Functions for computing general heightmaps and updating the special HeightMap</span>
+<span class="sd">    attribute of modern chunks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">argmax</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c"># def computeChunkHeightMap(chunk, HeightMap=None):</span>
+<span class="c">#     &quot;&quot;&quot;Computes the HeightMap array for a chunk, which stores the lowest</span>
+<span class="c">#     y-coordinate of each column where the sunlight is still at full strength.</span>
+<span class="c">#     The HeightMap array is indexed z,x contrary to the blocks array which is x,z,y.</span>
+<span class="c">#</span>
+<span class="c">#     If HeightMap is passed, fills it with the result and returns it. Otherwise, returns a</span>
+<span class="c">#     new array.</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+<span class="c">#     sectionHeights = []</span>
+<span class="c">#     for cy in chunk.sectionPositions():</span>
+<span class="c">#         section = chunk.getSection(cy)</span>
+<span class="c">#         if section is None:</span>
+<span class="c">#             continue</span>
+<span class="c">#</span>
+<span class="c">#         opaques = chunk.blocktypes.opacity[section.Blocks]</span>
+<span class="c">#         h = extractHeights(opaques)</span>
+<span class="c">#         h += (cy &lt;&lt; 4)</span>
+<span class="c">#         sectionHeights.append(h)</span>
+<span class="c">#</span>
+<span class="c">#     if len(sectionHeights):</span>
+<span class="c">#         heights = sectionHeights.pop(0)</span>
+<span class="c">#         for h in sectionHeights:</span>
+<span class="c">#             numpy.maximum(heights, h, out=heights)</span>
+<span class="c">#</span>
+<span class="c">#         heights = heights.swapaxes(0, 1)</span>
+<span class="c">#     else:</span>
+<span class="c">#         heights = numpy.zeros((16, 16), &#39;uint32&#39;)</span>
+<span class="c">#</span>
+<span class="c">#     if HeightMap is None:</span>
+<span class="c">#         return heights.astype(&#39;uint8&#39;)</span>
+<span class="c">#     else:</span>
+<span class="c">#         HeightMap[:] = heights</span>
+<span class="c">#         return HeightMap</span>
+
+<div class="viewcode-block" id="extractHeights"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.heightmaps.extractHeights">[docs]</a><span class="k">def</span> <span class="nf">extractHeights</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Given an array of bytes shaped (y, z, x), return the coordinates of the highest</span>
+<span class="sd">    non-zero value in each y-column into heightMap</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># The fastest way I&#39;ve found to do this is to make a boolean array with &gt;0,</span>
+    <span class="c"># then turn it upside down with ::-1 and use argmax to get the _first_ nonzero</span>
+    <span class="c"># from each column.</span>
+
+    <span class="n">l</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">heightMap</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">l</span><span class="p">,</span> <span class="n">w</span><span class="p">),</span> <span class="s">&#39;int16&#39;</span><span class="p">)</span>
+
+    <span class="n">heights</span> <span class="o">=</span> <span class="n">argmax</span><span class="p">((</span><span class="n">array</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">heights</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">heights</span>
+
+    <span class="c"># if the entire column is air, argmax finds the first air block and the result is a top height column</span>
+    <span class="c"># top height columns won&#39;t ever have air in the top block so we can find air columns by checking for both</span>
+    <span class="n">heights</span><span class="p">[(</span><span class="n">array</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">heights</span> <span class="o">==</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">heightMap</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">heights</span>
+
+    <span class="k">return</span> <span class="n">heightMap</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

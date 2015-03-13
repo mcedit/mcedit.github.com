@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering.chunkmeshes package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mcedit2.rendering package" href="mcedit2.rendering.html" />
+    <link rel="next" title="mcedit2.ui package" href="mcedit2.ui.html" />
+    <link rel="prev" title="mcedit2.rendering package" href="mcedit2.rendering.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.ui.html" title="mcedit2.ui package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.rendering.html" title="mcedit2.rendering package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li>
+          <li><a href="mcedit2.rendering.html" accesskey="U">mcedit2.rendering package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mcedit2-rendering-chunkmeshes-package">
+<h1>mcedit2.rendering.chunkmeshes package<a class="headerlink" href="#mcedit2-rendering-chunkmeshes-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mcedit2.rendering.chunkmeshes.entitymesh">
+<span id="mcedit2-rendering-chunkmeshes-entitymesh-module"></span><h2>mcedit2.rendering.chunkmeshes.entitymesh module<a class="headerlink" href="#module-mcedit2.rendering.chunkmeshes.entitymesh" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.entitymesh.</tt><tt class="descname">EntityMeshBase</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/entitymesh.html#EntityMeshBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.rendering.html#mcedit2.rendering.blockmeshes.ChunkMeshBase" title="mcedit2.rendering.blockmeshes.ChunkMeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.blockmeshes.ChunkMeshBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase.renderstate">
+<tt class="descname">renderstate</tt><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase.renderstate" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">RenderstateEntityNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase.detailLevels">
+<tt class="descname">detailLevels</tt><em class="property"> = (0, 1, 2)</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase.detailLevels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.TileEntityMesh">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.entitymesh.</tt><tt class="descname">TileEntityMesh</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/entitymesh.html#TileEntityMesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.TileEntityMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase" title="mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.TileEntityMesh.layer">
+<tt class="descname">layer</tt><em class="property"> = u'TileEntities'</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.TileEntityMesh.layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.TileEntityMesh.makeChunkVertices">
+<tt class="descname">makeChunkVertices</tt><big>(</big><em>chunk</em>, <em>limitBox</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/entitymesh.html#TileEntityMesh.makeChunkVertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.TileEntityMesh.makeChunkVertices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.entitymesh.</tt><tt class="descname">MonsterRenderer</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/entitymesh.html#MonsterRenderer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase" title="mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer.layer">
+<tt class="descname">layer</tt><em class="property"> = u'Entities'</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer.layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer.notMonsters">
+<tt class="descname">notMonsters</tt><em class="property"> = set([u'Item', u'XPOrb', u'Painting'])</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer.notMonsters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer.makeChunkVertices">
+<tt class="descname">makeChunkVertices</tt><big>(</big><em>chunk</em>, <em>limitBox</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/entitymesh.html#MonsterRenderer.makeChunkVertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer.makeChunkVertices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.ItemRenderer">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.entitymesh.</tt><tt class="descname">ItemRenderer</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/entitymesh.html#ItemRenderer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.ItemRenderer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase" title="mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.ItemRenderer.layer">
+<tt class="descname">layer</tt><em class="property"> = u'Items'</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.ItemRenderer.layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkmeshes.entitymesh.ItemRenderer.makeChunkVertices">
+<tt class="descname">makeChunkVertices</tt><big>(</big><em>chunk</em>, <em>limitBox</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/entitymesh.html#ItemRenderer.makeChunkVertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.entitymesh.ItemRenderer.makeChunkVertices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.chunkmeshes.lowdetail">
+<span id="mcedit2-rendering-chunkmeshes-lowdetail-module"></span><h2>mcedit2.rendering.chunkmeshes.lowdetail module<a class="headerlink" href="#module-mcedit2.rendering.chunkmeshes.lowdetail" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.lowdetail.</tt><tt class="descname">LowDetailBlockMesh</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/lowdetail.html#LowDetailBlockMesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.rendering.html#mcedit2.rendering.blockmeshes.ChunkMeshBase" title="mcedit2.rendering.blockmeshes.ChunkMeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.blockmeshes.ChunkMeshBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh.renderstate">
+<tt class="descname">renderstate</tt><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh.renderstate" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">RenderstateLowDetailNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh.detailLevels">
+<tt class="descname">detailLevels</tt><em class="property"> = (1,)</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh.detailLevels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh.makeChunkVertices">
+<tt class="descname">makeChunkVertices</tt><big>(</big><em>chunk</em>, <em>limitBox</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/lowdetail.html#LowDetailBlockMesh.makeChunkVertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh.makeChunkVertices" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chunk</strong> (<em>WorldEditorChunk</em>) &#8211; </li>
+<li><strong>limitBox</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">raise:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.lowdetail.OverheadBlockMesh">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.lowdetail.</tt><tt class="descname">OverheadBlockMesh</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/lowdetail.html#OverheadBlockMesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.lowdetail.OverheadBlockMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh" title="mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.lowdetail.OverheadBlockMesh.detailLevels">
+<tt class="descname">detailLevels</tt><em class="property"> = (2,)</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.lowdetail.OverheadBlockMesh.detailLevels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.chunkmeshes.terrainpop">
+<span id="mcedit2-rendering-chunkmeshes-terrainpop-module"></span><h2>mcedit2.rendering.chunkmeshes.terrainpop module<a class="headerlink" href="#module-mcedit2.rendering.chunkmeshes.terrainpop" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.terrainpop.</tt><tt class="descname">TerrainPopulatedRenderer</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/terrainpop.html#TerrainPopulatedRenderer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.rendering.html#mcedit2.rendering.blockmeshes.ChunkMeshBase" title="mcedit2.rendering.blockmeshes.ChunkMeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.blockmeshes.ChunkMeshBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.layer">
+<tt class="descname">layer</tt><em class="property"> = u'TerrainPopulated'</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.renderstate">
+<tt class="descname">renderstate</tt><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.renderstate" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">RenderstateEntityNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.color">
+<tt class="descname">color</tt><em class="property"> = (255, 200, 155)</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.vertexTemplate">
+<tt class="descname">vertexTemplate</tt><em class="property"> = array([[[  1.60000000e+01,   0.00000000e+00,   1.60000000e+01,            3.19047969e+05],         [  1.60000000e+01,   0.00000000e+00,   0.00000000e+00,            3.19047969e+05],         [  1.60000000e+01,   2.56000000e+02,   0.00000000e+00,            3.19047969e+05],         [  1.60000000e+01,   2.56000000e+02,   1.60000000e+01,            3.19047969e+05]],         [[  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,            3.19047969e+05],         [  0.00000000e+00,   0.00000000e+00,   1.60000000e+01,            3.19047969e+05],         [  0.00000000e+00,   2.56000000e+02,   1.60000000e+01,            3.19047969e+05],         [  0.00000000e+00,   2.56000000e+02,   0.00000000e+00,            3.19047969e+05]],         [[  0.00000000e+00,   2.56000000e+02,   0.00000000e+00,            3.19047969e+05],         [  0.00000000e+00,   2.56000000e+02,   1.60000000e+01,            3.19047969e+05],         [  1.60000000e+01,   2.56000000e+02,   1.60000000e+01,            3.19047969e+05],         [  1.60000000e+01,   2.56000000e+02,   0.00000000e+00,            3.19047969e+05]],         [[  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,            3.19047969e+05],         [  1.60000000e+01,   0.00000000e+00,   0.00000000e+00,            3.19047969e+05],         [  1.60000000e+01,   0.00000000e+00,   1.60000000e+01,            3.19047969e+05],         [  0.00000000e+00,   0.00000000e+00,   1.60000000e+01,            3.19047969e+05]],         [[  0.00000000e+00,   0.00000000e+00,   1.60000000e+01,            3.19047969e+05],         [  1.60000000e+01,   0.00000000e+00,   1.60000000e+01,            3.19047969e+05],         [  1.60000000e+01,   2.56000000e+02,   1.60000000e+01,            3.19047969e+05],         [  0.00000000e+00,   2.56000000e+02,   1.60000000e+01,            3.19047969e+05]],         [[  1.60000000e+01,   0.00000000e+00,   0.00000000e+00,            3.19047969e+05],         [  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,            3.19047969e+05],         [  0.00000000e+00,   2.56000000e+02,   0.00000000e+00,            3.19047969e+05],         [  1.60000000e+01,   2.56000000e+02,   0.00000000e+00,            3.19047969e+05]]], dtype=float32, shape=(6L, 4L, 4L))</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.vertexTemplate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.makeChunkVertices">
+<tt class="descname">makeChunkVertices</tt><big>(</big><em>chunk</em>, <em>_limitBox</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/terrainpop.html#TerrainPopulatedRenderer.makeChunkVertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer.makeChunkVertices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.chunkmeshes.tileticks">
+<span id="mcedit2-rendering-chunkmeshes-tileticks-module"></span><h2>mcedit2.rendering.chunkmeshes.tileticks module<a class="headerlink" href="#module-mcedit2.rendering.chunkmeshes.tileticks" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.chunkmeshes.tileticks.TileTicksRenderer">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkmeshes.tileticks.</tt><tt class="descname">TileTicksRenderer</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/tileticks.html#TileTicksRenderer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.tileticks.TileTicksRenderer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase" title="mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.chunkmeshes.entitymesh.EntityMeshBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkmeshes.tileticks.TileTicksRenderer.layer">
+<tt class="descname">layer</tt><em class="property"> = u'TileTicks'</em><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.tileticks.TileTicksRenderer.layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkmeshes.tileticks.TileTicksRenderer.makeChunkVertices">
+<tt class="descname">makeChunkVertices</tt><big>(</big><em>chunk</em>, <em>limitBox</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkmeshes/tileticks.html#TileTicksRenderer.makeChunkVertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkmeshes.tileticks.TileTicksRenderer.makeChunkVertices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.chunkmeshes">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mcedit2.rendering.chunkmeshes" title="Permalink to this headline">¶</a></h2>
+<p>__init__.py</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mcedit2.rendering.chunkmeshes package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunkmeshes.entitymesh">mcedit2.rendering.chunkmeshes.entitymesh module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunkmeshes.lowdetail">mcedit2.rendering.chunkmeshes.lowdetail module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunkmeshes.terrainpop">mcedit2.rendering.chunkmeshes.terrainpop module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunkmeshes.tileticks">mcedit2.rendering.chunkmeshes.tileticks module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunkmeshes">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mcedit2.rendering.html"
+                        title="previous chapter">mcedit2.rendering package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mcedit2.ui.html"
+                        title="next chapter">mcedit2.ui package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mcedit2.rendering.chunkmeshes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.ui.html" title="mcedit2.ui package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.rendering.html" title="mcedit2.rendering package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li>
+          <li><a href="mcedit2.rendering.html" >mcedit2.rendering package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

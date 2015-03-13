@@ -1,0 +1,1428 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.util package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mcedit2 package" href="mcedit2.html" />
+    <link rel="next" title="mcedit2.widgets package" href="mcedit2.widgets.html" />
+    <link rel="prev" title="mcedit2.ui package" href="mcedit2.ui.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.widgets.html" title="mcedit2.widgets package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.ui.html" title="mcedit2.ui package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" accesskey="U">mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mcedit2-util-package">
+<h1>mcedit2.util package<a class="headerlink" href="#mcedit2-util-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mcedit2.util.bresenham">
+<span id="mcedit2-util-bresenham-module"></span><h2>mcedit2.util.bresenham module<a class="headerlink" href="#module-mcedit2.util.bresenham" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mcedit2.util.bresenham.bresenham">
+<tt class="descclassname">mcedit2.util.bresenham.</tt><tt class="descname">bresenham</tt><big>(</big><em>p1</em>, <em>p2</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/bresenham.html#bresenham"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.bresenham.bresenham" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bresenham line algorithm
+adapted for 3d.  slooooow.
+Now in generator style.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.bugfixes">
+<span id="mcedit2-util-bugfixes-module"></span><h2>mcedit2.util.bugfixes module<a class="headerlink" href="#module-mcedit2.util.bugfixes" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mcedit2.util.bugfixes.QObject_tr_unicode_literals_fix">
+<tt class="descclassname">mcedit2.util.bugfixes.</tt><tt class="descname">QObject_tr_unicode_literals_fix</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/bugfixes.html#QObject_tr_unicode_literals_fix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.bugfixes.QObject_tr_unicode_literals_fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Because of a bug in PySide, QObject.tr will return an empty string if a unicode object is passed. Additionally,
+if a utf-8 encoded byte string is passed to tr (maybe this is only when no translations are loaded) then the
+returned string will be an incorrectly decoded unicode object (each character&#8217;s code point is a single byte of the
+utf-8 encoded byte string that was passed. Thus, encode using &#8216;ascii&#8217; and avoid using non-ascii characters
+in string literals.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.custom_traceback">
+<span id="mcedit2-util-custom-traceback-module"></span><h2>mcedit2.util.custom_traceback module<a class="headerlink" href="#module-mcedit2.util.custom_traceback" title="Permalink to this headline">¶</a></h2>
+<p>custom_traceback</p>
+<dl class="function">
+<dt id="mcedit2.util.custom_traceback.extract_tb">
+<tt class="descclassname">mcedit2.util.custom_traceback.</tt><tt class="descname">extract_tb</tt><big>(</big><em>tb</em>, <em>limit=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/custom_traceback.html#extract_tb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.custom_traceback.extract_tb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of up to limit pre-processed entries from traceback.</p>
+<p>This is useful for alternate formatting of stack traces.  If
+&#8216;limit&#8217; is omitted or None, all entries are extracted.  A
+pre-processed stack trace entry is a 5-tuple (filename, line
+number, function name, text, selfstr) representing the information that is
+usually printed for a stack trace.  The text is a string with
+leading and trailing whitespace stripped; if the source is not
+available it is None.</p>
+<p>This function is modified to return the name of the &#8216;self&#8217; parameter&#8217;s class as
+the 5th element of the tuple.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.custom_traceback.format_list">
+<tt class="descclassname">mcedit2.util.custom_traceback.</tt><tt class="descname">format_list</tt><big>(</big><em>extracted_list</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/custom_traceback.html#format_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.custom_traceback.format_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format a list of traceback entry tuples for printing.</p>
+<p>Given a list of tuples as returned by extract_tb() or
+extract_stack(), return a list of strings ready for printing.
+Each string in the resulting list corresponds to the item with the
+same index in the argument list.  Each string ends in a newline;
+the strings may contain internal newlines as well, for those items
+whose source text line is not None.</p>
+<p>This function is modified to include the 5th item of the tuple as
+the name of the class of the &#8216;self&#8217; parameter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.custom_traceback.print_list">
+<tt class="descclassname">mcedit2.util.custom_traceback.</tt><tt class="descname">print_list</tt><big>(</big><em>extracted_list</em>, <em>file=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/custom_traceback.html#print_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.custom_traceback.print_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the list of tuples as returned by extract_tb() or
+extract_stack() as a formatted stack trace to the given file.</p>
+<dl class="docutils">
+<dt>This function is modified to print the 5th element of the tuple</dt>
+<dd>returned by the modified functions above.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.custom_traceback.print_tb">
+<tt class="descclassname">mcedit2.util.custom_traceback.</tt><tt class="descname">print_tb</tt><big>(</big><em>tb</em>, <em>limit=None</em>, <em>file=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/custom_traceback.html#print_tb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.custom_traceback.print_tb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print up to &#8216;limit&#8217; stack trace entries from the traceback &#8216;tb&#8217;.</p>
+<p>If &#8216;limit&#8217; is omitted or None, all entries are printed.  If &#8216;file&#8217;
+is omitted or None, the output goes to sys.stderr; otherwise
+&#8216;file&#8217; should be an open file or file-like object with a write()
+method.</p>
+<p>This function is modified to also print the name of the &#8216;self&#8217; parameter&#8217;s class.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.custom_traceback.install">
+<tt class="descclassname">mcedit2.util.custom_traceback.</tt><tt class="descname">install</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/custom_traceback.html#install"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.custom_traceback.install" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.dialogs">
+<span id="mcedit2-util-dialogs-module"></span><h2>mcedit2.util.dialogs module<a class="headerlink" href="#module-mcedit2.util.dialogs" title="Permalink to this headline">¶</a></h2>
+<p>dialogs</p>
+<dl class="function">
+<dt id="mcedit2.util.dialogs.NotImplementedYet">
+<tt class="descclassname">mcedit2.util.dialogs.</tt><tt class="descname">NotImplementedYet</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/dialogs.html#NotImplementedYet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.dialogs.NotImplementedYet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.directories">
+<span id="mcedit2-util-directories-module"></span><h2>mcedit2.util.directories module<a class="headerlink" href="#module-mcedit2.util.directories" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mcedit2.util.directories.getUserFilesDirectory">
+<tt class="descclassname">mcedit2.util.directories.</tt><tt class="descname">getUserFilesDirectory</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/directories.html#getUserFilesDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.directories.getUserFilesDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.geometry">
+<span id="mcedit2-util-geometry-module"></span><h2>mcedit2.util.geometry module<a class="headerlink" href="#module-mcedit2.util.geometry" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+</div>
+<div class="section" id="module-mcedit2.util.glutils">
+<span id="mcedit2-util-glutils-module"></span><h2>mcedit2.util.glutils module<a class="headerlink" href="#module-mcedit2.util.glutils" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (c) 2010-2012 David Rio Vierra</p>
+<p>Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.</p>
+<p>THE SOFTWARE IS PROVIDED &#8220;AS IS&#8221; AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.</p>
+<p>glutils.py</p>
+<p>Pythonesque wrappers around certain OpenGL functions.</p>
+<dl class="class">
+<dt id="mcedit2.util.glutils.gl">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.glutils.</tt><tt class="descname">gl</tt><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.ResetGL">
+<em class="property">classmethod </em><tt class="descname">ResetGL</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.ResetGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.ResetGL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glPushMatrix">
+<em class="property">classmethod </em><tt class="descname">glPushMatrix</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glPushMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glPushMatrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glPushAttrib">
+<em class="property">classmethod </em><tt class="descname">glPushAttrib</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glPushAttrib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glPushAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glPushClientAttrib">
+<em class="property">classmethod </em><tt class="descname">glPushClientAttrib</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glPushClientAttrib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glPushClientAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glBegin">
+<em class="property">classmethod </em><tt class="descname">glBegin</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glBegin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glBegin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glEnable">
+<em class="property">classmethod </em><tt class="descname">glEnable</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glEnable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glEnable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glEnableClientState">
+<em class="property">classmethod </em><tt class="descname">glEnableClientState</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glEnableClientState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glEnableClientState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.glutils.gl.listCount">
+<tt class="descname">listCount</tt><em class="property"> = 0</em><a class="headerlink" href="#mcedit2.util.glutils.gl.listCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glGenLists">
+<em class="property">classmethod </em><tt class="descname">glGenLists</tt><big>(</big><em>n</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glGenLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glGenLists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.gl.glDeleteLists">
+<em class="property">classmethod </em><tt class="descname">glDeleteLists</tt><big>(</big><em>base</em>, <em>n</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#gl.glDeleteLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.gl.glDeleteLists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.glutils.DisplayList">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.glutils.</tt><tt class="descname">DisplayList</tt><big>(</big><em>drawFunc=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#DisplayList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.DisplayList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="classmethod">
+<dt id="mcedit2.util.glutils.DisplayList.destroyAllLists">
+<em class="property">classmethod </em><tt class="descname">destroyAllLists</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#DisplayList.destroyAllLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.DisplayList.destroyAllLists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.DisplayList.invalidate">
+<tt class="descname">invalidate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#DisplayList.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.DisplayList.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.DisplayList.destroy">
+<tt class="descname">destroy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#DisplayList.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.DisplayList.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.DisplayList.compile">
+<tt class="descname">compile</tt><big>(</big><em>drawFunc</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#DisplayList.compile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.DisplayList.compile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.DisplayList.getList">
+<tt class="descname">getList</tt><big>(</big><em>drawFunc=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#DisplayList.getList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.DisplayList.getList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.DisplayList.call">
+<tt class="descname">call</tt><big>(</big><em>drawFunc=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#DisplayList.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.DisplayList.call" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.glutils.Texture">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.glutils.</tt><tt class="descname">Texture</tt><big>(</big><em>textureFunc=None</em>, <em>minFilter=None</em>, <em>magFilter=None</em>, <em>maxLOD=4</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#Texture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.Texture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.util.glutils.Texture.allTextures">
+<tt class="descname">allTextures</tt><em class="property"> = []</em><a class="headerlink" href="#mcedit2.util.glutils.Texture.allTextures" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.glutils.Texture.defaultFilter">
+<tt class="descname">defaultFilter</tt><em class="property"> = GL_NEAREST</em><a class="headerlink" href="#mcedit2.util.glutils.Texture.defaultFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.Texture.load">
+<tt class="descname">load</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#Texture.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.Texture.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.Texture.dispose">
+<tt class="descname">dispose</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#Texture.dispose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.Texture.dispose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.Texture.bind">
+<tt class="descname">bind</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#Texture.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.Texture.bind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.glutils.Texture.invalidate">
+<tt class="descname">invalidate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#Texture.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.Texture.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.glutils.FramebufferTexture">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.glutils.</tt><tt class="descname">FramebufferTexture</tt><big>(</big><em>width</em>, <em>height</em>, <em>drawFunc</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#FramebufferTexture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.FramebufferTexture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.util.glutils.Texture" title="mcedit2.util.glutils.Texture"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.util.glutils.Texture</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.glutils.debugDrawPoint">
+<tt class="descclassname">mcedit2.util.glutils.</tt><tt class="descname">debugDrawPoint</tt><big>(</big><em>point</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/glutils.html#debugDrawPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.glutils.debugDrawPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.ipython_widget">
+<span id="mcedit2-util-ipython-widget-module"></span><h2>mcedit2.util.ipython_widget module<a class="headerlink" href="#module-mcedit2.util.ipython_widget" title="Permalink to this headline">¶</a></h2>
+<p>ipython_widget</p>
+<dl class="function">
+<dt id="mcedit2.util.ipython_widget.print_process_id">
+<tt class="descclassname">mcedit2.util.ipython_widget.</tt><tt class="descname">print_process_id</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/ipython_widget.html#print_process_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.ipython_widget.print_process_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.ipython_widget.terminal_widget">
+<tt class="descclassname">mcedit2.util.ipython_widget.</tt><tt class="descname">terminal_widget</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/ipython_widget.html#terminal_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.ipython_widget.terminal_widget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.ipython_widget.main">
+<tt class="descclassname">mcedit2.util.ipython_widget.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/ipython_widget.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.ipython_widget.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.lazyprop">
+<span id="mcedit2-util-lazyprop-module"></span><h2>mcedit2.util.lazyprop module<a class="headerlink" href="#module-mcedit2.util.lazyprop" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.util.lazyprop.lazyprop">
+<tt class="descclassname">mcedit2.util.lazyprop.</tt><tt class="descname">lazyprop</tt><big>(</big><em>fn</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/lazyprop.html#lazyprop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.lazyprop.lazyprop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lazily computed property wrapper.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nd">@lazyprop</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Big computation here!&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="mi">42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">func</span>
+<span class="go">Big computation here!</span>
+<span class="go">42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">func</span>
+<span class="go">42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">f</span><span class="o">.</span><span class="n">func</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">func</span>
+<span class="go">Big computation here!</span>
+<span class="go">42</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.load_png">
+<span id="mcedit2-util-load-png-module"></span><h2>mcedit2.util.load_png module<a class="headerlink" href="#module-mcedit2.util.load_png" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mcedit2.util.load_png.loadPNGTexture">
+<tt class="descclassname">mcedit2.util.load_png.</tt><tt class="descname">loadPNGTexture</tt><big>(</big><em>filename</em>, <em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_png.html#loadPNGTexture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_png.loadPNGTexture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.load_png.loadTextureFunc">
+<tt class="descclassname">mcedit2.util.load_png.</tt><tt class="descname">loadTextureFunc</tt><big>(</big><em>w</em>, <em>h</em>, <em>ndata</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_png.html#loadTextureFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_png.loadTextureFunc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.load_png.loadPNGImage">
+<tt class="descclassname">mcedit2.util.load_png.</tt><tt class="descname">loadPNGImage</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_png.html#loadPNGImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_png.loadPNGImage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.load_png.loadPNGData">
+<tt class="descclassname">mcedit2.util.load_png.</tt><tt class="descname">loadPNGData</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_png.html#loadPNGData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_png.loadPNGData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.load_png.loadPNGFile">
+<tt class="descclassname">mcedit2.util.load_png.</tt><tt class="descname">loadPNGFile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_png.html#loadPNGFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_png.loadPNGFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.load_ui">
+<span id="mcedit2-util-load-ui-module"></span><h2>mcedit2.util.load_ui module<a class="headerlink" href="#module-mcedit2.util.load_ui" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.util.load_ui.MCEUILoader">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.load_ui.</tt><tt class="descname">MCEUILoader</tt><big>(</big><em>baseinstance=None</em>, <em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_ui.html#MCEUILoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_ui.MCEUILoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtUiTools.QUiLoader</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.load_ui.MCEUILoader.createWidget">
+<tt class="descname">createWidget</tt><big>(</big><em>className</em>, <em>parent=None</em>, <em>name=u''</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_ui.html#MCEUILoader.createWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_ui.MCEUILoader.createWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>QWidget * QUiLoader::createWidget ( const QString &amp; className, QWidget * parent = 0, const QString &amp; name = QString() ) [virtual]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>className</strong> &#8211; str</li>
+<li><strong>parent</strong> &#8211; QWidget</li>
+<li><strong>name</strong> &#8211; str</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.load_ui.MCEUILoader.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000062E5508&gt;</em><a class="headerlink" href="#mcedit2.util.load_ui.MCEUILoader.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.load_ui.registerCustomWidget">
+<tt class="descclassname">mcedit2.util.load_ui.</tt><tt class="descname">registerCustomWidget</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_ui.html#registerCustomWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_ui.registerCustomWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.load_ui.load_ui">
+<tt class="descclassname">mcedit2.util.load_ui.</tt><tt class="descname">load_ui</tt><big>(</big><em>name</em>, <em>parent=None</em>, <em>baseinstance=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/load_ui.html#load_ui"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.load_ui.load_ui" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.mceaction">
+<span id="mcedit2-util-mceaction-module"></span><h2>mcedit2.util.mceaction module<a class="headerlink" href="#module-mcedit2.util.mceaction" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.util.mceaction.ChangeBinding">
+<tt class="descclassname">mcedit2.util.mceaction.</tt><tt class="descname">ChangeBinding</tt><big>(</big><em>shortcutName</em>, <em>shortcutString</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/mceaction.html#ChangeBinding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.mceaction.ChangeBinding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.mceaction.MCEAction">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.mceaction.</tt><tt class="descname">MCEAction</tt><big>(</big><em>name</em>, <em>parent</em>, <em>shortcutName=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/mceaction.html#MCEAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.mceaction.MCEAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QAction</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.mceaction.MCEAction.shortcutChanged">
+<tt class="descname">shortcutChanged</tt><big>(</big><em>shortcutString</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/mceaction.html#MCEAction.shortcutChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.mceaction.MCEAction.shortcutChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.mceaction.MCEAction.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000ACF6C08&gt;</em><a class="headerlink" href="#mcedit2.util.mceaction.MCEAction.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.minecraftinstall">
+<span id="mcedit2-util-minecraftinstall-module"></span><h2>mcedit2.util.minecraftinstall module<a class="headerlink" href="#module-mcedit2.util.minecraftinstall" title="Permalink to this headline">¶</a></h2>
+<p>minecraftinstall</p>
+<dl class="class">
+<dt id="mcedit2.util.minecraftinstall.MCInstall">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">MCInstall</tt><big>(</big><em>path</em>, <em>name='Unnamed'</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.checkUsable">
+<tt class="descname">checkUsable</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.checkUsable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.checkUsable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises MCInstallError explaining why this install is unusable, or else does nothing
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.versionsDir">
+<tt class="descname">versionsDir</tt><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.versionsDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.versionsDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.versions">
+<tt class="descname">versions</tt><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.versions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.versions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.getVersionJarPath">
+<tt class="descname">getVersionJarPath</tt><big>(</big><em>version</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.getVersionJarPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.getVersionJarPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.resourcePacks">
+<tt class="descname">resourcePacks</tt><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.resourcePacks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.resourcePacks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.getSaveFileDir">
+<tt class="descname">getSaveFileDir</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.getSaveFileDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.getSaveFileDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.getResourcePackPath">
+<tt class="descname">getResourcePackPath</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.getResourcePackPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.getResourcePackPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.getJsonSettingValue">
+<tt class="descname">getJsonSettingValue</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.getJsonSettingValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.getJsonSettingValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.getResourceLoader">
+<tt class="descname">getResourceLoader</tt><big>(</big><em>version</em>, <em>resourcePack</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.getResourceLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.getResourceLoader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MCInstall.findVersion1_8">
+<tt class="descname">findVersion1_8</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstall.findVersion1_8"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstall.findVersion1_8" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.minecraftinstall.splitVersion">
+<tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">splitVersion</tt><big>(</big><em>version</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#splitVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.splitVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a Minecraft version ID into major, minor, and revision. If the version could not be parsed, return (0, 0, &#8220;&#8221;)
+The revision is returned with the leading period. For example, if &#8220;1.8.1-pre3&#8221; is passed, (1, 8, &#8221;.1-pre3&#8221;) will
+be returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>version</strong> (<em>unicode</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">major, minor, revision</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int, int, unicode</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.minecraftinstall.usableVersion">
+<tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">usableVersion</tt><big>(</big><em>version</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#usableVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.usableVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the version has unstitched texture data in assets/minecraft/textures/blocks (v1.6+)
+(earlier versions have unstitched textures elsewhere, so don&#8217;t bother with them)
+:param version:
+:type version:
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mcedit2.util.minecraftinstall.MCInstallError">
+<em class="property">exception </em><tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">MCInstallError</tt><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MCInstallError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MCInstallError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.ValueError</span></tt></p>
+<p>Raised for invalid or unusable Minecraft installs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.minecraftinstall.getDefaultInstall">
+<tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">getDefaultInstall</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#getDefaultInstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.getDefaultInstall" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">MCInstall</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.minecraftinstall.listInstalls">
+<tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">listInstalls</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#listInstalls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.listInstalls" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.minecraftinstall.selectedInstallIndex">
+<tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">selectedInstallIndex</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#selectedInstallIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.selectedInstallIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.minecraftinstall.getInstall">
+<tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">getInstall</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#getInstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.getInstall" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.minecraftinstall.ensureInstallation">
+<tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">ensureInstallation</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#ensureInstallation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.ensureInstallation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called on app startup. Auto-detect install, display config dialog if no installs were found
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.minecraftinstall.NameItem">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">NameItem</tt><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#NameItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.NameItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QTableWidgetItem</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.NameItem.setData">
+<tt class="descname">setData</tt><big>(</big><em>data</em>, <em>role</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#NameItem.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.NameItem.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.minecraftinstall.PathItem">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">PathItem</tt><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#PathItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.PathItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QTableWidgetItem</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.PathItem.setData">
+<tt class="descname">setData</tt><big>(</big><em>data</em>, <em>role</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#PathItem.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.PathItem.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.minecraftinstall.</tt><tt class="descname">MinecraftInstallsDialog</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MinecraftInstallsDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QDialog</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog.itemChanged">
+<tt class="descname">itemChanged</tt><big>(</big><em>row</em>, <em>column</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MinecraftInstallsDialog.itemChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.itemChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog.add">
+<tt class="descname">add</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MinecraftInstallsDialog.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog.remove">
+<tt class="descname">remove</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MinecraftInstallsDialog.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.remove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog.select">
+<tt class="descname">select</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MinecraftInstallsDialog.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.select" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog.ok">
+<tt class="descname">ok</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MinecraftInstallsDialog.ok"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.ok" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/minecraftinstall.html#MinecraftInstallsDialog.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.minecraftinstall.MinecraftInstallsDialog.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000849D748&gt;</em><a class="headerlink" href="#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.objgraphwidget">
+<span id="mcedit2-util-objgraphwidget-module"></span><h2>mcedit2.util.objgraphwidget module<a class="headerlink" href="#module-mcedit2.util.objgraphwidget" title="Permalink to this headline">¶</a></h2>
+<p>objgraphwidget</p>
+<dl class="class">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.objgraphwidget.</tt><tt class="descname">ObjGraphWidget</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/objgraphwidget.html#ObjGraphWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QWidget</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget.itemChanged">
+<tt class="descname">itemChanged</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/objgraphwidget.html#ObjGraphWidget.itemChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget.itemChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget.showTempImage">
+<tt class="descname">showTempImage</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/objgraphwidget.html#ObjGraphWidget.showTempImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget.showTempImage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget.showGarbage">
+<tt class="descname">showGarbage</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/objgraphwidget.html#ObjGraphWidget.showGarbage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget.showGarbage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget.showRefs">
+<tt class="descname">showRefs</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/objgraphwidget.html#ObjGraphWidget.showRefs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget.showRefs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget.showBackrefs">
+<tt class="descname">showBackrefs</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/objgraphwidget.html#ObjGraphWidget.showBackrefs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget.showBackrefs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget.showGraph">
+<tt class="descname">showGraph</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/objgraphwidget.html#ObjGraphWidget.showGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget.showGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.objgraphwidget.ObjGraphWidget.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000849DB48&gt;</em><a class="headerlink" href="#mcedit2.util.objgraphwidget.ObjGraphWidget.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.profiler">
+<span id="mcedit2-util-profiler-module"></span><h2>mcedit2.util.profiler module<a class="headerlink" href="#module-mcedit2.util.profiler" title="Permalink to this headline">¶</a></h2>
+<p>profiler</p>
+<dl class="class">
+<dt id="mcedit2.util.profiler.Profiler">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">Profiler</tt><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.util.profiler.Profiler.sampleLimit">
+<tt class="descname">sampleLimit</tt><em class="property"> = 100000</em><a class="headerlink" href="#mcedit2.util.profiler.Profiler.sampleLimit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.dumpSamples">
+<tt class="descname">dumpSamples</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.dumpSamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.dumpSamples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.enter">
+<tt class="descname">enter</tt><big>(</big><em>name</em>, <em>entry=True</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.enter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Record the entry into a named profiling area. Call profiler.exit() to return to the previous area.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.context">
+<tt class="descname">context</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.function">
+<tt class="descname">function</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.iterate">
+<tt class="descname">iterate</tt><big>(</big><em>it</em>, <em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.iterate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.iterator">
+<tt class="descname">iterator</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.iterator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.recordSample">
+<tt class="descname">recordSample</tt><big>(</big><em>entry=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.recordSample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.recordSample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.Profiler.analyze">
+<tt class="descname">analyze</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#Profiler.analyze"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.Profiler.analyze" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.profiler.DummyProfiler">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">DummyProfiler</tt><a class="reference internal" href="_modules/mcedit2/util/profiler.html#DummyProfiler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.DummyProfiler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.util.profiler.Profiler" title="mcedit2.util.profiler.Profiler"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.util.profiler.Profiler</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.util.profiler.DummyProfiler.enter">
+<tt class="descname">enter</tt><big>(</big><em>name</em>, <em>entry=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#DummyProfiler.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.DummyProfiler.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.DummyProfiler.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#DummyProfiler.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.DummyProfiler.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.DummyProfiler.function">
+<tt class="descname">function</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#DummyProfiler.function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.DummyProfiler.function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profiler.DummyProfiler.iterate">
+<tt class="descname">iterate</tt><big>(</big><em>it</em>, <em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#DummyProfiler.iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.DummyProfiler.iterate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.profiler.AnalysisNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">AnalysisNode</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#AnalysisNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.AnalysisNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">collections.defaultdict</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.util.profiler.AnalysisNode.totalTime">
+<tt class="descname">totalTime</tt><a class="reference internal" href="_modules/mcedit2/util/profiler.html#AnalysisNode.totalTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.AnalysisNode.totalTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.profiler.ProfileAnalysis">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">ProfileAnalysis</tt><big>(</big><em>times</em>, <em>counts</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#ProfileAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.ProfileAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.util.profiler.AnalysisNode" title="mcedit2.util.profiler.AnalysisNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.util.profiler.AnalysisNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.profiler.getProfiler">
+<tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">getProfiler</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#getProfiler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.getProfiler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.profiler.function">
+<tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">function</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorate a function with profiler calls. If name is not given, uses the function&#8217;s name.</p>
+<p>Usage:</p>
+<p>&#64;profiler.function
+def foo():</p>
+<blockquote>
+<div>print &#8220;Work work.&#8221;</div></blockquote>
+<p>&#64;profiler.function(&#8220;Subroutine &#8216;bar&#8217; #2&#8221;)
+def bar():</p>
+<blockquote>
+<div>print &#8220;Work work work.&#8221;</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">function</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.profiler.context">
+<tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">context</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.profiler.iterate">
+<tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">iterate</tt><big>(</big><em>it</em>, <em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.iterate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps an iterator with profiler calls. Each call to it.next() is wrapped in a Profiler.context() call.</p>
+<p>Usage:</p>
+<p>someIterator = xrange(1000)
+for i in profiler.iterate(someIterator, &#8220;Costly foo iteration.&#8221;):</p>
+<blockquote>
+<div>print i</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.profiler.iterator">
+<tt class="descclassname">mcedit2.util.profiler.</tt><tt class="descname">iterator</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profiler.html#iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profiler.iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorates a function which returns an iterator by wrapping the iterator with profile calls.
+If name is not given, uses the function&#8217;s name.</p>
+<p>Usage:</p>
+<p>&#64;profiler.iterator
+def foo_iter():</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>for i in range(100):</dt>
+<dd>yield i</dd>
+</dl>
+</div></blockquote>
+<p>&#64;profiler.iterator(&#8220;Iterator &#8216;bar&#8217; #2&#8221;)
+def bar_iter():</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>for i in range(100):</dt>
+<dd>yield i</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">function</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.profilerui">
+<span id="mcedit2-util-profilerui-module"></span><h2>mcedit2.util.profilerui module<a class="headerlink" href="#module-mcedit2.util.profilerui" title="Permalink to this headline">¶</a></h2>
+<p>profilerui</p>
+<dl class="class">
+<dt id="mcedit2.util.profilerui.ProfilerWidget">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.profilerui.</tt><tt class="descname">ProfilerWidget</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profilerui.html#ProfilerWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profilerui.ProfilerWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QWidget</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.util.profilerui.ProfilerWidget.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000873CF88&gt;</em><a class="headerlink" href="#mcedit2.util.profilerui.ProfilerWidget.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.profilerui.ProfilerWidget.updateTable">
+<tt class="descname">updateTable</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/profilerui.html#ProfilerWidget.updateTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.profilerui.ProfilerWidget.updateTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.raycast">
+<span id="mcedit2-util-raycast-module"></span><h2>mcedit2.util.raycast module<a class="headerlink" href="#module-mcedit2.util.raycast" title="Permalink to this headline">¶</a></h2>
+<p>raycast</p>
+<dl class="exception">
+<dt id="mcedit2.util.raycast.RayCastError">
+<em class="property">exception </em><tt class="descclassname">mcedit2.util.raycast.</tt><tt class="descname">RayCastError</tt><a class="reference internal" href="_modules/mcedit2/util/raycast.html#RayCastError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.raycast.RayCastError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.ValueError</span></tt></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mcedit2.util.raycast.MaxDistanceError">
+<em class="property">exception </em><tt class="descclassname">mcedit2.util.raycast.</tt><tt class="descname">MaxDistanceError</tt><a class="reference internal" href="_modules/mcedit2/util/raycast.html#MaxDistanceError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.raycast.MaxDistanceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.util.raycast.RayCastError" title="mcedit2.util.raycast.RayCastError"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.util.raycast.RayCastError</span></tt></a></p>
+<p>Raised when a ray cast exceeds its max distance.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mcedit2.util.raycast.RayBoundsError">
+<em class="property">exception </em><tt class="descclassname">mcedit2.util.raycast.</tt><tt class="descname">RayBoundsError</tt><a class="reference internal" href="_modules/mcedit2/util/raycast.html#RayBoundsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.raycast.RayBoundsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.util.raycast.RayCastError" title="mcedit2.util.raycast.RayCastError"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.util.raycast.RayCastError</span></tt></a></p>
+<p>Raised when a ray exits or does not enter the level boundaries.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.raycast.rayCastInBounds">
+<tt class="descclassname">mcedit2.util.raycast.</tt><tt class="descname">rayCastInBounds</tt><big>(</big><em>ray</em>, <em>dimension</em>, <em>maxDistance=100</em>, <em>hitAir=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/raycast.html#rayCastInBounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.raycast.rayCastInBounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.raycast.rayCast">
+<tt class="descclassname">mcedit2.util.raycast.</tt><tt class="descname">rayCast</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/raycast.html#rayCast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.raycast.rayCast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Borrowed from <a class="reference external" href="https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game">https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game</a></p>
+<p>Updates a factor t along each axis to compute the distance from the vector origin (in units of the vector
+magnitude) to the next integer value (i.e. block edge) along that axis.</p>
+<p>Return the block position and face of the block touched.</p>
+<p>Raises MaxDistanceError if the ray exceeded the max distance without hitting any blocks, or if the ray exits or
+doesn&#8217;t enter the dimension&#8217;s bounds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ray</strong> (<em>Ray</em>) &#8211; </li>
+<li><strong>maxDistance</strong> (<em>int</em>) &#8211; </li>
+<li><strong>dimension</strong> (<a class="reference internal" href="mceditlib.html#mceditlib.worldeditor.WorldEditorDimension" title="mceditlib.worldeditor.WorldEditorDimension"><em>mceditlib.worldeditor.WorldEditorDimension</em></a>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(point, face)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.raycast.intbound">
+<tt class="descclassname">mcedit2.util.raycast.</tt><tt class="descname">intbound</tt><big>(</big><em>o</em>, <em>v</em>, <em>step</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/raycast.html#intbound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.raycast.intbound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.util.raycast.advanceToChunk">
+<tt class="descclassname">mcedit2.util.raycast.</tt><tt class="descname">advanceToChunk</tt><big>(</big><em>ray</em>, <em>dimension</em>, <em>maxDistance</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/raycast.html#advanceToChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.raycast.advanceToChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.resources">
+<span id="mcedit2-util-resources-module"></span><h2>mcedit2.util.resources module<a class="headerlink" href="#module-mcedit2.util.resources" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.util.resources.resourcePath">
+<tt class="descclassname">mcedit2.util.resources.</tt><tt class="descname">resourcePath</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/resources.html#resourcePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.resources.resourcePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.scanmodules">
+<span id="mcedit2-util-scanmodules-module"></span><h2>mcedit2.util.scanmodules module<a class="headerlink" href="#module-mcedit2.util.scanmodules" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.util.scanmodules.ScanModules">
+<tt class="descclassname">mcedit2.util.scanmodules.</tt><tt class="descname">ScanModules</tt><big>(</big><em>modulename</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/scanmodules.html#ScanModules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.scanmodules.ScanModules" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.screen">
+<span id="mcedit2-util-screen-module"></span><h2>mcedit2.util.screen module<a class="headerlink" href="#module-mcedit2.util.screen" title="Permalink to this headline">¶</a></h2>
+<p>screen</p>
+<dl class="function">
+<dt id="mcedit2.util.screen.centerWidgetInScreen">
+<tt class="descclassname">mcedit2.util.screen.</tt><tt class="descname">centerWidgetInScreen</tt><big>(</big><em>widget</em>, <em>resize=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/screen.html#centerWidgetInScreen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.screen.centerWidgetInScreen" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>widget</strong> &#8211; </li>
+<li><strong>resize</strong> &#8211; Fraction of screen width/height to resize widget to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.settings">
+<span id="mcedit2-util-settings-module"></span><h2>mcedit2.util.settings module<a class="headerlink" href="#module-mcedit2.util.settings" title="Permalink to this headline">¶</a></h2>
+<p>settings</p>
+<dl class="function">
+<dt id="mcedit2.util.settings.Settings">
+<tt class="descclassname">mcedit2.util.settings.</tt><tt class="descname">Settings</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.Settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.settings.MCESettingsOption">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.settings.</tt><tt class="descname">MCESettingsOption</tt><big>(</big><em>settings</em>, <em>key</em>, <em>type</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettingsOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettingsOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtCore.QObject</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettingsOption.value">
+<tt class="descname">value</tt><big>(</big><em>default=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettingsOption.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettingsOption.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettingsOption.setValue">
+<tt class="descname">setValue</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettingsOption.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettingsOption.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.settings.MCESettingsOption.valueChanged">
+<tt class="descname">valueChanged</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x0000000008358CA8&gt;</em><a class="headerlink" href="#mcedit2.util.settings.MCESettingsOption.valueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettingsOption.jsonValue">
+<tt class="descname">jsonValue</tt><big>(</big><em>default=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettingsOption.jsonValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettingsOption.jsonValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettingsOption.setJsonValue">
+<tt class="descname">setJsonValue</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettingsOption.setJsonValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettingsOption.setJsonValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.settings.MCESettingsOption.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835A908&gt;</em><a class="headerlink" href="#mcedit2.util.settings.MCESettingsOption.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.settings.MCESettings">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.settings.</tt><tt class="descname">MCESettings</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtCore.QSettings</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettings.getSignal">
+<tt class="descname">getSignal</tt><big>(</big><em>key</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettings.getSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettings.getSignal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a signal to be triggered when the setting <tt class="xref py py-obj docutils literal"><span class="pre">key</span></tt> is changed.
+The signal handler receives one argument: the setting&#8217;s new value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>str</em>) &#8211; Settings key</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettings.emitSignal">
+<tt class="descname">emitSignal</tt><big>(</big><em>key</em>, <em>val</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettings.emitSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettings.emitSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettings.setValue">
+<tt class="descname">setValue</tt><big>(</big><em>key</em>, <em>val</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettings.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettings.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettings.jsonValue">
+<tt class="descname">jsonValue</tt><big>(</big><em>key</em>, <em>default=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettings.jsonValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettings.jsonValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettings.setJsonValue">
+<tt class="descname">setJsonValue</tt><big>(</big><em>key</em>, <em>value</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettings.setJsonValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettings.setJsonValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.settings.MCESettings.getOption">
+<tt class="descname">getOption</tt><big>(</big><em>key</em>, <em>type=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/settings.html#MCESettings.getOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.settings.MCESettings.getOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an object that represents the setting at &#8216;key&#8217;. The object may be used to get and set the value and
+get the value&#8217;s valueChanged signal. Among other uses, the object&#8217;s setValue attribute may be connected to the
+valueChanged signal of an input field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.settings.MCESettings.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x000000000835A948&gt;</em><a class="headerlink" href="#mcedit2.util.settings.MCESettings.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.showprogress">
+<span id="mcedit2-util-showprogress-module"></span><h2>mcedit2.util.showprogress module<a class="headerlink" href="#module-mcedit2.util.showprogress" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.util.showprogress.showProgress">
+<tt class="descclassname">mcedit2.util.showprogress.</tt><tt class="descname">showProgress</tt><big>(</big><em>text</em>, <em>iter</em>, <em>cancel=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/showprogress.html#showProgress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.showprogress.showProgress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show a progress dialog for the given task. The task should be an iterable, yielding progress info as
+(current, max) or (current, max, statusString) tuples. Return the last value yielded by the task.
+:param text:
+:type text:
+:param iter:
+:type iter:
+:param cancel:
+:type cancel:
+:return:
+:rtype:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.undostack">
+<span id="mcedit2-util-undostack-module"></span><h2>mcedit2.util.undostack module<a class="headerlink" href="#module-mcedit2.util.undostack" title="Permalink to this headline">¶</a></h2>
+<p>undostack</p>
+<dl class="class">
+<dt id="mcedit2.util.undostack.MCEUndoStack">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.undostack.</tt><tt class="descname">MCEUndoStack</tt><a class="reference internal" href="_modules/mcedit2/util/undostack.html#MCEUndoStack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QUndoStack</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.util.undostack.MCEUndoStack.undoBlock">
+<tt class="descname">undoBlock</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.undoBlock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.undostack.MCEUndoStack.undo">
+<tt class="descname">undo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/undostack.html#MCEUndoStack.undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.undo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.undostack.MCEUndoStack.redo">
+<tt class="descname">redo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/undostack.html#MCEUndoStack.redo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.redo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.undostack.MCEUndoStack.push">
+<tt class="descname">push</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/undostack.html#MCEUndoStack.push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.push" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.undostack.MCEUndoStack.setUndoBlock">
+<tt class="descname">setUndoBlock</tt><big>(</big><em>callback</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/undostack.html#MCEUndoStack.setUndoBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.setUndoBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a function to be called before the next time undo, redo, or beginUndo is called. Some tools may need to
+call beginUndo, then interact with the user for a time before calling commitUndo, or they may need to use
+multiple undo revisions for a single operation with freedom given to the user between revisions. This
+ensures that the interactive operation will be completed or aborted before the next command begins its undo
+revision.</p>
+<p>User actions that only change the editor state will not call beginUndo, and their QUndoCommand may end up
+before the interrupted command in the history.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> (<em>callable</em>) &#8211; Function to call</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.undostack.MCEUndoStack.removeUndoBlock">
+<tt class="descname">removeUndoBlock</tt><big>(</big><em>callback</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/undostack.html#MCEUndoStack.removeUndoBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.removeUndoBlock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.undostack.MCEUndoStack.clearUndoBlock">
+<tt class="descname">clearUndoBlock</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/undostack.html#MCEUndoStack.clearUndoBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.clearUndoBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>If an undo block is set, calls its callback and removes it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.undostack.MCEUndoStack.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x0000000003E87BC8&gt;</em><a class="headerlink" href="#mcedit2.util.undostack.MCEUndoStack.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util.worldloader">
+<span id="mcedit2-util-worldloader-module"></span><h2>mcedit2.util.worldloader module<a class="headerlink" href="#module-mcedit2.util.worldloader" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.util.worldloader.LoaderTimer">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.worldloader.</tt><tt class="descname">LoaderTimer</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/worldloader.html#LoaderTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.worldloader.LoaderTimer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtCore.QTimer</span></tt></p>
+<dl class="classmethod">
+<dt id="mcedit2.util.worldloader.LoaderTimer.stopCtx">
+<em class="property">classmethod </em><tt class="descname">stopCtx</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/worldloader.html#LoaderTimer.stopCtx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.worldloader.LoaderTimer.stopCtx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="mcedit2.util.worldloader.LoaderTimer.stopAll">
+<em class="property">static </em><tt class="descname">stopAll</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/worldloader.html#LoaderTimer.stopAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.worldloader.LoaderTimer.stopAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="mcedit2.util.worldloader.LoaderTimer.startAll">
+<em class="property">static </em><tt class="descname">startAll</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/worldloader.html#LoaderTimer.startAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.worldloader.LoaderTimer.startAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.util.worldloader.LoaderTimer.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000083D3308&gt;</em><a class="headerlink" href="#mcedit2.util.worldloader.LoaderTimer.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.util.worldloader.WorldLoader">
+<em class="property">class </em><tt class="descclassname">mcedit2.util.worldloader.</tt><tt class="descname">WorldLoader</tt><big>(</big><em>scene</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/worldloader.html#WorldLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.worldloader.WorldLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.util.worldloader.WorldLoader.loadChunk">
+<tt class="descname">loadChunk</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/util/worldloader.html#WorldLoader.loadChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.worldloader.WorldLoader.loadChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.util.worldloader.WorldLoader.work">
+<tt class="descname">work</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/util/worldloader.html#WorldLoader.work"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.util.worldloader.WorldLoader.work" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.util">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mcedit2.util" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mcedit2.util package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.bresenham">mcedit2.util.bresenham module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.bugfixes">mcedit2.util.bugfixes module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.custom_traceback">mcedit2.util.custom_traceback module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.dialogs">mcedit2.util.dialogs module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.directories">mcedit2.util.directories module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.geometry">mcedit2.util.geometry module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.glutils">mcedit2.util.glutils module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.ipython_widget">mcedit2.util.ipython_widget module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.lazyprop">mcedit2.util.lazyprop module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.load_png">mcedit2.util.load_png module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.load_ui">mcedit2.util.load_ui module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.mceaction">mcedit2.util.mceaction module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.minecraftinstall">mcedit2.util.minecraftinstall module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.objgraphwidget">mcedit2.util.objgraphwidget module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.profiler">mcedit2.util.profiler module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.profilerui">mcedit2.util.profilerui module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.raycast">mcedit2.util.raycast module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.resources">mcedit2.util.resources module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.scanmodules">mcedit2.util.scanmodules module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.screen">mcedit2.util.screen module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.settings">mcedit2.util.settings module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.showprogress">mcedit2.util.showprogress module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.undostack">mcedit2.util.undostack module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util.worldloader">mcedit2.util.worldloader module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.util">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mcedit2.ui.html"
+                        title="previous chapter">mcedit2.ui package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mcedit2.widgets.html"
+                        title="next chapter">mcedit2.widgets package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mcedit2.util.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.widgets.html" title="mcedit2.widgets package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.ui.html" title="mcedit2.ui package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.handles package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mcedit2 package" href="mcedit2.html" />
+    <link rel="next" title="mcedit2.panels package" href="mcedit2.panels.html" />
+    <link rel="prev" title="mcedit2.editortools.brush package" href="mcedit2.editortools.brush.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.panels.html" title="mcedit2.panels package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.editortools.brush.html" title="mcedit2.editortools.brush package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" accesskey="U">mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mcedit2-handles-package">
+<h1>mcedit2.handles package<a class="headerlink" href="#mcedit2-handles-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mcedit2.handles.boxhandle">
+<span id="mcedit2-handles-boxhandle-module"></span><h2>mcedit2.handles.boxhandle module<a class="headerlink" href="#module-mcedit2.handles.boxhandle" title="Permalink to this headline">¶</a></h2>
+<p>boxhandle</p>
+<dl class="class">
+<dt id="mcedit2.handles.boxhandle.BoxHandle">
+<em class="property">class </em><tt class="descclassname">mcedit2.handles.boxhandle.</tt><tt class="descname">BoxHandle</tt><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.rendering.html#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtCore.QObject</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.dragResizeFace">
+<tt class="descname">dragResizeFace</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.dragResizeFace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.dragResizeDimension">
+<tt class="descname">dragResizeDimension</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.dragResizeDimension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.dragResizePosition">
+<tt class="descname">dragResizePosition</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.dragResizePosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.dragStartPoint">
+<tt class="descname">dragStartPoint</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.dragStartPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.dragStartFace">
+<tt class="descname">dragStartFace</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.dragStartFace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.oldBounds">
+<tt class="descname">oldBounds</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.oldBounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.hiliteFace">
+<tt class="descname">hiliteFace</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.hiliteFace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.boundsChanged">
+<tt class="descname">boundsChanged</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x00000000046D5068&gt;</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.boundsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.boundsChangedDone">
+<tt class="descname">boundsChangedDone</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x0000000003E979D0&gt;</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.boundsChangedDone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.bounds">
+<tt class="descname">bounds</tt><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle.bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.bounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.dragResizePoint">
+<tt class="descname">dragResizePoint</tt><big>(</big><em>ray</em><big>)</big><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle.dragResizePoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.dragResizePoint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Vector</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.boxFromDragResize">
+<tt class="descname">boxFromDragResize</tt><big>(</big><em>box</em>, <em>ray</em><big>)</big><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle.boxFromDragResize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.boxFromDragResize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.boxFromDragSelect">
+<tt class="descname">boxFromDragSelect</tt><big>(</big><em>ray</em><big>)</big><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle.boxFromDragSelect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.boxFromDragSelect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a flat selection from dragging the mouse outside the selection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">BoundingBox</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.mousePress">
+<tt class="descname">mousePress</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle.mousePress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.mousePress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.mouseMove">
+<tt class="descname">mouseMove</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle.mouseMove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.mouseMove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.mouseRelease">
+<tt class="descname">mouseRelease</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/handles/boxhandle.html#BoxHandle.mouseRelease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.mouseRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.handles.boxhandle.BoxHandle.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000071490C8&gt;</em><a class="headerlink" href="#mcedit2.handles.boxhandle.BoxHandle.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.handles">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mcedit2.handles" title="Permalink to this headline">¶</a></h2>
+<p>__init__.py</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mcedit2.handles package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mcedit2.handles.boxhandle">mcedit2.handles.boxhandle module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.handles">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mcedit2.editortools.brush.html"
+                        title="previous chapter">mcedit2.editortools.brush package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mcedit2.panels.html"
+                        title="next chapter">mcedit2.panels package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mcedit2.handles.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.panels.html" title="mcedit2.panels package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.editortools.brush.html" title="mcedit2.editortools.brush package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

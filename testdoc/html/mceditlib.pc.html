@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.pc package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mceditlib package" href="mceditlib.html" />
+    <link rel="next" title="mceditlib.selection package" href="mceditlib.selection.html" />
+    <link rel="prev" title="mceditlib.operations package" href="mceditlib.operations.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.selection.html" title="mceditlib.selection package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.operations.html" title="mceditlib.operations package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" accesskey="U">mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mceditlib-pc-package">
+<h1>mceditlib.pc package<a class="headerlink" href="#mceditlib-pc-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mceditlib.pc.regionfile">
+<span id="mceditlib-pc-regionfile-module"></span><h2>mceditlib.pc.regionfile module<a class="headerlink" href="#module-mceditlib.pc.regionfile" title="Permalink to this headline">¶</a></h2>
+<p>RegionFile class.</p>
+<p>Reads and writes chunks to <em>.mcr</em> (Minecraft Region)
+and <em>.mca</em> (Minecraft Anvil Region) files</p>
+<dl class="exception">
+<dt id="mceditlib.pc.regionfile.RegionFormatError">
+<em class="property">exception </em><tt class="descclassname">mceditlib.pc.regionfile.</tt><tt class="descname">RegionFormatError</tt><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFormatError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFormatError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.RuntimeError</span></tt></p>
+<p>Raised on an error in the region file format.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.pc.regionfile.deflate">
+<tt class="descclassname">mceditlib.pc.regionfile.</tt><tt class="descname">deflate</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#deflate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.deflate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.pc.regionfile.inflate">
+<tt class="descclassname">mceditlib.pc.regionfile.</tt><tt class="descname">inflate</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#inflate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.inflate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.pc.regionfile.RegionFile">
+<em class="property">class </em><tt class="descclassname">mceditlib.pc.regionfile.</tt><tt class="descname">RegionFile</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mceditlib.pc.regionfile.RegionFile.SECTOR_BYTES">
+<tt class="descname">SECTOR_BYTES</tt><em class="property"> = 4096</em><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.SECTOR_BYTES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.pc.regionfile.RegionFile.CHUNK_HEADER_SIZE">
+<tt class="descname">CHUNK_HEADER_SIZE</tt><em class="property"> = 5</em><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.CHUNK_HEADER_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.pc.regionfile.RegionFile.VERSION_GZIP">
+<tt class="descname">VERSION_GZIP</tt><em class="property"> = 1</em><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.VERSION_GZIP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.pc.regionfile.RegionFile.VERSION_DEFLATE">
+<tt class="descname">VERSION_DEFLATE</tt><em class="property"> = 2</em><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.VERSION_DEFLATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.pc.regionfile.RegionFile.usedSectors">
+<tt class="descname">usedSectors</tt><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.usedSectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.usedSectors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.pc.regionfile.RegionFile.sectorCount">
+<tt class="descname">sectorCount</tt><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.sectorCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.sectorCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.pc.regionfile.RegionFile.chunkCount">
+<tt class="descname">chunkCount</tt><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.chunkCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.chunkCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.chunkPositions">
+<tt class="descname">chunkPositions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.chunkPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.repair">
+<tt class="descname">repair</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.repair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.repair" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Fix the following problems with the region file:</dt>
+<dd><ul class="first last simple">
+<li>remove offset table entries pointing past the end of the file</li>
+<li>remove entries that overlap other entries</li>
+<li>relocate offsets for chunks whose xPos,yPos don&#8217;t match</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.readChunkCompressed">
+<tt class="descname">readChunkCompressed</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.readChunkCompressed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.readChunkCompressed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a chunk and return its compression type and the compressed data as a (data, fmt) tuple</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.readChunkBytes">
+<tt class="descname">readChunkBytes</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.readChunkBytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.readChunkBytes" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cx</strong> &#8211; </li>
+<li><strong>cz</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bytes</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.writeChunkBytes">
+<tt class="descname">writeChunkBytes</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>uncompressedData</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.writeChunkBytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.writeChunkBytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.writeChunkCompressed">
+<tt class="descname">writeChunkCompressed</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>data</em>, <em>format</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.writeChunkCompressed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.writeChunkCompressed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.writeSector">
+<tt class="descname">writeSector</tt><big>(</big><em>sectorNumber</em>, <em>data</em>, <em>format</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.writeSector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.writeSector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.containsChunk">
+<tt class="descname">containsChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.containsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.containsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.deleteChunk">
+<tt class="descname">deleteChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.deleteChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.deleteChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.getTimestamp">
+<tt class="descname">getTimestamp</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.getTimestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.getTimestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.pc.regionfile.RegionFile.setTimestamp">
+<tt class="descname">setTimestamp</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>timestamp=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/pc/regionfile.html#RegionFile.setTimestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.pc.regionfile.RegionFile.setTimestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.pc">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mceditlib.pc" title="Permalink to this headline">¶</a></h2>
+<p>__init__.py</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mceditlib.pc package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mceditlib.pc.regionfile">mceditlib.pc.regionfile module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.pc">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mceditlib.operations.html"
+                        title="previous chapter">mceditlib.operations package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mceditlib.selection.html"
+                        title="next chapter">mceditlib.selection package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mceditlib.pc.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.selection.html" title="mceditlib.selection package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.operations.html" title="mceditlib.operations package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" >mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

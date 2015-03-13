@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.editortools.move &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="mcedit2.editortools" href="../editortools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" accesskey="U">mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.editortools.move</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    move</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">mcedit2.editorsession</span> <span class="kn">import</span> <span class="n">PendingImport</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.editortools</span> <span class="kn">import</span> <span class="n">EditorTool</span>
+<span class="kn">from</span> <span class="nn">mcedit2.command</span> <span class="kn">import</span> <span class="n">SimpleRevisionCommand</span>
+<span class="kn">from</span> <span class="nn">mcedit2.editortools.select</span> <span class="kn">import</span> <span class="n">SelectionFaceNode</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.selection</span> <span class="kn">import</span> <span class="n">SelectionBoxNode</span><span class="p">,</span> <span class="n">SelectionFaceNode</span><span class="p">,</span> <span class="n">boxFaceUnderCursor</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">scenegraph</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.depths</span> <span class="kn">import</span> <span class="n">DepthOffset</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.worldscene</span> <span class="kn">import</span> <span class="n">WorldScene</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.load_ui</span> <span class="kn">import</span> <span class="n">load_ui</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.showprogress</span> <span class="kn">import</span> <span class="n">showProgress</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.worldloader</span> <span class="kn">import</span> <span class="n">WorldLoader</span>
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.layout</span> <span class="kn">import</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MoveSelectionCommand"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveSelectionCommand">[docs]</a><span class="k">class</span> <span class="nc">MoveSelectionCommand</span><span class="p">(</span><span class="n">SimpleRevisionCommand</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moveTool</span><span class="p">,</span> <span class="n">pendingImport</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">moveTool</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Move Selected Object&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveSelectionCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">moveTool</span><span class="o">.</span><span class="n">editorSession</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span> <span class="o">=</span> <span class="n">pendingImport</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span> <span class="o">=</span> <span class="n">moveTool</span>
+
+<div class="viewcode-block" id="MoveSelectionCommand.undo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveSelectionCommand.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveSelectionCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">currentImport</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">removePendingImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">chooseTool</span><span class="p">(</span><span class="s">&quot;Select&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveSelectionCommand.redo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveSelectionCommand.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">currentImport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">addPendingImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">chooseTool</span><span class="p">(</span><span class="s">&quot;Move&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveSelectionCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="MoveOffsetCommand"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveOffsetCommand">[docs]</a><span class="k">class</span> <span class="nc">MoveOffsetCommand</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QUndoCommand</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moveTool</span><span class="p">,</span> <span class="n">oldPoint</span><span class="p">,</span> <span class="n">newPoint</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveOffsetCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">moveTool</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Move Object&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">newPoint</span> <span class="o">=</span> <span class="n">newPoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oldPoint</span> <span class="o">=</span> <span class="n">oldPoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span> <span class="o">=</span> <span class="n">moveTool</span>
+
+<div class="viewcode-block" id="MoveOffsetCommand.undo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveOffsetCommand.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">movePosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldPoint</span>
+</div>
+<div class="viewcode-block" id="MoveOffsetCommand.redo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveOffsetCommand.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">movePosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newPoint</span>
+</div></div>
+<div class="viewcode-block" id="MoveFinishCommand"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveFinishCommand">[docs]</a><span class="k">class</span> <span class="nc">MoveFinishCommand</span><span class="p">(</span><span class="n">SimpleRevisionCommand</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moveTool</span><span class="p">,</span> <span class="n">pendingImport</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveFinishCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">moveTool</span><span class="o">.</span><span class="n">editorSession</span><span class="p">,</span> <span class="n">moveTool</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Finish Move&quot;</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span> <span class="o">=</span> <span class="n">pendingImport</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span> <span class="o">=</span> <span class="n">moveTool</span>
+
+<div class="viewcode-block" id="MoveFinishCommand.undo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveFinishCommand.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveFinishCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">addPendingImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentSelection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previousSelection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">chooseTool</span><span class="p">(</span><span class="s">&quot;Move&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveFinishCommand.redo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveFinishCommand.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveFinishCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previousSelection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentSelection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentSelection</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">previousSelection</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">removePendingImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CoordinateWidget"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.CoordinateWidget">[docs]</a><span class="k">class</span> <span class="nc">CoordinateWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CoordinateWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">load_ui</span><span class="p">(</span><span class="s">&quot;coord_widget.ui&quot;</span><span class="p">,</span> <span class="n">baseinstance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xInput</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setX</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yInput</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setY</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zInput</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setZ</span><span class="p">)</span>
+
+    <span class="n">pointChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">)</span>
+
+    <span class="n">_point</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span>
+
+    <span class="nd">@point.setter</span>
+<div class="viewcode-block" id="CoordinateWidget.point"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.CoordinateWidget.point">[docs]</a>    <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">point</span>
+        <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">point</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xInput</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yInput</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zInput</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CoordinateWidget.setX"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.CoordinateWidget.setX">[docs]</a>    <span class="k">def</span> <span class="nf">setX</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CoordinateWidget.setY"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.CoordinateWidget.setY">[docs]</a>    <span class="k">def</span> <span class="nf">setY</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CoordinateWidget.setZ"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.CoordinateWidget.setZ">[docs]</a>    <span class="k">def</span> <span class="nf">setZ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="PendingImportNode"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.PendingImportNode">[docs]</a><span class="k">class</span> <span class="nc">PendingImportNode</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">TranslateNode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pendingImport</span><span class="p">,</span> <span class="n">textureAtlas</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PendingImportNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span> <span class="o">=</span> <span class="n">pendingImport</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pendingImport</span><span class="o">.</span><span class="n">pos</span>
+
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">pendingImport</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">getDimension</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span> <span class="o">=</span> <span class="n">WorldScene</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">textureAtlas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">depthOffsetNode</span><span class="o">.</span><span class="n">depthOffset</span> <span class="o">=</span> <span class="n">DepthOffset</span><span class="o">.</span><span class="n">PreviewRenderer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outlineNode</span> <span class="o">=</span> <span class="n">SelectionBoxNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outlineNode</span><span class="o">.</span><span class="n">filled</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outlineNode</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outlineNode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">faceHoverNode</span> <span class="o">=</span> <span class="n">SelectionFaceNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">faceHoverNode</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">faceHoverNode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="n">WorldLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">translateOffset</span>
+
+    <span class="nd">@pos.setter</span>
+<div class="viewcode-block" id="PendingImportNode.pos"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.PendingImportNode.pos">[docs]</a>    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translateOffset</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="PendingImportNode.hoverFace"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.PendingImportNode.hoverFace">[docs]</a>    <span class="k">def</span> <span class="nf">hoverFace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">face</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">faceHoverNode</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">faceHoverNode</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">faceHoverNode</span><span class="o">.</span><span class="n">face</span> <span class="o">=</span> <span class="n">face</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">faceHoverNode</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+</div></div>
+<div class="viewcode-block" id="MoveTool"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool">[docs]</a><span class="k">class</span> <span class="nc">MoveTool</span><span class="p">(</span><span class="n">EditorTool</span><span class="p">):</span>
+    <span class="n">iconName</span> <span class="o">=</span> <span class="s">&quot;move&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Move&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MoveTool</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dragStartFace</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImports</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImportNodes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListView</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListWidget</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListWidget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">listClicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListWidget</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">listDoubleClicked</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointInput</span> <span class="o">=</span> <span class="n">CoordinateWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointInput</span><span class="o">.</span><span class="n">pointChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointInputChanged</span><span class="p">)</span>
+        <span class="n">confirmButton</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&quot;Confirm&quot;</span><span class="p">)</span>  <span class="c"># xxxx should be in worldview</span>
+        <span class="n">confirmButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confirmImport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">importsListWidget</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">pointInput</span><span class="p">,</span>
+                                         <span class="n">confirmButton</span><span class="p">,</span>
+                                         <span class="bp">None</span><span class="p">))</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">movePosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span><span class="o">.</span><span class="n">pos</span>
+
+    <span class="nd">@movePosition.setter</span>
+<div class="viewcode-block" id="MoveTool.movePosition"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.movePosition">[docs]</a>    <span class="k">def</span> <span class="nf">movePosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type value: Vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointInput</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointInputChanged</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveTool.pointInputChanged"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.pointInputChanged">[docs]</a>    <span class="k">def</span> <span class="nf">pointInputChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentImportNode</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c"># --- Pending imports ---</span>
+</div>
+<div class="viewcode-block" id="MoveTool.addPendingImport"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.addPendingImport">[docs]</a>    <span class="k">def</span> <span class="nf">addPendingImport</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pendingImport</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">()</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">pendingImport</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">pendingImport</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListWidget</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImportNodes</span><span class="p">[</span><span class="n">pendingImport</span><span class="p">]</span> <span class="o">=</span> <span class="n">PendingImportNode</span><span class="p">(</span><span class="n">pendingImport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">textureAtlas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="o">=</span> <span class="n">pendingImport</span>
+</div>
+<div class="viewcode-block" id="MoveTool.removePendingImport"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.removePendingImport">[docs]</a>    <span class="k">def</span> <span class="nf">removePendingImport</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pendingImport</span><span class="p">):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImports</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImports</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span><span class="o">.</span><span class="n">removeRows</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImports</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImports</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImportNodes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span><span class="o">.</span><span class="n">removeChild</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveTool.doMoveOffsetCommand"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.doMoveOffsetCommand">[docs]</a>    <span class="k">def</span> <span class="nf">doMoveOffsetCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPoint</span><span class="p">,</span> <span class="n">newPoint</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">newPoint</span> <span class="o">!=</span> <span class="n">oldPoint</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="n">MoveOffsetCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPoint</span><span class="p">,</span> <span class="n">newPoint</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">pushCommand</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveTool.listClicked"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.listClicked">[docs]</a>    <span class="k">def</span> <span class="nf">listClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span><span class="o">.</span><span class="n">itemFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">pendingImport</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="o">=</span> <span class="n">pendingImport</span>
+</div>
+<div class="viewcode-block" id="MoveTool.listDoubleClicked"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.listDoubleClicked">[docs]</a>    <span class="k">def</span> <span class="nf">listDoubleClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">importsListModel</span><span class="o">.</span><span class="n">itemFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">pendingImport</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">pendingImport</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+</div>
+    <span class="n">_currentImport</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">currentImport</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentImport</span>
+
+    <span class="nd">@currentImport.setter</span>
+<div class="viewcode-block" id="MoveTool.currentImport"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.currentImport">[docs]</a>    <span class="k">def</span> <span class="nf">currentImport</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currentImport</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImportNodes</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">outlineNode</span><span class="o">.</span><span class="n">wireColor</span> <span class="o">=</span> <span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">)</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">pendingImport</span> <span class="ow">is</span> <span class="n">value</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="MoveTool.currentImportNode"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.currentImportNode">[docs]</a>    <span class="k">def</span> <span class="nf">currentImportNode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImportNodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="MoveTool.schematicBox"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.schematicBox">[docs]</a>    <span class="k">def</span> <span class="nf">schematicBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">getDimension</span><span class="p">()</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">movePosition</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c"># --- Mouse events ---</span>
+</div>
+<div class="viewcode-block" id="MoveTool.dragMovePoint"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.dragMovePoint">[docs]</a>    <span class="k">def</span> <span class="nf">dragMovePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a point representing the intersection between the mouse ray</span>
+<span class="sd">         and an imaginary plane coplanar to the dragged face</span>
+
+<span class="sd">        :type ray: Ray</span>
+<span class="sd">        :rtype: Vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartFace</span><span class="o">.</span><span class="n">dimension</span>
+        <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">intersectPlane</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="MoveTool.mouseMove"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.mouseMove">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># Hilite face cursor is over</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImportNode</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">point</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">boxFaceUnderCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schematicBox</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">hoverFace</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+
+        <span class="c"># Highlight face of box to move along, or else axis pointers to grab and drag?</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="MoveTool.mouseDrag"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.mouseDrag">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># Move box using face or axis pointers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartFace</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragMovePoint</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">movePosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartMovePosition</span> <span class="o">+</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveTool.mousePress"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.mousePress">[docs]</a>    <span class="k">def</span> <span class="nf">mousePress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># Record which face/axis was clicked for mouseDrag. Store current revision # in MoveCommand, begin undo</span>
+        <span class="c"># revision, cut selection from world, end undo revision, create overlay node for pasted selection</span>
+        <span class="c"># Inform EditorSession that a multi-step undo is being recorded and give it a callback to use when something</span>
+        <span class="c"># else tries to call beginUndo before we&#39;re done - call it an &quot;undo block&quot;</span>
+
+
+        <span class="c"># begin drag</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">point</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">boxFaceUnderCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schematicBox</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragStartFace</span> <span class="o">=</span> <span class="n">face</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span> <span class="o">=</span> <span class="n">point</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragStartMovePosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">movePosition</span>
+</div>
+<div class="viewcode-block" id="MoveTool.mouseRelease"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.mouseRelease">[docs]</a>    <span class="k">def</span> <span class="nf">mouseRelease</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># Don&#39;t paste cut selection in yet. Wait for tool switch or &quot;Confirm&quot; button press. Begin new revision</span>
+        <span class="c"># for paste operation, paste stored world, store revision after paste (should be previously stored revision</span>
+        <span class="c"># +2), commit MoveCommand to undo history.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">doMoveOffsetCommand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dragStartMovePosition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">movePosition</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveTool.toolActive"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.toolActive">[docs]</a>    <span class="k">def</span> <span class="nf">toolActive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">selectionTool</span><span class="o">.</span><span class="n">hideSelectionWalls</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Need to cut out selection</span>
+            <span class="c"># xxxx for huge selections, don&#39;t cut, just do everything at the end?</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentSelection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">export</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">exportSchematicIter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentSelection</span><span class="p">)</span>
+            <span class="n">schematic</span> <span class="o">=</span> <span class="n">showProgress</span><span class="p">(</span><span class="s">&quot;Copying...&quot;</span><span class="p">,</span> <span class="n">export</span><span class="p">)</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentSelection</span><span class="o">.</span><span class="n">origin</span>
+            <span class="n">pendingImport</span> <span class="o">=</span> <span class="n">PendingImport</span><span class="p">(</span><span class="n">schematic</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;&lt;Moved Object&gt;&quot;</span><span class="p">))</span>
+            <span class="n">moveCommand</span> <span class="o">=</span> <span class="n">MoveSelectionCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pendingImport</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">moveCommand</span><span class="o">.</span><span class="n">begin</span><span class="p">():</span>
+                <span class="n">fill</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">fillBlocksIter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentSelection</span><span class="p">,</span> <span class="s">&quot;air&quot;</span><span class="p">)</span>
+                <span class="n">showProgress</span><span class="p">(</span><span class="s">&quot;Clearing...&quot;</span><span class="p">,</span> <span class="n">fill</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">pushCommand</span><span class="p">(</span><span class="n">moveCommand</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveTool.toolInactive"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.toolInactive">[docs]</a>    <span class="k">def</span> <span class="nf">toolInactive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">selectionTool</span><span class="o">.</span><span class="n">hideSelectionWalls</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pendingImportNodes</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">hoverFace</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MoveTool.confirmImport"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.move.MoveTool.confirmImport">[docs]</a>    <span class="k">def</span> <span class="nf">confirmImport</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="n">MoveFinishCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">command</span><span class="o">.</span><span class="n">begin</span><span class="p">():</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">importSchematicIter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span><span class="o">.</span><span class="n">schematic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentImport</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="n">showProgress</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Pasting...&quot;</span><span class="p">),</span> <span class="n">task</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">pushCommand</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" >mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

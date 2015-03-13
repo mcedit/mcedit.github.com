@@ -1,0 +1,654 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.schematic &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.schematic</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Jul 22, 2011</span>
+
+<span class="sd">@author: Rio</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">import</span> <span class="nn">atexit</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">closing</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">swapaxes</span><span class="p">,</span> <span class="n">uint8</span><span class="p">,</span> <span class="n">zeros</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">mceditlib.anvil.adapter</span> <span class="kn">import</span> <span class="n">AnvilWorldAdapter</span>
+<span class="kn">from</span> <span class="nn">mceditlib.anvil.entities</span> <span class="kn">import</span> <span class="n">PCEntityRef</span>
+<span class="kn">from</span> <span class="nn">mceditlib.anvil.entities</span> <span class="kn">import</span> <span class="n">PCTileEntityRef</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">PlayerNotFound</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">mceditlib.levelbase</span> <span class="kn">import</span> <span class="n">FakeChunkedLevelAdapter</span>
+<span class="kn">from</span> <span class="nn">mceditlib.blocktypes</span> <span class="kn">import</span> <span class="n">pc_blocktypes</span><span class="p">,</span> <span class="n">BlockTypeSet</span><span class="p">,</span> <span class="n">blocktypes_named</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">nbt</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="createSchematic"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.createSchematic">[docs]</a><span class="k">def</span> <span class="nf">createSchematic</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">blocktypes</span><span class="o">=</span><span class="s">&#39;Alpha&#39;</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mceditlib.worldeditor</span> <span class="kn">import</span> <span class="n">WorldEditor</span>
+
+    <span class="n">adapter</span> <span class="o">=</span> <span class="n">SchematicFileAdapter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">blocktypes</span><span class="o">=</span><span class="n">blocktypes</span><span class="p">)</span>
+    <span class="n">editor</span> <span class="o">=</span> <span class="n">WorldEditor</span><span class="p">(</span><span class="n">adapter</span><span class="o">=</span><span class="n">adapter</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">editor</span>
+</div>
+<div class="viewcode-block" id="SchematicFileAdapter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter">[docs]</a><span class="k">class</span> <span class="nc">SchematicFileAdapter</span><span class="p">(</span><span class="n">FakeChunkedLevelAdapter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">blocktypes</span> <span class="o">=</span> <span class="n">pc_blocktypes</span>
+
+    <span class="c"># XXX use abstract entity ref or select correct ref for contained level format</span>
+    <span class="n">EntityRef</span> <span class="o">=</span> <span class="n">PCEntityRef</span>
+    <span class="n">TileEntityRef</span> <span class="o">=</span> <span class="n">PCTileEntityRef</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">blocktypes</span><span class="o">=</span><span class="s">&#39;Alpha&#39;</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an object which stores a section of a Minecraft world as an</span>
+<span class="sd">        NBT structure. The order of the coordinates for the block arrays in</span>
+<span class="sd">        the file is y,z,x. This is the same order used in Minecraft 1.4&#39;s</span>
+<span class="sd">        chunk sections.</span>
+
+<span class="sd">        :type shape: tuple</span>
+<span class="sd">        :param shape: The shape of the schematic as (x, y, z)</span>
+<span class="sd">        :type filename: basestring</span>
+<span class="sd">        :param filename: Path to a file to load a saved schematic from.</span>
+<span class="sd">        :type blocktypes: basestring or BlockTypeSet</span>
+<span class="sd">        :param blocktypes: The name of a builtin blocktypes set (one of</span>
+<span class="sd">            &quot;Classic&quot;, &quot;Alpha&quot;, &quot;Pocket&quot;) to indicate allowable blocks. The default</span>
+<span class="sd">            is Alpha. An instance of BlockTypeSet may be passed instead.</span>
+<span class="sd">        :rtype: SchematicFileAdapter</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">shape</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;shape or filename required to create </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+                <span class="n">rootTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rootTag</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">rootTag</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">blocktypes</span> <span class="ow">in</span> <span class="n">blocktypes_named</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span> <span class="o">=</span> <span class="n">blocktypes_named</span><span class="p">[</span><span class="n">blocktypes</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">blocktypes</span><span class="p">,</span> <span class="n">BlockTypeSet</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span> <span class="o">=</span> <span class="n">blocktypes</span>
+
+        <span class="k">if</span> <span class="n">rootTag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">rootTag</span>
+            <span class="k">if</span> <span class="s">&quot;Materials&quot;</span> <span class="ow">in</span> <span class="n">rootTag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span> <span class="o">=</span> <span class="n">blocktypes_named</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Materials</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Materials&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Blocks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">w</span> <span class="o">*</span> <span class="n">l</span> <span class="o">*</span> <span class="n">h</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Blocks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;uint16&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="c"># _Blocks is y, z, x</span>
+
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Blocks&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&quot;AddBlocks&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">:</span>
+                <span class="c"># Use WorldEdit&#39;s &quot;AddBlocks&quot; array to load and store the 4 high bits of a block ID.</span>
+                <span class="c"># Unlike Minecraft&#39;s NibbleArrays, this array stores the first block&#39;s bits in the</span>
+                <span class="c"># 4 high bits of the first byte.</span>
+
+                <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">l</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span>
+
+                <span class="c"># If odd, add one to the size to make sure the adjacent slices line up.</span>
+                <span class="n">add</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span> <span class="o">+</span> <span class="p">(</span><span class="n">size</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">),</span> <span class="s">&#39;uint16&#39;</span><span class="p">)</span>
+
+                <span class="c"># Fill the even bytes with data</span>
+                <span class="n">add</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;AddBlocks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+                <span class="c"># Copy the low 4 bits to the odd bytes</span>
+                <span class="n">add</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">add</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xf</span>
+
+                <span class="c"># Shift the even bytes down</span>
+                <span class="n">add</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;&gt;=</span> <span class="mi">4</span>
+
+                <span class="c"># Shift every byte up before merging it with Blocks</span>
+                <span class="n">add</span> <span class="o">&lt;&lt;=</span> <span class="mi">8</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span> <span class="o">|=</span> <span class="n">add</span><span class="p">[:</span><span class="n">size</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;AddBlocks&quot;</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s">&quot;Biomes&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Biomes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rootTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;Schematic&quot;</span><span class="p">)</span>
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Entities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">()</span>
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;TileEntities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">()</span>
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Materials&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s">&#39;uint16&#39;</span><span class="p">)</span>
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">zeros</span><span class="p">((</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">uint8</span><span class="p">))</span>
+
+            <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Biomes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">zeros</span><span class="p">((</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">uint8</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">rootTag</span>
+
+        <span class="c">#expand blocks and data to chunk edges</span>
+        <span class="n">h16</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Height</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="mh">0xf</span>
+        <span class="n">l16</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Length</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="mh">0xf</span>
+        <span class="n">w16</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="mh">0xf</span>
+
+        <span class="n">blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">h16</span><span class="p">,</span> <span class="n">l16</span><span class="p">,</span> <span class="n">w16</span><span class="p">),</span> <span class="n">blocks</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span><span class="p">[:</span><span class="n">blocks</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">blocks</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:</span><span class="n">blocks</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">blocks</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">h16</span><span class="p">,</span> <span class="n">l16</span><span class="p">,</span> <span class="n">w16</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[:</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">&amp;=</span> <span class="mh">0xF</span>  <span class="c"># discard high bits</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Entities</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">EntityRef</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Entities&quot;</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TileEntities</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">EntityRef</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;TileEntities&quot;</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="SchematicFileAdapter.saveChanges"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.saveChanges">[docs]</a>    <span class="k">def</span> <span class="nf">saveChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveToFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchematicFileAdapter.saveToFile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.saveToFile">[docs]</a>    <span class="k">def</span> <span class="nf">saveToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; save to file named filename.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Materials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Blocks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;uint8&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">]</span>
+
+        <span class="n">add</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">add</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">add</span> <span class="o">=</span> <span class="n">add</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">]</span>
+            <span class="c"># WorldEdit AddBlocks compatibility.</span>
+            <span class="c"># The first 4-bit value is stored in the high bits of the first byte.</span>
+
+            <span class="c"># Increase odd size by one to align slices.</span>
+            <span class="n">packed_add</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">add</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="p">(</span><span class="n">add</span><span class="o">.</span><span class="n">size</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">),</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+            <span class="n">packed_add</span><span class="p">[:</span><span class="n">add</span><span class="o">.</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">add</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+            <span class="c"># Shift even bytes to the left</span>
+            <span class="n">packed_add</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;=</span> <span class="mi">4</span>
+
+            <span class="c"># Merge odd bytes into even bytes</span>
+            <span class="n">packed_add</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span> <span class="o">|=</span> <span class="n">packed_add</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="c"># Save only the even bytes, now that they contain the odd bytes in their lower bits.</span>
+            <span class="n">packed_add</span> <span class="o">=</span> <span class="n">packed_add</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;AddBlocks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">packed_add</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">chunkfh</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">chunkfh</span><span class="p">)</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Blocks&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;AddBlocks&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;SchematicFileAdapter(shape={0}, blocktypes={2}, filename=</span><span class="se">\&quot;</span><span class="s">{1}</span><span class="se">\&quot;</span><span class="s">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="ow">or</span> <span class="s">u&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Materials</span><span class="p">)</span>
+
+    <span class="c"># these refer to the blocks array instead of the file&#39;s height because rotation swaps the axes</span>
+    <span class="c"># this will have an impact later on when editing schematics instead of just importing/exporting</span>
+
+    <span class="n">minHeight</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="SchematicFileAdapter.getDimensionBounds"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.getDimensionBounds">[docs]</a>    <span class="k">def</span> <span class="nf">getDimensionBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SchematicFileAdapter.maxHeight"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.maxHeight">[docs]</a>    <span class="k">def</span> <span class="nf">maxHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SchematicFileAdapter.Length"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.Length">[docs]</a>    <span class="k">def</span> <span class="nf">Length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SchematicFileAdapter.Width"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.Width">[docs]</a>    <span class="k">def</span> <span class="nf">Width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SchematicFileAdapter.Height"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.Height">[docs]</a>    <span class="k">def</span> <span class="nf">Height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SchematicFileAdapter.Blocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.Blocks">[docs]</a>    <span class="k">def</span> <span class="nf">Blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">swapaxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Blocks</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SchematicFileAdapter.Data"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.Data">[docs]</a>    <span class="k">def</span> <span class="nf">Data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">swapaxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Materials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Materials&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@Materials.setter</span>
+<div class="viewcode-block" id="SchematicFileAdapter.Materials"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.Materials">[docs]</a>    <span class="k">def</span> <span class="nf">Materials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&quot;Materials&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Materials&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Materials&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">val</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SchematicFileAdapter.Biomes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.Biomes">[docs]</a>    <span class="k">def</span> <span class="nf">Biomes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">swapaxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Biomes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchematicFileAdapter.getPlayer"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.getPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">getPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">PlayerNotFound</span>
+</div>
+<div class="viewcode-block" id="SchematicFileAdapter.playerNames"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.playerNames">[docs]</a>    <span class="k">def</span> <span class="nf">playerNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">()</span>
+</div>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_isTagLevel</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">rootTag</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Schematic&quot;</span> <span class="o">==</span> <span class="n">rootTag</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">_update_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rootTag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c">#</span>
+    <span class="c"># def rotateLeft(self):</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     Rotate the schematic to the left (when looking down).</span>
+    <span class="c">#</span>
+    <span class="c">#     Transform this schematic in place by rotating 90 degrees counterclockwise around the vertical axis.</span>
+    <span class="c">#</span>
+    <span class="c">#     By default, rotateLeft and the other transformation functions use swapaxes</span>
+    <span class="c">#     and reversed slice to modify the indexing properties of self.Blocks without copying any data.</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#</span>
+    <span class="c">#     self._fakeEntities = None</span>
+    <span class="c">#     self._Blocks = swapaxes(self._Blocks, 1, 2)[:, ::-1, :]  # x=z; z=-x</span>
+    <span class="c">#     if &quot;Biomes&quot; in self.rootTag:</span>
+    <span class="c">#         self.rootTag[&quot;Biomes&quot;].value = swapaxes(self.rootTag[&quot;Biomes&quot;].value, 0, 1)[::-1, :]</span>
+    <span class="c">#</span>
+    <span class="c">#     self.rootTag[&quot;Data&quot;].value   = swapaxes(self.rootTag[&quot;Data&quot;].value, 1, 2)[:, ::-1, :]  # x=z; z=-x</span>
+    <span class="c">#     self._update_shape()</span>
+    <span class="c">#</span>
+    <span class="c">#     blockrotation.RotateLeft(self.Blocks, self.Data)</span>
+    <span class="c">#</span>
+    <span class="c">#     log.info(u&quot;Relocating entities...&quot;)</span>
+    <span class="c">#     for entity in self.Entities:</span>
+    <span class="c">#         for p in &quot;Pos&quot;, &quot;Motion&quot;:</span>
+    <span class="c">#             if p == &quot;Pos&quot;:</span>
+    <span class="c">#                 zBase = self.Length</span>
+    <span class="c">#             else:</span>
+    <span class="c">#                 zBase = 0.0</span>
+    <span class="c">#             newX = entity[p][2].value</span>
+    <span class="c">#             newZ = zBase - entity[p][0].value</span>
+    <span class="c">#</span>
+    <span class="c">#             entity[p][0].value = newX</span>
+    <span class="c">#             entity[p][2].value = newZ</span>
+    <span class="c">#         entity[&quot;Rotation&quot;][0].value -= 90.0</span>
+    <span class="c">#         if entity[&quot;id&quot;].value in (&quot;Painting&quot;, &quot;ItemFrame&quot;):</span>
+    <span class="c">#             x, z = entity[&quot;TileX&quot;].value, entity[&quot;TileZ&quot;].value</span>
+    <span class="c">#             newx = z</span>
+    <span class="c">#             newz = self.Length - x - 1</span>
+    <span class="c">#</span>
+    <span class="c">#             entity[&quot;TileX&quot;].value, entity[&quot;TileZ&quot;].value = newx, newz</span>
+    <span class="c">#             entity[&quot;Dir&quot;].value = (entity[&quot;Dir&quot;].value + 1) % 4</span>
+    <span class="c">#</span>
+    <span class="c">#     for tileEntity in self.TileEntities:</span>
+    <span class="c">#         if not &#39;x&#39; in tileEntity:</span>
+    <span class="c">#             continue</span>
+    <span class="c">#</span>
+    <span class="c">#         newX = tileEntity[&quot;z&quot;].value</span>
+    <span class="c">#         newZ = self.Length - tileEntity[&quot;x&quot;].value - 1</span>
+    <span class="c">#</span>
+    <span class="c">#         tileEntity[&quot;x&quot;].value = newX</span>
+    <span class="c">#         tileEntity[&quot;z&quot;].value = newZ</span>
+    <span class="c">#</span>
+    <span class="c"># def roll(self):</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     Roll the level toward sunrise.</span>
+    <span class="c">#</span>
+    <span class="c">#     Transform this level in place by rotating 90 degrees counterclockwise around the distal axis. Rolls cannot</span>
+    <span class="c">#     preserve all blocks as there are no wall-mounted versions of many floor-mounted objects. Unattached blocks</span>
+    <span class="c">#     will become items on the next play. Rolls also cannot preserve biome data.</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     self.rootTag.pop(&#39;Biomes&#39;, None)</span>
+    <span class="c">#     self._fakeEntities = None</span>
+    <span class="c">#</span>
+    <span class="c">#     self._Blocks = swapaxes(self._Blocks, 2, 0)[:, :, ::-1]  # x=y; y=-x</span>
+    <span class="c">#     self.rootTag[&quot;Data&quot;].value = swapaxes(self.rootTag[&quot;Data&quot;].value, 2, 0)[:, :, ::-1]</span>
+    <span class="c">#     self._update_shape()</span>
+    <span class="c">#</span>
+    <span class="c"># def flipVertical(self):</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     Flip the schematic top to bottom.</span>
+    <span class="c">#</span>
+    <span class="c">#     Transform this schematic in place by inverting it vertically. Vertical flips cannot preserve all blocks</span>
+    <span class="c">#     as there are no wall-mounted versions of many floor-mounted objects. Unattached blocks will become</span>
+    <span class="c">#     items on the next play.</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     self._fakeEntities = None</span>
+    <span class="c">#</span>
+    <span class="c">#     blockrotation.FlipVertical(self.Blocks, self.Data)</span>
+    <span class="c">#     self._Blocks = self._Blocks[::-1, :, :]  # y=-y</span>
+    <span class="c">#     self.rootTag[&quot;Data&quot;].value = self.rootTag[&quot;Data&quot;].value[::-1, :, :]</span>
+    <span class="c">#</span>
+    <span class="c"># def flipNorthSouth(self):</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     Flip the schematic north to south.</span>
+    <span class="c">#</span>
+    <span class="c">#     Transform this schematic in place by inverting it latitudinally.</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     if &quot;Biomes&quot; in self.rootTag:</span>
+    <span class="c">#         self.rootTag[&quot;Biomes&quot;].value = self.rootTag[&quot;Biomes&quot;].value[::-1, :]</span>
+    <span class="c">#</span>
+    <span class="c">#     self._fakeEntities = None</span>
+    <span class="c">#</span>
+    <span class="c">#     blockrotation.FlipNorthSouth(self.Blocks, self.Data)</span>
+    <span class="c">#     self._Blocks = self._Blocks[:, :, ::-1]  # x=-x</span>
+    <span class="c">#     self.rootTag[&quot;Data&quot;].value = self.rootTag[&quot;Data&quot;].value[:, :, ::-1]</span>
+    <span class="c">#</span>
+    <span class="c">#     northSouthPaintingMap = [0, 3, 2, 1]</span>
+    <span class="c">#</span>
+    <span class="c">#     log.info(u&quot;N/S Flip: Relocating entities...&quot;)</span>
+    <span class="c">#     for entity in self.Entities:</span>
+    <span class="c">#</span>
+    <span class="c">#         entity[&quot;Pos&quot;][0].value = self.Width - entity[&quot;Pos&quot;][0].value</span>
+    <span class="c">#         entity[&quot;Motion&quot;][0].value = -entity[&quot;Motion&quot;][0].value</span>
+    <span class="c">#</span>
+    <span class="c">#         entity[&quot;Rotation&quot;][0].value -= 180.0</span>
+    <span class="c">#</span>
+    <span class="c">#         if entity[&quot;id&quot;].value in (&quot;Painting&quot;, &quot;ItemFrame&quot;):</span>
+    <span class="c">#             entity[&quot;TileX&quot;].value = self.Width - entity[&quot;TileX&quot;].value</span>
+    <span class="c">#             entity[&quot;Dir&quot;].value = northSouthPaintingMap[entity[&quot;Dir&quot;].value]</span>
+    <span class="c">#</span>
+    <span class="c">#     for tileEntity in self.TileEntities:</span>
+    <span class="c">#         if not &#39;x&#39; in tileEntity:</span>
+    <span class="c">#             continue</span>
+    <span class="c">#</span>
+    <span class="c">#         tileEntity[&quot;x&quot;].value = self.Width - tileEntity[&quot;x&quot;].value - 1</span>
+    <span class="c">#</span>
+    <span class="c"># def flipEastWest(self):</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     Flip the schematic east to west.</span>
+    <span class="c">#</span>
+    <span class="c">#     Transform this schematic in place by inverting it longitudinally.</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     if &quot;Biomes&quot; in self.rootTag:</span>
+    <span class="c">#         self.rootTag[&quot;Biomes&quot;].value = self.rootTag[&quot;Biomes&quot;].value[:, ::-1]</span>
+    <span class="c">#</span>
+    <span class="c">#     self._fakeEntities = None</span>
+    <span class="c">#</span>
+    <span class="c">#     blockrotation.FlipEastWest(self.Blocks, self.Data)</span>
+    <span class="c">#     self._Blocks = self._Blocks[:, ::-1, :]  # z=-z</span>
+    <span class="c">#     self.rootTag[&quot;Data&quot;].value = self.rootTag[&quot;Data&quot;].value[:, ::-1, :]</span>
+    <span class="c">#</span>
+    <span class="c">#     eastWestPaintingMap = [2, 1, 0, 3]</span>
+    <span class="c">#</span>
+    <span class="c">#     log.info(u&quot;E/W Flip: Relocating entities...&quot;)</span>
+    <span class="c">#     for entity in self.Entities:</span>
+    <span class="c">#</span>
+    <span class="c">#         entity[&quot;Pos&quot;][2].value = self.Length - entity[&quot;Pos&quot;][2].value</span>
+    <span class="c">#         entity[&quot;Motion&quot;][2].value = -entity[&quot;Motion&quot;][2].value</span>
+    <span class="c">#</span>
+    <span class="c">#         entity[&quot;Rotation&quot;][0].value -= 180.0</span>
+    <span class="c">#</span>
+    <span class="c">#         if entity[&quot;id&quot;].value in (&quot;Painting&quot;, &quot;ItemFrame&quot;):</span>
+    <span class="c">#             entity[&quot;TileZ&quot;].value = self.Length - entity[&quot;TileZ&quot;].value</span>
+    <span class="c">#             entity[&quot;Dir&quot;].value = eastWestPaintingMap[entity[&quot;Dir&quot;].value]</span>
+    <span class="c">#</span>
+    <span class="c">#     for tileEntity in self.TileEntities:</span>
+    <span class="c">#         tileEntity[&quot;z&quot;].value = self.Length - tileEntity[&quot;z&quot;].value - 1</span>
+
+
+<div class="viewcode-block" id="SchematicFileAdapter.setBlockData"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.setBlockData">[docs]</a>    <span class="k">def</span> <span class="nf">setBlockData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">newdata</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Width</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span> <span class="ow">or</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">newdata</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchematicFileAdapter.getBlockData"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.getBlockData">[docs]</a>    <span class="k">def</span> <span class="nf">getBlockData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Width</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span> <span class="ow">or</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="SchematicFileAdapter.chestWithItemID"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.chestWithItemID">[docs]</a>    <span class="k">def</span> <span class="nf">chestWithItemID</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">itemID</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">damage</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a chest with a stack of &#39;itemID&#39; in each slot.</span>
+<span class="sd">        Optionally specify the count of items in each stack. Pass a negative</span>
+<span class="sd">        value for damage to create unnaturally sturdy tools. &quot;&quot;&quot;</span>
+        <span class="n">rootTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+        <span class="n">invTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">()</span>
+        <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">invTag</span>
+        <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">36</span><span class="p">):</span>
+            <span class="n">itemTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+            <span class="n">itemTag</span><span class="p">[</span><span class="s">&quot;Slot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
+            <span class="n">itemTag</span><span class="p">[</span><span class="s">&quot;Count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+            <span class="n">itemTag</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">itemID</span><span class="p">)</span>
+            <span class="n">itemTag</span><span class="p">[</span><span class="s">&quot;Damage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">(</span><span class="n">damage</span><span class="p">)</span>
+            <span class="n">invTag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">itemTag</span><span class="p">)</span>
+
+        <span class="n">chest</span> <span class="o">=</span> <span class="n">INVEditChest</span><span class="p">(</span><span class="n">rootTag</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">chest</span>
+</div>
+<div class="viewcode-block" id="SchematicFileAdapter.readChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.SchematicFileAdapter.readChunk">[docs]</a>    <span class="k">def</span> <span class="nf">readChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SchematicFileAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">readChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">create</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;Biomes&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">Biomes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+            <span class="n">srcBiomes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[</span><span class="n">x</span><span class="p">:</span><span class="n">x</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span><span class="n">z</span> <span class="o">+</span> <span class="mi">16</span><span class="p">]</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">srcBiomes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">:</span><span class="n">srcBiomes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">srcBiomes</span>
+        <span class="k">return</span> <span class="n">chunk</span>
+
+</div></div>
+<div class="viewcode-block" id="INVEditChest"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.INVEditChest">[docs]</a><span class="k">class</span> <span class="nc">INVEditChest</span><span class="p">(</span><span class="n">FakeChunkedLevelAdapter</span><span class="p">):</span>
+    <span class="n">Width</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Height</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Length</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Blocks</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">Data</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[[</span><span class="mi">0</span><span class="p">]]],</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="n">Entities</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">()</span>
+    <span class="n">Materials</span> <span class="o">=</span> <span class="n">pc_blocktypes</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_isTagLevel</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">rootTag</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Inventory&quot;</span> <span class="ow">in</span> <span class="n">rootTag</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="n">rootTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[[</span><span class="n">pc_blocktypes</span><span class="o">.</span><span class="n">Chest</span><span class="o">.</span><span class="n">ID</span><span class="p">]]],</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Inventory&quot;</span><span class="p">]):</span>
+            <span class="n">slot</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s">&quot;Slot&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">if</span> <span class="n">slot</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">slot</span> <span class="o">&gt;=</span> <span class="mi">36</span><span class="p">:</span>
+                <span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Inventory&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">item</span><span class="p">[</span><span class="s">&quot;Slot&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">-=</span> <span class="mi">9</span>  <span class="c"># adjust for different chest slot indexes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">rootTag</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="INVEditChest.TileEntities"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.INVEditChest.TileEntities">[docs]</a>    <span class="k">def</span> <span class="nf">TileEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">chestTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+        <span class="n">chestTag</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">(</span><span class="s">&quot;Chest&quot;</span><span class="p">)</span>
+        <span class="n">chestTag</span><span class="p">[</span><span class="s">&quot;Items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Inventory&quot;</span><span class="p">])</span>
+        <span class="n">chestTag</span><span class="p">[</span><span class="s">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">chestTag</span><span class="p">[</span><span class="s">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">chestTag</span><span class="p">[</span><span class="s">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">([</span><span class="n">chestTag</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;TileEntities&quot;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ZipSchematic"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.ZipSchematic">[docs]</a><span class="k">class</span> <span class="nc">ZipSchematic</span> <span class="p">(</span><span class="n">AnvilWorldAdapter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;No adapter for zipped world/schematic files yet!!!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zipfilename</span> <span class="o">=</span> <span class="n">filename</span>
+
+        <span class="n">tempdir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mktemp</span><span class="p">(</span><span class="s">&quot;schematic&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">create</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">zf</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">zf</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">tempdir</span><span class="p">)</span>
+            <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ZipSchematic</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">tempdir</span><span class="p">,</span> <span class="n">create</span><span class="p">)</span>
+        <span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">schematicDat</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="s">&quot;schematic.dat&quot;</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">Width</span> <span class="o">=</span> <span class="n">schematicDat</span><span class="p">[</span><span class="s">&#39;Width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Height</span> <span class="o">=</span> <span class="n">schematicDat</span><span class="p">[</span><span class="s">&#39;Height&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Length</span> <span class="o">=</span> <span class="n">schematicDat</span><span class="p">[</span><span class="s">&#39;Length&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="k">if</span> <span class="s">&quot;Materials&quot;</span> <span class="ow">in</span> <span class="n">schematicDat</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span> <span class="o">=</span> <span class="n">blocktypes_named</span><span class="p">[</span><span class="n">schematicDat</span><span class="p">[</span><span class="s">&quot;Materials&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Exception reading schematic.dat, skipping: {0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Width</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Length</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ZipSchematic.saveChanges"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.ZipSchematic.saveChanges">[docs]</a>    <span class="k">def</span> <span class="nf">saveChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveToFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zipfilename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ZipSchematic.saveToFile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.ZipSchematic.saveToFile">[docs]</a>    <span class="k">def</span> <span class="nf">saveToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ZipSchematic</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">saveChanges</span><span class="p">()</span>
+        <span class="n">schematicDat</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+        <span class="n">schematicDat</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Mega Schematic&quot;</span>
+
+        <span class="n">schematicDat</span><span class="p">[</span><span class="s">&quot;Width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">schematicDat</span><span class="p">[</span><span class="s">&quot;Height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">schematicDat</span><span class="p">[</span><span class="s">&quot;Length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">schematicDat</span><span class="p">[</span><span class="s">&quot;Materials&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">schematicDat</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="s">&quot;schematic.dat&quot;</span><span class="p">))</span>
+
+        <span class="n">basedir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">basedir</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZIP_STORED</span><span class="p">))</span> <span class="k">as</span> <span class="n">z</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">basedir</span><span class="p">):</span>
+                <span class="c"># NOTE: ignore empty directories</span>
+                <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="n">absfn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+                    <span class="n">zfn</span> <span class="o">=</span> <span class="n">absfn</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">basedir</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">):]</span>  <span class="c"># XXX: relative path</span>
+                    <span class="n">z</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">absfn</span><span class="p">,</span> <span class="n">zfn</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ZipSchematic.getWorldBounds"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.ZipSchematic.getWorldBounds">[docs]</a>    <span class="k">def</span> <span class="nf">getWorldBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">))</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ZipSchematic.canOpenFile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.schematic.ZipSchematic.canOpenFile">[docs]</a>    <span class="k">def</span> <span class="nf">canOpenFile</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">is_zipfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

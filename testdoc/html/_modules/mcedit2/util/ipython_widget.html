@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.util.ipython_widget &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.util.ipython_widget</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ipython_widget</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="c">#</span>
+<span class="c"># import atexit</span>
+<span class="c">#</span>
+<span class="c"># from IPython.kernel.zmq.kernelapp import IPKernelApp</span>
+<span class="c"># from IPython.lib.kernel import find_connection_file</span>
+<span class="c"># from IPython.qt.inprocess import QtInProcessKernelManager</span>
+<span class="c"># from IPython.qt.console.rich_ipython_widget import RichIPythonWidget</span>
+<span class="c"># from IPython.utils.traitlets import TraitError</span>
+<span class="c"># from PySide import QtGui, QtCore</span>
+<span class="c">#</span>
+<span class="c"># def event_loop(kernel):</span>
+<span class="c">#     kernel.timer = QtCore.QTimer()</span>
+<span class="c">#     kernel.timer.timeout.connect(kernel.do_one_iteration)</span>
+<span class="c">#     kernel.timer.start(1000*kernel._poll_interval)</span>
+<span class="c">#</span>
+<span class="c"># def default_kernel_app():</span>
+<span class="c">#     app = IPKernelApp.instance()</span>
+<span class="c">#     app.initialize([&#39;python&#39;, &#39;--pylab=qt&#39;])</span>
+<span class="c">#     app.kernel.eventloop = event_loop</span>
+<span class="c">#     return app</span>
+<span class="c">#</span>
+<span class="c"># def default_manager(kernel):</span>
+<span class="c">#     connection_file = find_connection_file(kernel.connection_file)</span>
+<span class="c">#     manager = QtInProcessKernelManager(connection_file=connection_file)</span>
+<span class="c">#     manager.load_connection_file()</span>
+<span class="c">#     atexit.register(manager.cleanup_connection_file)</span>
+<span class="c">#     return manager</span>
+<span class="c">#</span>
+<span class="c"># def console_widget(manager):</span>
+<span class="c">#     try: # Ipython v0.13</span>
+<span class="c">#         widget = RichIPythonWidget(gui_completion=&#39;droplist&#39;)</span>
+<span class="c">#     except TraitError:  # IPython v0.12</span>
+<span class="c">#         widget = RichIPythonWidget(gui_completion=True)</span>
+<span class="c">#     widget.kernel_manager = manager</span>
+<span class="c">#     return widget</span>
+<span class="c">#</span>
+<span class="c"># def terminal_widget(**kwargs):</span>
+<span class="c">#     kernel_app = default_kernel_app()</span>
+<span class="c">#     manager = default_manager(kernel_app)</span>
+<span class="c">#     widget = console_widget(manager)</span>
+<span class="c">#</span>
+<span class="c">#     #update namespace</span>
+<span class="c">#     kernel_app.shell.user_ns.update(kwargs)</span>
+<span class="c">#     client = manager.client()</span>
+<span class="c">#     client.start_channels()</span>
+<span class="c">#     widget.kernel_client = client</span>
+<span class="c">#</span>
+<span class="c">#     kernel_app.start()</span>
+<span class="c">#     return widget</span>
+<span class="c">#</span>
+<span class="c"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c">#     app = QtGui.QApplication([])</span>
+<span class="c">#     widget = terminal_widget(testing=123)</span>
+<span class="c">#     widget.show()</span>
+<span class="c">#     app.exec_()</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">IPython.qt.console.rich_ipython_widget</span> <span class="kn">import</span> <span class="n">RichIPythonWidget</span>
+<span class="kn">from</span> <span class="nn">IPython.qt.inprocess</span> <span class="kn">import</span> <span class="n">QtInProcessKernelManager</span>
+<span class="kn">from</span> <span class="nn">IPython.lib</span> <span class="kn">import</span> <span class="n">guisupport</span>
+
+
+<div class="viewcode-block" id="print_process_id"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.ipython_widget.print_process_id">[docs]</a><span class="k">def</span> <span class="nf">print_process_id</span><span class="p">():</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Process ID is:&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="terminal_widget"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.ipython_widget.terminal_widget">[docs]</a><span class="k">def</span> <span class="nf">terminal_widget</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="c"># Create an in-process kernel</span>
+    <span class="c"># &gt;&gt;&gt; print_process_id()</span>
+    <span class="c"># will print the same process ID as the main process</span>
+    <span class="n">kernel_manager</span> <span class="o">=</span> <span class="n">QtInProcessKernelManager</span><span class="p">()</span>
+    <span class="n">kernel_manager</span><span class="o">.</span><span class="n">start_kernel</span><span class="p">()</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel_manager</span><span class="o">.</span><span class="n">kernel</span>
+    <span class="n">kernel</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s">&#39;qt4&#39;</span>
+    <span class="n">kernel</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">kernel_client</span> <span class="o">=</span> <span class="n">kernel_manager</span><span class="o">.</span><span class="n">client</span><span class="p">()</span>
+    <span class="n">kernel_client</span><span class="o">.</span><span class="n">start_channels</span><span class="p">()</span>
+
+    <span class="n">control</span> <span class="o">=</span> <span class="n">RichIPythonWidget</span><span class="p">()</span>
+    <span class="n">control</span><span class="o">.</span><span class="n">kernel_manager</span> <span class="o">=</span> <span class="n">kernel_manager</span>
+    <span class="n">control</span><span class="o">.</span><span class="n">kernel_client</span> <span class="o">=</span> <span class="n">kernel_client</span>
+    <span class="k">return</span> <span class="n">control</span>
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.ipython_widget.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c"># Print the ID of the main process</span>
+    <span class="n">print_process_id</span><span class="p">()</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">guisupport</span><span class="o">.</span><span class="n">get_app_qt4</span><span class="p">()</span>
+    <span class="n">control</span> <span class="o">=</span> <span class="n">terminal_widget</span><span class="p">(</span><span class="n">testing</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">():</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">kernel_client</span><span class="o">.</span><span class="n">stop_channels</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">kernel_manager</span><span class="o">.</span><span class="n">shutdown_kernel</span><span class="p">()</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="n">control</span><span class="o">.</span><span class="n">exit_requested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
+
+    <span class="n">control</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">guisupport</span><span class="o">.</span><span class="n">start_event_loop_qt4</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

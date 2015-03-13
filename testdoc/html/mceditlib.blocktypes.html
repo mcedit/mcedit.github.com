@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.blocktypes package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mceditlib package" href="mceditlib.html" />
+    <link rel="next" title="mceditlib.operations package" href="mceditlib.operations.html" />
+    <link rel="prev" title="mceditlib.anvil package" href="mceditlib.anvil.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.operations.html" title="mceditlib.operations package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.anvil.html" title="mceditlib.anvil package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" accesskey="U">mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mceditlib-blocktypes-package">
+<h1>mceditlib.blocktypes package<a class="headerlink" href="#mceditlib-blocktypes-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-mceditlib.blocktypes">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mceditlib.blocktypes" title="Permalink to this headline">¶</a></h2>
+<p>Block definitions for all known level formats
+Reader for block definitions stored in .yaml files (based on Minecraft X-Ray)</p>
+<dl class="class">
+<dt id="mceditlib.blocktypes.BlockType">
+<em class="property">class </em><tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">BlockType</tt><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mceditlib.blocktypes._BlockType</span></tt></p>
+<p>Value object representing an (id, data, blocktypeSet) tuple.
+Accessing its attributes will return the corresponding elements
+of its parent material&#8217;s json arrays.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blocktypes.openResource">
+<tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">openResource</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#openResource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.openResource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.blocktypes.BlockTypeSet">
+<em class="property">class </em><tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">BlockTypeSet</tt><big>(</big><em>defaultName='Unused Block'</em>, <em>idMapping=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mceditlib.blocktypes.BlockTypeSet.defaultColor">
+<tt class="descname">defaultColor</tt><em class="property"> = (201, 119, 240, 255)</em><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.defaultColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.getBlockTypeAttr">
+<tt class="descname">getBlockTypeAttr</tt><big>(</big><em>block</em>, <em>attr</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.getBlockTypeAttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.getBlockTypeAttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when accessing an attribute of a BlockType.
+:param block:
+:type block:
+:param attr:
+:type attr:
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.get">
+<tt class="descname">get</tt><big>(</big><em>key</em>, <em>default=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.blocksMatching">
+<tt class="descname">blocksMatching</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.blocksMatching"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.blocksMatching" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addIDMappingFromFile">
+<tt class="descname">addIDMappingFromFile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addIDMappingFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addIDMappingFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addJsonBlocksFromFile">
+<tt class="descname">addJsonBlocksFromFile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addJsonBlocksFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addJsonBlocksFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addJsonBlocks">
+<tt class="descname">addJsonBlocks</tt><big>(</big><em>blockJson</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addJsonBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addJsonBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addJsonBlock">
+<tt class="descname">addJsonBlock</tt><big>(</big><em>blockJson</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addJsonBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addJsonBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a block to this blockset using the keys and values in <tt class="xref py py-obj docutils literal"><span class="pre">block</span></tt>.</p>
+<dl class="docutils">
+<dt>Required keys:</dt>
+<dd>internalName - String used by Minecraft to identify this block</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.blocktypes.PCBlockTypeSet">
+<em class="property">class </em><tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">PCBlockTypeSet</tt><a class="reference internal" href="_modules/mceditlib/blocktypes.html#PCBlockTypeSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.PCBlockTypeSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.blocktypes.BlockTypeSet" title="mceditlib.blocktypes.BlockTypeSet"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.blocktypes.BlockTypeSet</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blocktypes.convertBlocks">
+<tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">convertBlocks</tt><big>(</big><em>destTypes</em>, <em>sourceTypes</em>, <em>ID</em>, <em>meta</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#convertBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.convertBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mceditlib.blocktypes package</a><ul>
+<li><a class="reference internal" href="#module-mceditlib.blocktypes">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mceditlib.anvil.html"
+                        title="previous chapter">mceditlib.anvil package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mceditlib.operations.html"
+                        title="next chapter">mceditlib.operations package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mceditlib.blocktypes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.operations.html" title="mceditlib.operations package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.anvil.html" title="mceditlib.anvil package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" >mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

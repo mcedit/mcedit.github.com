@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering.chunkmeshes.lowdetail &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.rendering.chunkmeshes.lowdetail</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ${NAME}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">renderstates</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.blockmeshes</span> <span class="kn">import</span> <span class="n">standardCubeTemplates</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.blockmeshes</span> <span class="kn">import</span> <span class="n">ChunkMeshBase</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.vertexarraybuffer</span> <span class="kn">import</span> <span class="n">VertexArrayBuffer</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">faces</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LowDetailBlockMesh"><a class="viewcode-back" href="../../../../mcedit2.rendering.chunkmeshes.html#mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh">[docs]</a><span class="k">class</span> <span class="nc">LowDetailBlockMesh</span><span class="p">(</span><span class="n">ChunkMeshBase</span><span class="p">):</span>
+    <span class="n">renderstate</span> <span class="o">=</span> <span class="n">renderstates</span><span class="o">.</span><span class="n">RenderstateLowDetailNode</span>
+    <span class="n">detailLevels</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="c">#</span>
+    <span class="c">#    def drawFaceVertices(self, buf):</span>
+    <span class="c">#        if not len(buf):</span>
+    <span class="c">#            return</span>
+    <span class="c">#        stride = 16</span>
+    <span class="c">#</span>
+    <span class="c">#        GL.glVertexPointer(3, GL.GL_FLOAT, stride, numpy.ravel(buf.ravel()))</span>
+    <span class="c">#        GL.glColorPointer(4, GL.GL_UNSIGNED_BYTE, stride, (buf.view(dtype=&#39;uint8&#39;).ravel()[12:]))</span>
+    <span class="c">#</span>
+    <span class="c">#        GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)</span>
+    <span class="c">#        GL.glDrawArrays(GL.GL_QUADS, 0, len(buf) * 4)</span>
+    <span class="c">#        GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)</span>
+
+<div class="viewcode-block" id="LowDetailBlockMesh.makeChunkVertices"><a class="viewcode-back" href="../../../../mcedit2.rendering.chunkmeshes.html#mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh.makeChunkVertices">[docs]</a>    <span class="k">def</span> <span class="nf">makeChunkVertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">limitBox</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param chunk:</span>
+<span class="sd">        :type chunk: WorldEditorChunk</span>
+<span class="sd">        :param limitBox:</span>
+<span class="sd">        :return: :raise:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">dimension</span>
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">chunkPosition</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="s">&#39;HeightMap&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">chunk</span><span class="o">.</span><span class="n">HeightMap</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">heightMap</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">HeightMap</span>
+        <span class="n">chunkWidth</span> <span class="o">=</span> <span class="n">chunkLength</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="n">chunkHeight</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">height</span>
+
+        <span class="n">z</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="n">chunkLength</span><span class="p">,</span> <span class="n">chunkWidth</span><span class="p">)))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">heightMap</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)[:</span><span class="n">chunkLength</span><span class="p">,</span> <span class="p">:</span><span class="n">chunkWidth</span><span class="p">]</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">chunkHeight</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">nonZeroHeights</span> <span class="o">=</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">heights</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">nonZeroHeights</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">nonZeroHeights</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">nonZeroHeights</span><span class="p">]</span>
+
+        <span class="c"># Get the top block in each column</span>
+        <span class="n">blockResult</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">getBlocks</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="p">(</span><span class="n">cx</span> <span class="o">*</span> <span class="mi">16</span><span class="p">),</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="p">(</span><span class="n">cz</span> <span class="o">*</span> <span class="mi">16</span><span class="p">),</span> <span class="n">return_Data</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">topBlocks</span> <span class="o">=</span> <span class="n">blockResult</span><span class="o">.</span><span class="n">Blocks</span>
+        <span class="n">topBlockData</span> <span class="o">=</span> <span class="n">blockResult</span><span class="o">.</span><span class="n">Data</span>
+
+        <span class="c"># Get the block above each column top. We&#39;ll recolor the top face of the column if a flower or another</span>
+        <span class="c"># transparent block is on top.</span>
+
+        <span class="n">aboveY</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">aboveY</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">chunkHeight</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">aboveY</span><span class="p">)</span>
+        <span class="n">blocksAbove</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">getBlocks</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="p">(</span><span class="n">cx</span> <span class="o">*</span> <span class="mi">16</span><span class="p">),</span> <span class="n">aboveY</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="p">(</span><span class="n">cz</span> <span class="o">*</span> <span class="mi">16</span><span class="p">))</span><span class="o">.</span><span class="n">Blocks</span>
+
+        <span class="n">flatcolors</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">mapColor</span><span class="p">[</span><span class="n">topBlocks</span><span class="p">,</span> <span class="n">topBlockData</span><span class="p">][:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c"># flatcolors[:,:,:3] *= (0.6 + (h * (0.4 / float(chunkHeight-1)))) [topBlocks != 0][:, numpy.newaxis, numpy.newaxis]</span>
+
+        <span class="k">yield</span>
+        <span class="n">vertexBuffer</span> <span class="o">=</span> <span class="n">VertexArrayBuffer</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">textures</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lights</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span><span class="p">[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="n">va0</span> <span class="o">=</span> <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">va0</span><span class="o">.</span><span class="n">vertex</span><span class="p">[:]</span> <span class="o">+=</span> <span class="n">standardCubeTemplates</span><span class="p">[</span><span class="n">faces</span><span class="o">.</span><span class="n">FaceYIncreasing</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">overmask</span> <span class="o">=</span> <span class="n">blocksAbove</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">mapColor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">][</span><span class="n">blocksAbove</span><span class="p">[</span><span class="n">overmask</span><span class="p">]][:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">flatcolors</span><span class="p">[</span><span class="n">overmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">colors</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detailLevel</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">heightfactor</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">height</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.33</span> <span class="o">+</span> <span class="mf">0.66</span>
+            <span class="n">flatcolors</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="n">heightfactor</span><span class="p">[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c"># xxx implicit cast from byte to float and back</span>
+
+        <span class="n">va0</span><span class="o">.</span><span class="n">rgb</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">flatcolors</span>
+
+        <span class="k">yield</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detailLevel</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vertexArrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">va0</span><span class="p">]</span>
+            <span class="k">return</span>
+
+        <span class="c"># Calculate how deep each column needs to go to be flush with the adjacent column;</span>
+        <span class="c"># If columns extend all the way down, performance suffers due to fill rate.</span>
+
+        <span class="n">depths</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chunkWidth</span><span class="p">,</span> <span class="n">chunkLength</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint16&#39;</span><span class="p">)</span>
+        <span class="n">depths</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">minimum</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="n">heights</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+                                     <span class="n">heights</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:],</span>
+                                     <span class="n">heights</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                     <span class="n">heights</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">depths</span> <span class="o">=</span> <span class="n">depths</span><span class="p">[</span><span class="n">nonZeroHeights</span><span class="p">]</span>
+        <span class="k">yield</span>
+
+        <span class="n">va1</span> <span class="o">=</span> <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">va1</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">standardCubeTemplates</span><span class="p">[</span><span class="n">faces</span><span class="o">.</span><span class="n">FaceXIncreasing</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">va1</span><span class="o">.</span><span class="n">vertex</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">depths</span>
+        <span class="n">va1</span><span class="o">.</span><span class="n">vertex</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">depths</span>  <span class="c"># stretch to floor</span>
+        <span class="n">va1</span><span class="o">.</span><span class="n">vertex</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.5</span>  <span class="c"># drop down to prevent intersection pixels</span>
+
+
+        <span class="n">flatcolors</span> <span class="o">*=</span> <span class="mf">0.8</span>
+
+        <span class="n">va1</span><span class="o">.</span><span class="n">rgb</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">flatcolors</span>
+        <span class="n">grassmask</span> <span class="o">=</span> <span class="n">topBlocks</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="c"># color grass sides with dirt&#39;s color</span>
+        <span class="n">va1</span><span class="o">.</span><span class="n">rgb</span><span class="p">[</span><span class="n">grassmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">mapColor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">][[</span><span class="mi">3</span><span class="p">]][:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="n">va2</span> <span class="o">=</span> <span class="n">va1</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">va1</span><span class="o">.</span><span class="n">vertex</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">1.0</span>  <span class="c"># turn diagonally</span>
+        <span class="n">va2</span><span class="o">.</span><span class="n">vertex</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">1.0</span>  <span class="c"># turn diagonally</span>
+
+
+        <span class="n">vertexArrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">va1</span><span class="p">,</span> <span class="n">va2</span><span class="p">,</span> <span class="n">va0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertexArrays</span> <span class="o">=</span> <span class="n">vertexArrays</span>
+
+</div></div>
+<div class="viewcode-block" id="OverheadBlockMesh"><a class="viewcode-back" href="../../../../mcedit2.rendering.chunkmeshes.html#mcedit2.rendering.chunkmeshes.lowdetail.OverheadBlockMesh">[docs]</a><span class="k">class</span> <span class="nc">OverheadBlockMesh</span><span class="p">(</span><span class="n">LowDetailBlockMesh</span><span class="p">):</span>
+    <span class="n">detailLevels</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

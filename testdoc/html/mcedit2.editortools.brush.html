@@ -1,0 +1,439 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.editortools.brush package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mcedit2.editortools package" href="mcedit2.editortools.html" />
+    <link rel="next" title="mcedit2.handles package" href="mcedit2.handles.html" />
+    <link rel="prev" title="mcedit2.editortools package" href="mcedit2.editortools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.handles.html" title="mcedit2.handles package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.editortools.html" title="mcedit2.editortools package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li>
+          <li><a href="mcedit2.editortools.html" accesskey="U">mcedit2.editortools package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mcedit2-editortools-brush-package">
+<h1>mcedit2.editortools.brush package<a class="headerlink" href="#mcedit2-editortools-brush-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-mcedit2.editortools.brush">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mcedit2.editortools.brush" title="Permalink to this headline">¶</a></h2>
+<p>brush</p>
+<dl class="class">
+<dt id="mcedit2.editortools.brush.BrushCommand">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">BrushCommand</tt><big>(</big><em>editorSession</em>, <em>points</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.html#mcedit2.command.SimplePerformCommand" title="mcedit2.command.SimplePerformCommand"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.command.SimplePerformCommand</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushCommand.noise">
+<tt class="descname">noise</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushCommand.noise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushCommand.noise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushCommand.hollow">
+<tt class="descname">hollow</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushCommand.hollow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushCommand.hollow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushCommand.brushBoxForPoint">
+<tt class="descname">brushBoxForPoint</tt><big>(</big><em>point</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushCommand.brushBoxForPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushCommand.brushBoxForPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushCommand.perform">
+<tt class="descname">perform</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushCommand.perform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushCommand.perform" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.BrushMode">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">BrushMode</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushMode.options">
+<tt class="descname">options</tt><em class="property"> = []</em><a class="headerlink" href="#mcedit2.editortools.brush.BrushMode.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushMode.brushBoundingBox">
+<tt class="descname">brushBoundingBox</tt><big>(</big><em>center</em>, <em>options={}</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushMode.brushBoundingBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushMode.brushBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushMode.applyToPoint">
+<tt class="descname">applyToPoint</tt><big>(</big><em>command</em>, <em>point</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushMode.applyToPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushMode.applyToPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by BrushCommand for brush modes that can&#8217;t be implemented using applyToChunk
+:type point: Vector
+:type command: BrushCommand</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushMode.applyToSelections">
+<tt class="descname">applyToSelections</tt><big>(</big><em>command</em>, <em>selections</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushMode.applyToSelections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushMode.applyToSelections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by BrushCommand to apply this brush mode to the given selection. Selection is generated
+by calling</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushMode.createOptionsPanel">
+<tt class="descname">createOptionsPanel</tt><big>(</big><em>tool</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushMode.createOptionsPanel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushMode.createOptionsPanel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.Fill">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">Fill</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#Fill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.Fill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.editortools.brush.BrushMode" title="mcedit2.editortools.brush.BrushMode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.editortools.brush.BrushMode</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.Fill.name">
+<tt class="descname">name</tt><em class="property"> = u'Fill'</em><a class="headerlink" href="#mcedit2.editortools.brush.Fill.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.Fill.applyToSelections">
+<tt class="descname">applyToSelections</tt><big>(</big><em>command</em>, <em>selections</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#Fill.applyToSelections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.Fill.applyToSelections" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.BrushModes">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">BrushModes</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushModes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushModes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushModes.allModes">
+<tt class="descname">allModes</tt><em class="property"> = (&lt;mcedit2.editortools.brush.Fill object at 0x00000000083D06D8&gt;,)</em><a class="headerlink" href="#mcedit2.editortools.brush.BrushModes.allModes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.Style">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">Style</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#Style"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.Style" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.Style.ID">
+<tt class="descname">ID</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mcedit2.editortools.brush.Style.ID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.Style.icon">
+<tt class="descname">icon</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mcedit2.editortools.brush.Style.icon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.Style.shapeFunc">
+<tt class="descname">shapeFunc</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mcedit2.editortools.brush.Style.shapeFunc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.MaskLevel">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">MaskLevel</tt><big>(</big><em>selection</em>, <em>fillBlock</em>, <em>blocktypes</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#MaskLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.MaskLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.editortools.brush.MaskLevel.chunkPositions">
+<tt class="descname">chunkPositions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#MaskLevel.chunkPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.MaskLevel.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.MaskLevel.getChunk">
+<tt class="descname">getChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>create=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#MaskLevel.getChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.MaskLevel.getChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.MaskLevel.containsChunk">
+<tt class="descname">containsChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#MaskLevel.containsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.MaskLevel.containsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.FakeBrushSection">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">FakeBrushSection</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#FakeBrushSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushSection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.FakeBrushSection.BlockLight">
+<tt class="descname">BlockLight</tt><em class="property"> = array([[[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         ...,         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]]], dtype=uint8, shape=(16L, 16L, 16L))</em><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushSection.BlockLight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.FakeBrushSection.SkyLight">
+<tt class="descname">SkyLight</tt><em class="property"> = array([[[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         ...,         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]],         [[15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         ...,          [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15],         [15, 15, 15, ..., 15, 15, 15]]], dtype=uint8, shape=(16L, 16L, 16L))</em><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushSection.SkyLight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">FakeBrushChunk</tt><big>(</big><em>world</em>, <em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#FakeBrushChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk.Entities">
+<tt class="descname">Entities</tt><em class="property"> = ()</em><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk.Entities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk.TileEntities">
+<tt class="descname">TileEntities</tt><em class="property"> = ()</em><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk.TileEntities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk.blocktypes">
+<tt class="descname">blocktypes</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#FakeBrushChunk.blocktypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk.blocktypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk.chunkPosition">
+<tt class="descname">chunkPosition</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#FakeBrushChunk.chunkPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk.chunkPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk.sectionPositions">
+<tt class="descname">sectionPositions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#FakeBrushChunk.sectionPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk.sectionPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk.bounds">
+<tt class="descname">bounds</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#FakeBrushChunk.bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk.bounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.FakeBrushChunk.getSection">
+<tt class="descname">getSection</tt><big>(</big><em>y</em>, <em>create=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#FakeBrushChunk.getSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.FakeBrushChunk.getSection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.BrushTool">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">BrushTool</tt><big>(</big><em>editorSession</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.editortools.html#mcedit2.editortools.EditorTool" title="mcedit2.editortools.EditorTool"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.editortools.EditorTool</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.name">
+<tt class="descname">name</tt><em class="property"> = u'Brush'</em><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.iconName">
+<tt class="descname">iconName</tt><em class="property"> = u'brush'</em><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.iconName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.maxBrushSize">
+<tt class="descname">maxBrushSize</tt><em class="property"> = 512</em><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.maxBrushSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.brushSize">
+<tt class="descname">brushSize</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.brushSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.brushSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.setX">
+<tt class="descname">setX</tt><big>(</big><em>val</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.setX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.setX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.setY">
+<tt class="descname">setY</tt><big>(</big><em>val</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.setY"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.setY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.setZ">
+<tt class="descname">setZ</tt><big>(</big><em>val</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.setZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.setZ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.setBlocktypes">
+<tt class="descname">setBlocktypes</tt><big>(</big><em>types</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.setBlocktypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.setBlocktypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.mousePress">
+<tt class="descname">mousePress</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.mousePress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.mousePress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.mouseMove">
+<tt class="descname">mouseMove</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.mouseMove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.mouseMove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.options">
+<tt class="descname">options</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.brushMode">
+<tt class="descname">brushMode</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.brushMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.brushMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.brushStyle">
+<tt class="descname">brushStyle</tt><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.brushStyle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.brushStyle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.brushBoxForPoint">
+<tt class="descname">brushBoxForPoint</tt><big>(</big><em>point</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.brushBoxForPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.brushBoxForPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.brushSelectionForCursor">
+<tt class="descname">brushSelectionForCursor</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.brushSelectionForCursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.brushSelectionForCursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushTool.updateCursor">
+<tt class="descname">updateCursor</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushTool.updateCursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.updateCursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushTool.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000083D3AC8&gt;</em><a class="headerlink" href="#mcedit2.editortools.brush.BrushTool.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.editortools.brush.BrushModeWidget">
+<em class="property">class </em><tt class="descclassname">mcedit2.editortools.brush.</tt><tt class="descname">BrushModeWidget</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushModeWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushModeWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QComboBox</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.editortools.brush.BrushModeWidget.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000083D3B48&gt;</em><a class="headerlink" href="#mcedit2.editortools.brush.BrushModeWidget.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushModeWidget.currentMode">
+<tt class="descname">currentMode</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushModeWidget.currentMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushModeWidget.currentMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.editortools.brush.BrushModeWidget.indexDidChange">
+<tt class="descname">indexDidChange</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/editortools/brush.html#BrushModeWidget.indexDidChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.editortools.brush.BrushModeWidget.indexDidChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mcedit2.editortools.brush package</a><ul>
+<li><a class="reference internal" href="#module-mcedit2.editortools.brush">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mcedit2.editortools.html"
+                        title="previous chapter">mcedit2.editortools package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mcedit2.handles.html"
+                        title="next chapter">mcedit2.handles package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mcedit2.editortools.brush.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.handles.html" title="mcedit2.handles package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.editortools.html" title="mcedit2.editortools package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li>
+          <li><a href="mcedit2.editortools.html" >mcedit2.editortools package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

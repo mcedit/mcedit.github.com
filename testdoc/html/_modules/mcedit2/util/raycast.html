@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.util.raycast &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.util.raycast</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    raycast</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">profiler</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">Ray</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">SectionBox</span><span class="p">,</span> <span class="n">rayIntersectsBox</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">faces</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RayCastError"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.raycast.RayCastError">[docs]</a><span class="k">class</span> <span class="nc">RayCastError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="MaxDistanceError"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.raycast.MaxDistanceError">[docs]</a><span class="k">class</span> <span class="nc">MaxDistanceError</span><span class="p">(</span><span class="n">RayCastError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when a ray cast exceeds its max distance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="RayBoundsError"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.raycast.RayBoundsError">[docs]</a><span class="k">class</span> <span class="nc">RayBoundsError</span><span class="p">(</span><span class="n">RayCastError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when a ray exits or does not enter the level boundaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="rayCastInBounds"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.raycast.rayCastInBounds">[docs]</a><span class="k">def</span> <span class="nf">rayCastInBounds</span><span class="p">(</span><span class="n">ray</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">maxDistance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">hitAir</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">position</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">rayCast</span><span class="p">(</span><span class="n">ray</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">maxDistance</span><span class="p">,</span> <span class="n">hitAir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">RayBoundsError</span><span class="p">:</span>
+        <span class="n">ixs</span> <span class="o">=</span> <span class="n">rayIntersectsBox</span><span class="p">(</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">ray</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ixs</span><span class="p">:</span>
+            <span class="n">position</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">ixs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="n">position</span><span class="o">.</span><span class="n">intfloor</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">position</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">return</span> <span class="n">position</span><span class="p">,</span> <span class="n">face</span>
+</div>
+<span class="nd">@profiler.function</span>
+<div class="viewcode-block" id="rayCast"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.raycast.rayCast">[docs]</a><span class="k">def</span> <span class="nf">rayCast</span><span class="p">(</span><span class="n">ray</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">maxDistance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">hitAir</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Borrowed from https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game</span>
+
+<span class="sd">    Updates a factor t along each axis to compute the distance from the vector origin (in units of the vector</span>
+<span class="sd">    magnitude) to the next integer value (i.e. block edge) along that axis.</span>
+
+<span class="sd">    Return the block position and face of the block touched.</span>
+
+<span class="sd">    Raises MaxDistanceError if the ray exceeded the max distance without hitting any blocks, or if the ray exits or</span>
+<span class="sd">    doesn&#39;t enter the dimension&#39;s bounds.</span>
+
+<span class="sd">    :param ray:</span>
+<span class="sd">    :type ray: Ray</span>
+<span class="sd">    :param maxDistance:</span>
+<span class="sd">    :type maxDistance: int</span>
+<span class="sd">    :param dimension:</span>
+<span class="sd">    :type dimension: mceditlib.worldeditor.WorldEditorDimension</span>
+<span class="sd">    :return: (point, face)</span>
+<span class="sd">    :rtype:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">point</span><span class="p">,</span> <span class="n">vector</span> <span class="o">=</span> <span class="n">ray</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vector</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot cast with zero direction ray.&quot;</span><span class="p">)</span>
+
+    <span class="n">bounds</span> <span class="o">=</span> <span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="k">if</span> <span class="n">point</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
+        <span class="n">intersects</span> <span class="o">=</span> <span class="n">rayIntersectsBox</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">ray</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">intersects</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RayBoundsError</span><span class="p">(</span><span class="s">&quot;Ray does not enter dimension bounds.&quot;</span><span class="p">)</span>
+
+        <span class="n">point</span> <span class="o">=</span> <span class="n">intersects</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">point</span> <span class="o">=</span> <span class="n">advanceToChunk</span><span class="p">(</span><span class="n">Ray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">vector</span><span class="p">),</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">maxDistance</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">currentCX</span><span class="p">,</span> <span class="n">currentCY</span><span class="p">,</span> <span class="n">currentCZ</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">intfloor</span><span class="p">()</span>
+    <span class="n">currentChunk</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">_cast</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">maxDistance</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">cx</span> <span class="o">!=</span> <span class="n">currentCX</span> <span class="ow">or</span> <span class="n">cz</span> <span class="o">!=</span> <span class="n">currentCZ</span><span class="p">:</span>
+            <span class="n">currentCX</span> <span class="o">=</span> <span class="n">cx</span>
+            <span class="n">currentCZ</span> <span class="o">=</span> <span class="n">cz</span>
+            <span class="k">if</span> <span class="n">dimension</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+                <span class="n">currentChunk</span> <span class="o">=</span> <span class="n">dimension</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>  <span class="c"># xxxx WorldEditor.recentlyLoadedChunks</span>
+        <span class="n">ID</span> <span class="o">=</span> <span class="n">dimension</span><span class="o">.</span><span class="n">getBlockID</span><span class="p">(</span><span class="o">*</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ID</span> <span class="ow">or</span> <span class="n">hitAir</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="n">pos</span><span class="p">),</span> <span class="n">faces</span><span class="o">.</span><span class="n">Face</span><span class="o">.</span><span class="n">fromVector</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+
+    <span class="k">raise</span> <span class="n">MaxDistanceError</span><span class="p">(</span><span class="s">&quot;Ray exceeded max distance.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="intbound"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.raycast.intbound">[docs]</a><span class="k">def</span> <span class="nf">intbound</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="o">-</span><span class="n">v</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="o">-</span><span class="n">o</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">o</span> <span class="o">%</span> <span class="n">step</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">step</span> <span class="o">-</span> <span class="p">(</span><span class="n">o</span> <span class="o">%</span> <span class="n">step</span><span class="p">))</span> <span class="o">/</span> <span class="n">v</span>
+</div>
+<span class="k">def</span> <span class="nf">_cast</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">maxDistance</span><span class="p">,</span> <span class="n">stepSize</span><span class="p">):</span>
+    <span class="n">originPos</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">o</span> <span class="o">-</span> <span class="n">o</span> <span class="o">%</span> <span class="n">stepSize</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">origin</span><span class="p">)</span>
+    <span class="c"># Integer single steps along each vector axis</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="p">[</span><span class="n">stepSize</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">stepSize</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vector</span><span class="p">]</span>
+    <span class="n">faceDirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vector</span><span class="p">]</span>
+
+    <span class="c"># t factor along each axis</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">[</span><span class="n">intbound</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">stepSize</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="k">else</span> <span class="mi">2000000000</span> <span class="k">for</span> <span class="n">o</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">vector</span><span class="p">)]</span>
+    <span class="c"># distance to increment t along each axis after finding a block edge</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">/</span><span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">vector</span><span class="p">)]</span>
+
+    <span class="c"># to compare maxDistance against t</span>
+    <span class="n">maxDistance</span> <span class="o">/=</span> <span class="n">vector</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+    <span class="n">face</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="c"># find axis of nearest block edge</span>
+        <span class="k">yield</span> <span class="n">originPos</span><span class="p">,</span> <span class="n">face</span>
+        <span class="n">smallAxis</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="n">t</span><span class="p">[</span><span class="n">smallAxis</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">smallAxis</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="n">smallAxis</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxDistance</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="c"># compute block coordinates and face direction</span>
+        <span class="n">originPos</span><span class="p">[</span><span class="n">smallAxis</span><span class="p">]</span> <span class="o">+=</span> <span class="n">step</span><span class="p">[</span><span class="n">smallAxis</span><span class="p">]</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">face</span><span class="p">[</span><span class="n">smallAxis</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">faceDirs</span><span class="p">[</span><span class="n">smallAxis</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="advanceToChunk"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.raycast.advanceToChunk">[docs]</a><span class="k">def</span> <span class="nf">advanceToChunk</span><span class="p">(</span><span class="n">ray</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">maxDistance</span><span class="p">):</span>
+    <span class="n">point</span><span class="p">,</span> <span class="n">vector</span> <span class="o">=</span> <span class="n">ray</span>
+    <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">_cast</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">maxDistance</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="n">x</span> <span class="o">&gt;&gt;=</span> <span class="mi">4</span>
+        <span class="n">y</span> <span class="o">&gt;&gt;=</span> <span class="mi">4</span>
+        <span class="n">z</span> <span class="o">&gt;&gt;=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RayBoundsError</span><span class="p">(</span><span class="s">&quot;Ray exited dimension bounds.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dimension</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">dimension</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">section</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># if (section.Blocks == 0).all():</span>
+                <span class="c">#     log.warn(&quot;Empty section found!!&quot;)</span>
+                <span class="c">#     continue</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">SectionBox</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">box</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">point</span>
+                <span class="n">ixs</span> <span class="o">=</span> <span class="n">rayIntersectsBox</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">ray</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ixs</span><span class="p">:</span>
+                    <span class="n">hitPoint</span> <span class="o">=</span> <span class="n">ixs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="n">hitPoint</span>
+
+    <span class="k">raise</span> <span class="n">RayBoundsError</span><span class="p">(</span><span class="s">&quot;Ray exited dimension bounds.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,880 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Support Modules &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="next" title="Command-line Editor" href="mce.html" />
+    <link rel="prev" title="Storage Modules" href="storage.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mce.html" title="Command-line Editor"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="storage.html" title="Storage Modules"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="support-modules">
+<h1>Support Modules<a class="headerlink" href="#support-modules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-mceditlib.exceptions">
+<span id="exceptions-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">exceptions</span></tt> Module<a class="headerlink" href="#module-mceditlib.exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="mceditlib.exceptions.PlayerNotFound">
+<em class="property">exception </em><tt class="descclassname">mceditlib.exceptions.</tt><tt class="descname">PlayerNotFound</tt><a class="reference internal" href="_modules/mceditlib/exceptions.html#PlayerNotFound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.exceptions.PlayerNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.KeyError</span></tt></p>
+<p>Requested player not found in level.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.exceptions.ChunkNotPresent">
+<em class="property">exception </em><tt class="descclassname">mceditlib.exceptions.</tt><tt class="descname">ChunkNotPresent</tt><a class="reference internal" href="_modules/mceditlib/exceptions.html#ChunkNotPresent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.exceptions.ChunkNotPresent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.KeyError</span></tt></p>
+<p>Requested chunk not found in level.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.exceptions.ChunkSizeError">
+<em class="property">exception </em><tt class="descclassname">mceditlib.exceptions.</tt><tt class="descname">ChunkSizeError</tt><a class="reference internal" href="_modules/mceditlib/exceptions.html#ChunkSizeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.exceptions.ChunkSizeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.ValueError</span></tt></p>
+<p>Attempted to save a chunk larger than region file&#8217;s allocation limit (1 MB)</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.exceptions.LevelFormatError">
+<em class="property">exception </em><tt class="descclassname">mceditlib.exceptions.</tt><tt class="descname">LevelFormatError</tt><a class="reference internal" href="_modules/mceditlib/exceptions.html#LevelFormatError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.exceptions.LevelFormatError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<p>General error for level data not being formatted as expected</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.exceptions.RegionMalformed">
+<em class="property">exception </em><tt class="descclassname">mceditlib.exceptions.</tt><tt class="descname">RegionMalformed</tt><a class="reference internal" href="_modules/mceditlib/exceptions.html#RegionMalformed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.exceptions.RegionMalformed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.exceptions.LevelFormatError" title="mceditlib.exceptions.LevelFormatError"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.exceptions.LevelFormatError</span></tt></a></p>
+<p>Region index entry points outside of the file or to an incomplete sector. Region compress type
+is unknown.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.exceptions.ChunkMalformed">
+<em class="property">exception </em><tt class="descclassname">mceditlib.exceptions.</tt><tt class="descname">ChunkMalformed</tt><a class="reference internal" href="_modules/mceditlib/exceptions.html#ChunkMalformed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.exceptions.ChunkMalformed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.exceptions.LevelFormatError" title="mceditlib.exceptions.LevelFormatError"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.exceptions.LevelFormatError</span></tt></a></p>
+<p>Chunk did not have an expected NBT tag.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="box-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">box</span></tt> Module<a class="headerlink" href="#box-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="entity-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">entity</span></tt> Module<a class="headerlink" href="#entity-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mceditlib.items">
+<span id="items-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">items</span></tt> Module<a class="headerlink" href="#module-mceditlib.items" title="Permalink to this headline">¶</a></h2>
+<p>items.py</p>
+<p>Reads the items.txt used by INVEdit to load item definitions.</p>
+<dl class="class">
+<dt id="mceditlib.items.ItemType">
+<em class="property">class </em><tt class="descclassname">mceditlib.items.</tt><tt class="descname">ItemType</tt><big>(</big><em>id</em>, <em>name</em>, <em>imagefile=None</em>, <em>imagecoords=None</em>, <em>maxdamage=0</em>, <em>damagevalue=0</em>, <em>stacksize=64</em><big>)</big><a class="reference internal" href="_modules/mceditlib/items.html#ItemType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.items.ItemType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.items.Items">
+<em class="property">class </em><tt class="descclassname">mceditlib.items.</tt><tt class="descname">Items</tt><big>(</big><em>filename=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/items.html#Items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.items.Items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mceditlib.items.Items.items_txt">
+<tt class="descname">items_txt</tt><em class="property"> = &quot;\n:version 34\n:mc-version Minecraft 1.4\n\n#            Blocks\n# ID  NAME                   FILE         CORDS   DAMAGE\n   1  Stone                  terrain.png  1,0\n   2  Grass                  terrain.png  3,0\n   3  Dirt                   terrain.png  2,0\n   4  Cobblestone            terrain.png  0,1\n   5  Oak_Wooden_Planks      terrain.png  4,0    0\n   5  Spruce_Wooden_Planks   terrain.png  6,12   1\n   5  Birch_Wooden_Planks    terrain.png  6,13   2\n   5  Jungle_Wooden_Planks   terrain.png  7,12   3\n   6  Oak_Sapling            terrain.png  15,0   0\n   6  Spruce_Sapling         terrain.png  15,3   1\n   6  Birch_Sapling          terrain.png  15,4   2\n   6  Jungle_Sapling         terrain.png  14,1   3\n   7  Bedrock                terrain.png  1,1\n   8  Water                  terrain.png  15,13\n   9  Still_Water            terrain.png  15,13\n  10  Lava                   terrain.png  15,15\n  11  Still_Lava             terrain.png  15,15\n  12  Sand                   terrain.png  2,1\n  13  Gravel                 terrain.png  3,1\n  14  Gold_Ore               terrain.png  0,2\n  15  Iron_Ore               terrain.png  1,2\n  16  Coal_Ore               terrain.png  2,2\n  17  Oak_Wood               terrain.png  4,1    0\n  17  Dark_Wood              terrain.png  4,7    1\n  17  Birch_Wood             terrain.png  5,7    2\n  17  Jungle_Wood            terrain.png  9,9    3\n  18  Oak_Leaves             special.png  15,0   0\n  18  Dark_Leaves            special.png  14,1   1\n  18  Birch_Leaves           special.png  14,2   2\n  18  Jungle_Leaves          special.png  14,3   3\n  19  Sponge                 terrain.png  0,3\n  20  Glass                  terrain.png  1,3\n  21  Lapis_Lazuli_Ore       terrain.png  0,10\n  22  Lapis_Lazuli_Block     terrain.png  0,9\n  23  Dispenser              terrain.png  14,2\n  24  Sandstone              terrain.png  0,12   0\n  24  Chiseled_Sandstone     terrain.png  5,14   1\n  24  Smooth_Sandstone       terrain.png  6,14   2\n  25  Note_Block             terrain.png  10,4\n  26  Bed_Block              terrain.png  6,8\n  27  Powered_Rail           terrain.png  3,10\n  28  Detector_Rail          terrain.png  3,12\n  29  Sticky_Piston          terrain.png  10,6\n  30  Cobweb                 terrain.png  11,0\n  31  Dead_Bush              terrain.png  7,3    0\n  31  Tall_Grass             special.png  15,0   1\n  31  Fern                   special.png  15,1   2\n  32  Dead_Bush              terrain.png  7,3\n  33  Piston                 terrain.png  11,6\n  34  Piston_(head)          terrain.png  11,6\n  35  Wool                   terrain.png  0,4    0\n  35  Orange_Wool            terrain.png  2,13   1\n  35  Magenta_Wool           terrain.png  2,12   2\n  35  Light_Blue_Wool        terrain.png  2,11   3\n  35  Yellow_Wool            terrain.png  2,10   4\n  35  Lime_Wool              terrain.png  2,9    5\n  35  Pink_Wool              terrain.png  2,8    6\n  35  Gray_Wool              terrain.png  2,7    7\n  35  Light_Gray_Wool        terrain.png  1,14   8\n  35  Cyan_Wool              terrain.png  1,13   9\n  35  Purple_Wool            terrain.png  1,12   10\n  35  Blue_Wool              terrain.png  1,11   11\n  35  Brown_Wool             terrain.png  1,10   12\n  35  Green_Wool             terrain.png  1,9    13\n  35  Red_Wool               terrain.png  1,8    14\n  35  Black_Wool             terrain.png  1,7    15\n  37  Flower                 terrain.png  13,0\n  38  Rose                   terrain.png  12,0\n  39  Brown_Mushroom         terrain.png  13,1\n  40  Red_Mushroom           terrain.png  12,1\n  41  Block_of_Gold          terrain.png  7,1\n  42  Block_of_Iron          terrain.png  6,1\n  43  Double_Stone_Slab      terrain.png  5,0    0\n  43  Double_Sandstone_Slab  terrain.png  0,12   1\n  43  Double_Wooden_Slab     terrain.png  4,0    2\n  43  Double_Stone_Slab      terrain.png  0,1    3\n  44  Stone_Slab             special.png  2,2    0\n  44  Sandstone_Slab         special.png  8,0    1\n  44  Wooden_Slab            special.png  3,0    2\n  44  Stone_Slab             special.png  1,0    3\n  44  Brick_Slab             special.png  0,0    4\n  44  Stone_Brick_Slab       special.png  2,0    5\n  45  Bricks                 terrain.png  7,0\n  46  TNT                    terrain.png  8,0\n  47  Bookshelf              terrain.png  3,2\n  48  Moss_Stone             terrain.png  4,2\n  49  Obsidian               terrain.png  5,2\n  50  Torch                  terrain.png  0,5\n  51  Fire                   special.png  0,5\n  52  Monster_Spawner        terrain.png  1,4\n  53  Oak_Wood_Stair         special.png  3,1\n  54  Chest                  special.png  0,6\n  55  Redstone_Dust          terrain.png  4,5\n  56  Diamond_Ore            terrain.png  2,3\n  57  Block_of_Diamond       terrain.png  8,1\n  58  Workbench              terrain.png  12,3   (x1)\n  59  Crops                  terrain.png  15,5\n  60  Farmland               terrain.png  7,5\n  61  Furnace                terrain.png  12,2\n  62  Lit_Furnace            terrain.png  13,3\n  63  Sign_Block             terrain.png  0,0\n  64  Wooden_Door_Block      terrain.png  1,6\n  65  Ladder                 terrain.png  3,5\n  66  Rail                   terrain.png  0,8\n  67  Stone_Stairs           special.png  1,1\n  68  Wall_Sign              terrain.png  4,0\n  69  Lever                  terrain.png  0,6\n  70  Stone_Pressure_Plate   special.png  2,4\n  71  Iron_Door_Block        terrain.png  2,6\n  72  Wooden_Pressure_Plate  special.png  3,4\n  73  Redstone_Ore           terrain.png  3,3\n  74  Glowing_Redstone_Ore   terrain.png  3,3\n  75  Redstone_Torch_(off)   terrain.png  3,7\n  76  Redstone_Torch         terrain.png  3,6\n  77  Stone_Button           special.png  2,3\n  78  Snow_Layer             special.png  1,4\n  79  Ice                    terrain.png  3,4\n  80  Snow                   terrain.png  2,4\n  81  Cactus                 terrain.png  6,4\n  82  Clay                   terrain.png  8,4\n  83  Sugar_cane             terrain.png  9,4\n  84  Jukebox                terrain.png  10,4\n  85  Fence                  special.png  3,2\n  86  Pumpkin                terrain.png  7,7\n  87  Netherrack             terrain.png  7,6\n  88  Soul_Sand              terrain.png  8,6\n  89  Glowstone              terrain.png  9,6\n  90  Portal                 special.png  1,5\n  91  Jack-o'-lantern        terrain.png  8,7\n  92  Cake                   special.png  0,4\n  93  Repeater_Block_(off)   terrain.png  3,8\n  94  Repeater_Block         terrain.png  3,9\n  95  Locked_Chest           special.png  0,2\n  96  Trapdoor               terrain.png  4,5\n  97  Silverfish_Block       terrain.png  1,0\n  98  Stone_Brick            terrain.png  6,3    0\n  98  Mossy_Stone_Brick      terrain.png  4,6    1\n  98  Cracked_Stone_Brick    terrain.png  5,6    2\n  98  Chiseled_Stone_Brick   terrain.png  5,13   3\n  99  Brown_Mushroom_Block   terrain.png  13,7\n 100  Red_Mushroom_Block     terrain.png  14,7\n 101  Iron_Bars              terrain.png  5,5\n 102  Glass_Pane             special.png  1,3\n 103  Melon                  terrain.png  8,8\n 104  Pumpkin_Stem           special.png  15,4\n 105  Melon_Stem             special.png  15,4\n 106  Vines                  special.png  15,2\n 107  Fence_Gate             special.png  4,3\n 108  Brick_Stairs           special.png  0,1\n 109  Stone_Brick_Stairs     special.png  2,1\n 110  Mycelium               terrain.png  13,4\n 111  Lily_Pad               special.png  15,3\n 112  Nether_Brick           terrain.png  0,14\n 113  Nether_Brick_Fence     special.png  7,2\n 114  Nether_Brick_Stairs    special.png  7,1\n 115  Nether_Wart            terrain.png  2,14\n 116  Enchantment_Table      terrain.png  6,11   (x1)\n 117  Brewing_Stand          terrain.png  13,9\n 118  Cauldron               terrain.png  10,9\n 119  End_Portal             special.png  2,5\n 120  End_Portal_Frame       terrain.png  15,9\n 121  End_Stone              terrain.png  15,10\n 122  Dragon_Egg             special.png  0,7\n 123  Redstone_Lamp          terrain.png  3,13\n 124  Redstone_Lamp_(on)     terrain.png  4,13\n 125  Oak_Wooden_D._Slab     terrain.png  4,0    0\n 125  Spruce_Wooden_D._Slab  terrain.png  6,12   1\n 125  Birch_Wooden_D._Slab   terrain.png  6,13   2\n 125  Jungle_Wooden_D._Slab  terrain.png  7,12   3\n 126  Oak_Wooden_Slab        special.png  3,0    0\n 126  Spruce_Wooden_Slab     special.png  4,0    1\n 126  Birch_Wooden_Slab      special.png  5,0    2\n 126  Jungle_Wooden_Slab     special.png  6,0    3\n 127  Cocoa_Plant            special.png  15,5\n 128  Sandstone_Stairs       special.png  8,1\n 129  Emerald_Ore            terrain.png  11,10\n 130  Ender_Chest            special.png  1,6\n 131  Tripwire_Hook          terrain.png  12,10\n 132  Tripwire               terrain.png  5,11\n 133  Block_of_Emerald       terrain.png  9,1\n 134  Spruce_Wood_Stairs     special.png  4,1\n 135  Birch_Wood_Stairs      special.png  5,1\n 136  Jungle_Wood_Stairs     special.png  6,1\n 137  Command_Block          terrain.png  8,11\n 138  Beacon                 special.png  2,6\n 139  Cobblestone_Wall       special.png  1,2    0\n 140  Moss_Stone_Wall        special.png  0,2    1\n 141  Flower_Pot             terrain.png  9,11\n 142  Carrots                terrain.png  11,12\n 143  Potatoes               terrain.png  12,12\n 144  Wooden_Button          special.png  3,3\n 145  Head                     items.png  0,14\n 146  Anvil                  special.png  3,6    0\n 146  Slightly_Damaged_Anvil special.png  4,6    1\n 146  Very_Damaged_Anvil     special.png  5,6    2\n\n#            Items\n# ID  NAME                   FILE       CORDS  DAMAGE\n 256  Iron_Shovel            items.png  2,5    +250\n 257  Iron_Pickaxe           items.png  2,6    +250\n 258  Iron_Axe               items.png  2,7    +250\n 259  Flint_and_Steel        items.png  5,0    +64\n 260  Apple                  items.png  10,0\n 261  Bow                    items.png  5,1    +384\n 262  Arrow                  items.png  5,2\n 263  Coal                   items.png  7,0    0\n 263  Charcoal               items.png  7,0    1\n 264  Diamond                items.png  7,3\n 265  Iron_Ingot             items.png  7,1\n 266  Gold_Ingot             items.png  7,2\n 267  Iron_Sword             items.png  2,4    +250\n 268  Wooden_Sword           items.png  0,4    +59\n 269  Wooden_Shovel          items.png  0,5    +59\n 270  Wooden_Pickaxe         items.png  0,6    +59\n 271  Wooden_Axe             items.png  0,7    +59\n 272  Stone_Sword            items.png  1,4    +131\n 273  Stone_Shovel           items.png  1,5    +131\n 274  Stone_Pickaxe          items.png  1,6    +131\n 275  Stone_Axe              items.png  1,7    +131\n 276  Diamond_Sword          items.png  3,4    +1561\n 277  Diamond_Shovel         items.png  3,5    +1561\n 278  Diamond_Pickaxe        items.png  3,6    +1561\n 279  Diamond_Axe            items.png  3,7    +1561\n 280  Stick                  items.png  5,3\n 281  Bowl                   items.png  7,4\n 282  Mushroom_Stew          items.png  8,4    x1\n 283  Golden_Sword           items.png  4,4    +32\n 284  Golden_Shovel          items.png  4,5    +32\n 285  Golden_Pickaxe         items.png  4,6    +32\n 286  Golden_Axe             items.png  4,7    +32\n 287  String                 items.png  8,0\n 288  Feather                items.png  8,1\n 289  Gunpowder              items.png  8,2\n 290  Wooden_Hoe             items.png  0,8    +59\n 291  Stone_Hoe              items.png  1,8    +131\n 292  Iron_Hoe               items.png  2,8    +250\n 293  Diamond_Hoe            items.png  3,8    +1561\n 294  Golden_Hoe             items.png  4,8    +32\n 295  Seeds                  items.png  9,0\n 296  Wheat                  items.png  9,1\n 297  Bread                  items.png  9,2\n 298  Leather_Cap            items.png  0,0    +34\n 299  Leather_Tunic          items.png  0,1    +48\n 300  Leather_Pants          items.png  0,2    +46\n 301  Leather_Boots          items.png  0,3    +40\n 302  Chainmail_Helmet       items.png  1,0    +68\n 303  Chainmail_Chestplate   items.png  1,1    +96\n 304  Chainmail_Leggings     items.png  1,2    +92\n 305  Chainmail_Boots        items.png  1,3    +80\n 306  Iron_Helmet            items.png  2,0    +136\n 307  Iron_Chestplate        items.png  2,1    +192\n 308  Iron_Leggings          items.png  2,2    +184\n 309  Iron_Boots             items.png  2,3    +160\n 310  Diamond_Helmet         items.png  3,0    +272\n 311  Diamond_Chestplate     items.png  3,1    +384\n 312  Diamond_Leggings       items.png  3,2    +368\n 313  Diamond_Boots          items.png  3,3    +320\n 314  Golden_Helmet          items.png  4,0    +68\n 315  Golden_Chestplate      items.png  4,1    +96\n 316  Golden_Leggings        items.png  4,2    +92\n 317  Golden_Boots           items.png  4,3    +80\n 318  Flint                  items.png  6,0\n 319  Raw_Porkchop           items.png  7,5\n 320  Cooked_Porkchop        items.png  8,5\n 321  Painting               items.png  10,1\n 322  Golden_Apple           items.png  11,0\n 322  Ench._Golden_Apple   special.png  0,3    1\n 323  Sign                   items.png  10,2   x16\n 324  Wooden_Door            items.png  11,2   x1\n 325  Bucket                 items.png  10,4   x16\n 326  Water_Bucket           items.png  11,4   x1\n 327  Lava_Bucket            items.png  12,4   x1\n 328  Minecart               items.png  7,8    x1\n 329  Saddle                 items.png  8,6    x1\n 330  Iron_Door              items.png  12,2   x1\n 331  Redstone               items.png  8,3\n 332  Snowball               items.png  14,0   x16\n 333  Boat                   items.png  8,8    x1\n 334  Leather                items.png  7,6\n 335  Milk                   items.png  13,4   x1\n 336  Brick                  items.png  6,1\n 337  Clay                   items.png  9,3\n 338  Sugar_Canes            items.png  11,1\n 339  Paper                  items.png  10,3\n 340  Book                   items.png  11,3\n 341  Slimeball              items.png  14,1\n 342  Minecart_with_Chest    items.png  7,9    x1\n 343  Minecart_with_Furnace  items.png  7,10   x1\n 344  Egg                    items.png  12,0\n 345  Compass                items.png  6,3    (x1)\n 346  Fishing_Rod            items.png  5,4    +64\n 347  Clock                  items.png  6,4    (x1)\n 348  Glowstone_Dust         items.png  9,4\n 349  Raw_Fish               items.png  9,5\n 350  Cooked_Fish            items.png  10,5\n 351  Ink_Sack               items.png  14,4   0\n 351  Rose_Red               items.png  14,5   1\n 351  Cactus_Green           items.png  14,6   2\n 351  Coco_Beans             items.png  14,7   3\n 351  Lapis_Lazuli           items.png  14,8   4\n 351  Purple_Dye             items.png  14,9   5\n 351  Cyan_Dye               items.png  14,10  6\n 351  Light_Gray_Dye         items.png  14,11  7\n 351  Gray_Dye               items.png  15,4   8\n 351  Pink_Dye               items.png  15,5   9\n 351  Lime_Dye               items.png  15,6   10\n 351  Dandelion_Yellow       items.png  15,7   11\n 351  Light_Blue_Dye         items.png  15,8   12\n 351  Magenta_Dye            items.png  15,9   13\n 351  Orange_Dye             items.png  15,10  14\n 351  Bone_Meal              items.png  15,11  15\n 352  Bone                   items.png  12,1\n 353  Sugar                  items.png  13,0\n 354  Cake                   items.png  13,1   x1\n 355  Bed                    items.png  13,2   x1\n 356  Redstone_Repeater      items.png  6,5\n 357  Cookie                 items.png  12,5\n 358  Map                    items.png  12,3   x1\n 359  Shears                 items.png  13,5   +238\n 360  Melon                  items.png  13,6\n 361  Pumpkin_Seeds          items.png  13,3\n 362  Melon_Seeds            items.png  14,3\n 363  Raw_Beef               items.png  9,6\n 364  Steak                  items.png  10,6\n 365  Raw_Chicken            items.png  9,7\n 366  Cooked_Chicken         items.png  10,7\n 367  Rotten_Flesh           items.png  11,5\n 368  Ender_Pearl            items.png  11,6\n 369  Blaze_Rod              items.png  12,6\n 370  Ghast_Tear             items.png  11,7\n 371  Gold_Nugget            items.png  12,7\n 372  Nether_Wart            items.png  13,7\n 374  Glass_Bottle           items.png  12,8\n 375  Spider_Eye             items.png  11,8\n 376  Fermented_Spider_Eye   items.png  10,8\n 377  Blaze_Powder           items.png  13,9\n 378  Magma_Cream            items.png  13,10\n 379  Brewing_Stand          items.png  12,10  (x1)\n 380  Cauldron               items.png  12,9   (x1)\n 381  Eye_of_Ender           items.png  11,9\n 382  Glistering_Melon       items.png  9,8\n 383  Spawn_Egg              items.png  9,9\n 384  Bottle_o'_Enchanting   items.png  11,10\n 385  Fire_Charge            items.png  14,2\n 386  Book_and_Quill         items.png  11,11  x1\n 387  Written_Book           items.png  12,11  x1\n 388  Emerald                items.png  10,11\n 389  Item_Frame             items.png  14,12\n 390  Flower_Pot             items.png  13,11\n 391  Carrot                 items.png  8,7\n 392  Potato                 items.png  7,7\n 393  Baked_Potato           items.png  6,7\n 394  Poisonous_Potato       items.png  6,8\n 395  Empty_Map              items.png  13,12  x1\n 396  Golden_Carrot          items.png  6,9\n 397  Skeleton_Head          items.png  0,14   0\n 397  Wither_Skeleton_Head   items.png  1,14   1\n 397  Zombie_Head            items.png  2,14   2\n 397  Human_Head             items.png  3,14   3\n 397  Creeper_Head           items.png  4,14   4\n 398  Carrot_on_a_Stick      items.png  6,6    +25\n 399  Nether_Star            items.png  9,11\n 400  Pumpkin_Pie            items.png  8,9\n2256  C418_-_13              items.png  0,15   x1\n2257  C418_-_cat             items.png  1,15   x1\n2258  C418_-_blocks          items.png  2,15   x1\n2259  C418_-_chirp           items.png  3,15   x1\n2260  C418_-_far             items.png  4,15   x1\n2261  C418_-_mall            items.png  5,15   x1\n2262  C418_-_mellohi         items.png  6,15   x1\n2263  C418_-_stal            items.png  7,15   x1\n2264  C418_-_strad           items.png  8,15   x1\n2265  C418_-_ward            items.png  9,15   x1\n2266  C418_-_11              items.png  10,15  x1\n\n#           Potions\n# ID  NAME                    FILE         CORDS  DAMAGE\n 373  Water_Bottle            special.png  0,14   0\n 373  Awkward_Potion          special.png  1,14   16\n 373  Thick_Potion            special.png  1,14   32\n 373  Mundane_Potion          special.png  1,14   64\n 373  Mundane_Potion          special.png  1,14   8192\n 373  Regeneration_(0:45)     special.png  2,14   8193\n 373  Regeneration_(2:00)     special.png  2,14   8257\n 373  Regeneration_II_(0:22)  special.png  2,14   8225\n 373  Swiftness_(3:00)        special.png  3,14   8194\n 373  Swiftness_(8:00)        special.png  3,14   8258\n 373  Swiftness_II_(1:30)     special.png  3,14   8226\n 373  Fire_Resistance_(3:00)  special.png  4,14   8195\n 373  Fire_Resistance_(3:00)  special.png  4,14   8227\n 373  Fire_Resistance_(8:00)  special.png  4,14   8259\n 373  Healing                 special.png  6,14   8197\n 373  Healing                 special.png  6,14   8261\n 373  Healing_II              special.png  6,14   8229\n 373  Strength_(3:00)         special.png  8,14   8201\n 373  Strength_(8:00)         special.png  8,14   8265\n 373  Strength_II_(1:30)      special.png  8,14   8233\n 373  Poison_(0:45)           special.png  5,14   8196\n 373  Poison_(2:00)           special.png  5,14   8260\n 373  Poison_II_(0:22)        special.png  5,14   8228\n 373  Weakness_(1:30)         special.png  7,14   8200\n 373  Weakness_(1:30)         special.png  7,14   8332\n 373  Weakness_(4:00)         special.png  7,14   8264\n 373  Slowness_(1:30)         special.png  9,14   8202\n 373  Slowness_(1:30)         special.png  9,14   8234\n 373  Slowness_(4:00)         special.png  9,14   8266\n 373  Harming                 special.png  10,14  8204\n 373  Harming                 special.png  10,14  8268\n 373  Harming_II              special.png  10,14  8236\n# Unbrewable:\n 373  Regeneration_II_(1:00)  special.png  2,14   8289\n 373  Swiftness_II_(4:00)     special.png  3,14   8290\n 373  Strength_II_(4:00)      special.png  8,14   8297\n 373  Poison_II_(1:00)        special.png  5,14   8292\n\n#           Splash Potions\n# ID  NAME                    FILE         CORDS  DAMAGE\n 373  Splash_Mundane          special.png  1,13   16384\n 373  Regeneration_(0:33)     special.png  2,13   16385\n 373  Regeneration_(1:30)     special.png  2,13   16499\n 373  Regeneration_II_(0:16)  special.png  2,13   16417\n 373  Swiftness_(2:15)        special.png  3,13   16386\n 373  Swiftness_(6:00)        special.png  3,13   16450\n 373  Swiftness_II_(1:07)     special.png  3,13   16418\n 373  Fire_Resistance_(2:15)  special.png  4,13   16387\n 373  Fire_Resistance_(2:15)  special.png  4,13   16419\n 373  Fire_Resistance_(6:00)  special.png  4,13   16451\n 373  Healing                 special.png  6,13   16389\n 373  Healing                 special.png  6,13   16453\n 373  Healing_II              special.png  6,13   16421\n 373  Strength_(2:15)         special.png  8,13   16393\n 373  Strength_(6:00)         special.png  8,13   16457\n 373  Strength_II_(1:07)      special.png  8,13   16425\n 373  Poison_(0:33)           special.png  5,13   16388\n 373  Poison_(1:30)           special.png  5,13   16452\n 373  Poison_II_(0:16)        special.png  5,13   16420\n 373  Weakness_(1:07)         special.png  7,13   16392\n 373  Weakness_(1:07)         special.png  7,13   16424\n 373  Weakness_(3:00)         special.png  7,13   16456\n 373  Slowness_(1:07)         special.png  9,13   16394\n 373  Slowness_(1:07)         special.png  9,13   16426\n 373  Slowness_(3:00)         special.png  9,13   16458\n 373  Harming                 special.png  10,13  16396\n 373  Harming                 special.png  10,13  16460\n 373  Harming_II              special.png  10,13  16428\n# Unbrewable:\n 373  Regeneration_II_(0:45)  special.png  2,13   16481\n 373  Swiftness_II_(3:00)     special.png  3,13   16482\n 373  Strength_II_(3:00)      special.png  8,13   16489\n 373  Poison_II_(0:45)        special.png  5,13   16484\n\n#           Spawn Eggs\n# ID  NAME                   FILE         CORDS  DAMAGE\n 383  Spawn_Creeper          special.png  0,9    50\n 383  Spawn_Skeleton         special.png  1,9    51\n 383  Spawn_Spider           special.png  2,9    52\n 383  Spawn_Zombie           special.png  3,9    54\n 383  Spawn_Slime            special.png  4,9    55\n 383  Spawn_Ghast            special.png  0,10   56\n 383  Spawn_Zombie_Pigmen    special.png  1,10   57\n 383  Spawn_Enderman         special.png  2,10   58\n 383  Spawn_Cave_Spider      special.png  3,10   59\n 383  Spawn_Silverfish       special.png  4,10   60\n 383  Spawn_Blaze            special.png  0,11   61\n 383  Spawn_Magma_Cube       special.png  1,11   62\n 383  Spawn_Bat              special.png  5,9    65\n 383  Spawn_Witch            special.png  5,10   66\n 383  Spawn_Pig              special.png  2,11   90\n 383  Spawn_Sheep            special.png  3,11   91\n 383  Spawn_Cow              special.png  4,11   92\n 383  Spawn_Chicken          special.png  0,12   93\n 383  Spawn_Squid            special.png  1,12   94\n 383  Spawn_Wolf             special.png  2,12   95\n 383  Spawn_Mooshroom        special.png  3,12   96\n 383  Spawn_Villager         special.png  4,12   120\n\n#           Groups\n# NAME      ICON  ITEMS\n# Column 1\n~ Natural    2     2,3,12,24,128,44~1,13,82,79,80,78\n~ Stone      1     1,4,48,67,44~3,139,140,98,109,44~5,44~0,45,108,44~4,101\n~ Wood       5     17,5,53,134,135,136,126,47,85,107,20,102,30\n~ NetherEnd  87    87,88,89,348,112,114,113,372,121,122\n~ Ores       56    16,15,14,56,129,73,21,49,42,41,57,133,22,263~0,265,266,264,388\n~ Special    54    46,52,58,54,130,61,23,25,84,116,379,380,138,146~0,321,389,323,324,330,355,65,96,390,397\n~ Plants1    81    31~1,31~2,106,111,18,81,86,91,103,110\n~ Plants2    6     295,361,362,6,296,338,37,38,39,40,32\n~ Transport  328   66,27,28,328,342,343,333,329,398\n~ Logic      331   331,76,356,69,70,72,131,77,144,33,29,123,137\n~ Wool       35    35~0,35~8,35~7,35~15,35~14,35~12,35~1,35~4,35~5,35~13,35~11,35~3,35~9,35~10,35~2,35~6\n~ Dye        351   351~15,351~7,351~8,351~0,351~1,351~3,351~14,351~11,351~10,351~2,351~4,351~12,351~6,351~5,351~13,351~9\n# Column 2\n~ TierWood   299   298,299,300,301,269,270,271,290,268\n~ TierStone  303   302,303,304,305,273,274,275,291,272\n~ TierIron   307   306,307,308,309,256,257,258,292,267\n~ TierDiam   311   310,311,312,313,277,278,279,293,276\n~ TierGold   315   314,315,316,317,284,285,286,294,283\n~ Tools      261   50,261,262,259,346,359,345,347,395,358,325,326,327,335,384,385,386,387\n~ Food       297   260,322,282,297,360,319,320,363,364,365,366,349,350,354,357,391,396,392,393,394,400\n~ Items      318   280,281,318,337,336,353,339,340,332,376,377,382,381\n~ Drops      341   344,288,334,287,352,289,367,375,341,368,369,370,371,378,399\n~ Music      2257  2256,2257,2258,2259,2260,2261,2262,2263,2264,2265,2266\n# New\n~ Potion     373   373~0,373~16,373~32,373~8192,373~8193,373~8257,373~8225,373~8289,373~8194,373~8258,373~8226,373~8290,373~8195,373~8259,373~8197,373~8229,373~8201,373~8265,373~8233,373~8297,373~8196,373~8260,373~8228,373~8292,373~8200,373~8264,373~8202,373~8266,373~8204,373~8236,373~16384,373~16385,373~16499,373~16417,373~16481,373~16386,373~16450,373~16418,373~16482,373~16387,373~16451,373~16389,373~16421,373~16393,373~16457,373~16425,373~16489,373~16388,373~16452,373~16420,373~16484,373~16392,373~16456,373~16394,373~16458,373~16396,373~16428\n~ Eggs       383   383~50,383~51,383~52,383~54,383~55,383~56,383~57,383~58,383~59,383~60,383~61,383~62,383~65,383~66,383~90,383~91,383~92,383~93,383~94,383~95,383~96,383~120\n\n#            Enchantments\n# EID  NAME                   MAX  ITEMS\n+   0  Protection             4    298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317\n+   1  Fire_Protection        4    298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317\n+   2  Feather_Falling        4    301,305,309,313,317\n+   3  Blast_Protection       4    298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317\n+   4  Projectile_Protection  4    298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317\n+   5  Respiration            3    298,302,306,310,314\n+   6  Aqua_Affinity          1    298,302,306,310,314\n+  16  Sharpness              5    268,272,267,276,283\n+  17  Smite                  5    268,272,267,276,283\n+  18  Bane_of_Arthropods     5    268,272,267,276,283\n+  19  Knockback              2    268,272,267,276,283\n+  20  Fire_Aspect            2    268,272,267,276,283\n+  21  Looting                3    268,272,267,276,283\n+  32  Efficiency             5    269,270,271,273,274,275,256,257,258,277,278,279,284,285,286\n+  33  Silk_Touch             1    269,270,271,273,274,275,256,257,258,277,278,279,284,285,286\n+  34  Unbreaking             3    269,270,271,273,274,275,256,257,258,277,278,279,284,285,286\n+  35  Fortune                3    269,270,271,273,274,275,256,257,258,277,278,279,284,285,286\n+  48  Power                  5    261\n+  49  Punch                  2    261\n+  50  Flame                  1    261\n+  51  Infinity               1    261\n&quot;</em><a class="headerlink" href="#mceditlib.items.Items.items_txt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.items.Items.findItem">
+<tt class="descname">findItem</tt><big>(</big><em>id=0</em>, <em>damage=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/items.html#Items.findItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.items.Items.findItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.items.ItemNotFound">
+<em class="property">exception </em><tt class="descclassname">mceditlib.items.</tt><tt class="descname">ItemNotFound</tt><a class="reference internal" href="_modules/mceditlib/items.html#ItemNotFound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.items.ItemNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.KeyError</span></tt></p>
+</dd></dl>
+
+</div>
+<div class="section" id="blocktypes-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">blocktypes</span></tt> Module<a class="headerlink" href="#blocktypes-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mceditlib.blocktypes"></span><p>Block definitions for all known level formats
+Reader for block definitions stored in .yaml files (based on Minecraft X-Ray)</p>
+<dl class="class">
+<dt id="mceditlib.blocktypes.BlockType">
+<em class="property">class </em><tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">BlockType</tt><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mceditlib.blocktypes._BlockType</span></tt></p>
+<p>Value object representing an (id, data, blocktypeSet) tuple.
+Accessing its attributes will return the corresponding elements
+of its parent material&#8217;s json arrays.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blocktypes.openResource">
+<tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">openResource</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#openResource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.openResource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.blocktypes.BlockTypeSet">
+<em class="property">class </em><tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">BlockTypeSet</tt><big>(</big><em>defaultName='Unused Block'</em>, <em>idMapping=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mceditlib.blocktypes.BlockTypeSet.defaultColor">
+<tt class="descname">defaultColor</tt><em class="property"> = (201, 119, 240, 255)</em><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.defaultColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.getBlockTypeAttr">
+<tt class="descname">getBlockTypeAttr</tt><big>(</big><em>block</em>, <em>attr</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.getBlockTypeAttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.getBlockTypeAttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when accessing an attribute of a BlockType.
+:param block:
+:type block:
+:param attr:
+:type attr:
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.get">
+<tt class="descname">get</tt><big>(</big><em>key</em>, <em>default=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.blocksMatching">
+<tt class="descname">blocksMatching</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.blocksMatching"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.blocksMatching" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addIDMappingFromFile">
+<tt class="descname">addIDMappingFromFile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addIDMappingFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addIDMappingFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addJsonBlocksFromFile">
+<tt class="descname">addJsonBlocksFromFile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addJsonBlocksFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addJsonBlocksFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addJsonBlocks">
+<tt class="descname">addJsonBlocks</tt><big>(</big><em>blockJson</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addJsonBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addJsonBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.blocktypes.BlockTypeSet.addJsonBlock">
+<tt class="descname">addJsonBlock</tt><big>(</big><em>blockJson</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#BlockTypeSet.addJsonBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.BlockTypeSet.addJsonBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a block to this blockset using the keys and values in <tt class="xref py py-obj docutils literal"><span class="pre">block</span></tt>.</p>
+<dl class="docutils">
+<dt>Required keys:</dt>
+<dd>internalName - String used by Minecraft to identify this block</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.blocktypes.PCBlockTypeSet">
+<em class="property">class </em><tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">PCBlockTypeSet</tt><a class="reference internal" href="_modules/mceditlib/blocktypes.html#PCBlockTypeSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.PCBlockTypeSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.blocktypes.BlockTypeSet" title="mceditlib.blocktypes.BlockTypeSet"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.blocktypes.BlockTypeSet</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blocktypes.convertBlocks">
+<tt class="descclassname">mceditlib.blocktypes.</tt><tt class="descname">convertBlocks</tt><big>(</big><em>destTypes</em>, <em>sourceTypes</em>, <em>ID</em>, <em>meta</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blocktypes.html#convertBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blocktypes.convertBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.heightmaps">
+<span id="heightmaps-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">heightmaps</span></tt> Module<a class="headerlink" href="#module-mceditlib.heightmaps" title="Permalink to this headline">¶</a></h2>
+<p>heightmaps.py</p>
+<p>Functions for computing general heightmaps and updating the special HeightMap
+attribute of modern chunks.</p>
+<dl class="function">
+<dt id="mceditlib.heightmaps.extractHeights">
+<tt class="descclassname">mceditlib.heightmaps.</tt><tt class="descname">extractHeights</tt><big>(</big><em>array</em><big>)</big><a class="reference internal" href="_modules/mceditlib/heightmaps.html#extractHeights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.heightmaps.extractHeights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an array of bytes shaped (y, z, x), return the coordinates of the highest
+non-zero value in each y-column into heightMap</p>
+</dd></dl>
+
+</div>
+<div class="section" id="biome-types-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">biome_types</span></tt> Module<a class="headerlink" href="#biome-types-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mceditlib.block_copy">
+<span id="block-copy-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">block_copy</span></tt> Module<a class="headerlink" href="#module-mceditlib.block_copy" title="Permalink to this headline">¶</a></h2>
+<p>block_copy.py</p>
+<p>Optimized functions for copying all world data (blocks, tile entities, entities, biomes) from
+one world or schematic file to another.</p>
+<dl class="function">
+<dt id="mceditlib.block_copy.convertBlocks">
+<tt class="descclassname">mceditlib.block_copy.</tt><tt class="descname">convertBlocks</tt><big>(</big><em>destLevel</em>, <em>sourceLevel</em>, <em>blocks</em>, <em>blockData</em><big>)</big><a class="reference internal" href="_modules/mceditlib/block_copy.html#convertBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.block_copy.convertBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.block_copy.sourceMaskFunc">
+<tt class="descclassname">mceditlib.block_copy.</tt><tt class="descname">sourceMaskFunc</tt><big>(</big><em>blocksToCopy</em><big>)</big><a class="reference internal" href="_modules/mceditlib/block_copy.html#sourceMaskFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.block_copy.sourceMaskFunc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.block_copy.copyBlocksIter">
+<tt class="descclassname">mceditlib.block_copy.</tt><tt class="descname">copyBlocksIter</tt><big>(</big><em>destLevel</em>, <em>sourceLevel</em>, <em>sourceSelection</em>, <em>destinationPoint</em>, <em>blocksToCopy=None</em>, <em>entities=True</em>, <em>create=False</em>, <em>biomes=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/block_copy.html#copyBlocksIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.block_copy.copyBlocksIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy blocks and entities from the <tt class="xref py py-obj docutils literal"><span class="pre">sourceBox</span></tt> area of <tt class="xref py py-obj docutils literal"><span class="pre">sourceLevel</span></tt> to <tt class="xref py py-obj docutils literal"><span class="pre">destLevel</span></tt> starting at <tt class="xref py py-obj docutils literal"><span class="pre">destinationPoint</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sourceLevel</strong> &#8211; ISectionWorld</li>
+<li><strong>destLevel</strong> &#8211; ISectionWorld</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Optional parameters:</dt>
+<dd><ul class="first last simple">
+<li><tt class="xref py py-obj docutils literal"><span class="pre">blocksToCopy</span></tt>: list of blockIDs to copy.</li>
+<li><tt class="xref py py-obj docutils literal"><span class="pre">entities</span></tt>: True to copy Entities and TileEntities, False otherwise.</li>
+<li><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt>: True to create new chunks in destLevel, False otherwise.</li>
+<li><tt class="xref py py-obj docutils literal"><span class="pre">biomes</span></tt>: True to copy biome data, False otherwise.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="block-fill-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">block_fill</span></tt> Module<a class="headerlink" href="#block-fill-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mceditlib.blockrotation">
+<span id="blockrotation-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">blockrotation</span></tt> Module<a class="headerlink" href="#module-mceditlib.blockrotation" title="Permalink to this headline">¶</a></h2>
+<p>blockrotation.py</p>
+<p>Functions for adjusting blockdatas after rotating, rolling, flipping
+or mirroring a schematic file.</p>
+<p>Most of this file initializes the gigantic lookup tables that
+list the new blockdata for each blocktype and rotation type. A lot of this
+should be moved to the block definition file (minecraft.json) by naming
+the different blockdata values with directions and inferring the rotations
+from those. Only certain blocks (e.g. Doors and Vines) need special handling
+during rotation.</p>
+<p>Entities and TileEntities are rotated in schematic.py.</p>
+<dl class="function">
+<dt id="mceditlib.blockrotation.genericVerticalFlip">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">genericVerticalFlip</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#genericVerticalFlip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.genericVerticalFlip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.genericRotation">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">genericRotation</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#genericRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.genericRotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.genericEastWestFlip">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">genericEastWestFlip</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#genericEastWestFlip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.genericEastWestFlip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.genericNorthSouthFlip">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">genericNorthSouthFlip</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#genericNorthSouthFlip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.genericNorthSouthFlip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.genericFlipRotation">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">genericFlipRotation</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#genericFlipRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.genericFlipRotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.masterRotationTable">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">masterRotationTable</tt><big>(</big><em>attrname</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#masterRotationTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.masterRotationTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.rotationTypeTable">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">rotationTypeTable</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#rotationTypeTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.rotationTypeTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.blockrotation.BlockRotation">
+<em class="property">class </em><tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">BlockRotation</tt><a class="reference internal" href="_modules/mceditlib/blockrotation.html#BlockRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.BlockRotation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mceditlib.blockrotation.BlockRotation.rotateLeft">
+<tt class="descname">rotateLeft</tt><em class="property"> = array([[ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        ...,         [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15]], dtype=uint8)</em><a class="headerlink" href="#mceditlib.blockrotation.BlockRotation.rotateLeft" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.blockrotation.BlockRotation.flipEastWest">
+<tt class="descname">flipEastWest</tt><em class="property"> = array([[ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        ...,         [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15]], dtype=uint8)</em><a class="headerlink" href="#mceditlib.blockrotation.BlockRotation.flipEastWest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.blockrotation.BlockRotation.flipNorthSouth">
+<tt class="descname">flipNorthSouth</tt><em class="property"> = array([[ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        ...,         [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15]], dtype=uint8)</em><a class="headerlink" href="#mceditlib.blockrotation.BlockRotation.flipNorthSouth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.blockrotation.BlockRotation.flipVertical">
+<tt class="descname">flipVertical</tt><em class="property"> = array([[ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        ...,         [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15],        [ 0,  1,  2, ..., 13, 14, 15]], dtype=uint8)</em><a class="headerlink" href="#mceditlib.blockrotation.BlockRotation.flipVertical" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.blockrotation.BlockRotation.typeTable">
+<tt class="descname">typeTable</tt><em class="property"> = {}</em><a class="headerlink" href="#mceditlib.blockrotation.BlockRotation.typeTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.SameRotationType">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">SameRotationType</tt><big>(</big><em>blocktype1</em>, <em>blocktype2</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#SameRotationType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.SameRotationType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.FlipVertical">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">FlipVertical</tt><big>(</big><em>blocks</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#FlipVertical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.FlipVertical" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.FlipNorthSouth">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">FlipNorthSouth</tt><big>(</big><em>blocks</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#FlipNorthSouth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.FlipNorthSouth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.FlipEastWest">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">FlipEastWest</tt><big>(</big><em>blocks</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#FlipEastWest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.FlipEastWest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.blockrotation.RotateLeft">
+<tt class="descclassname">mceditlib.blockrotation.</tt><tt class="descname">RotateLeft</tt><big>(</big><em>blocks</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/blockrotation.html#RotateLeft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.blockrotation.RotateLeft" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.cachefunc">
+<span id="cachefunc-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">cachefunc</span></tt> Module<a class="headerlink" href="#module-mceditlib.cachefunc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mceditlib.cachefunc.Counter">
+<em class="property">class </em><tt class="descclassname">mceditlib.cachefunc.</tt><tt class="descname">Counter</tt><a class="reference internal" href="_modules/mceditlib/cachefunc.html#Counter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.cachefunc.Counter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></p>
+<p>Mapping where default values are zero</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.cachefunc.lru_cache">
+<tt class="descclassname">mceditlib.cachefunc.</tt><tt class="descname">lru_cache</tt><big>(</big><em>maxsize=100</em><big>)</big><a class="reference internal" href="_modules/mceditlib/cachefunc.html#lru_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.cachefunc.lru_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-recently-used cache decorator.</p>
+<p>Arguments to the cached function must be hashable.
+Cache performance statistics stored in f.hits and f.misses.
+Clear the cache with f.clear().
+<a class="reference external" href="http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used">http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.cachefunc.lfu_cache">
+<tt class="descclassname">mceditlib.cachefunc.</tt><tt class="descname">lfu_cache</tt><big>(</big><em>maxsize=100</em><big>)</big><a class="reference internal" href="_modules/mceditlib/cachefunc.html#lfu_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.cachefunc.lfu_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-frequenty-used cache decorator.</p>
+<p>Arguments to the cached function must be hashable.
+Cache performance statistics stored in f.hits and f.misses.
+Clear the cache with f.clear().
+<a class="reference external" href="http://en.wikipedia.org/wiki/Least_Frequently_Used">http://en.wikipedia.org/wiki/Least_Frequently_Used</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.export">
+<span id="export-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">export</span></tt> Module<a class="headerlink" href="#module-mceditlib.export" title="Permalink to this headline">¶</a></h2>
+<p>export.py</p>
+<p>Extracting schematic files of diffeerent formats</p>
+<dl class="function">
+<dt id="mceditlib.export.extractSchematicFrom">
+<tt class="descclassname">mceditlib.export.</tt><tt class="descname">extractSchematicFrom</tt><big>(</big><em>sourceDim</em>, <em>box</em>, <em>entities=True</em><big>)</big><a class="reference internal" href="_modules/mceditlib/export.html#extractSchematicFrom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.export.extractSchematicFrom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.export.extractSchematicFromIter">
+<tt class="descclassname">mceditlib.export.</tt><tt class="descname">extractSchematicFromIter</tt><big>(</big><em>sourceDim</em>, <em>box</em>, <em>entities=True</em><big>)</big><a class="reference internal" href="_modules/mceditlib/export.html#extractSchematicFromIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.export.extractSchematicFromIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.export.extractZipSchematicFrom">
+<tt class="descclassname">mceditlib.export.</tt><tt class="descname">extractZipSchematicFrom</tt><big>(</big><em>sourceLevel</em>, <em>box</em>, <em>zipfilename=None</em>, <em>entities=True</em><big>)</big><a class="reference internal" href="_modules/mceditlib/export.html#extractZipSchematicFrom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.export.extractZipSchematicFrom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.export.extractZipSchematicFromIter">
+<tt class="descclassname">mceditlib.export.</tt><tt class="descname">extractZipSchematicFromIter</tt><big>(</big><em>sourceLevel</em>, <em>box</em>, <em>zipfilename=None</em>, <em>entities=True</em><big>)</big><a class="reference internal" href="_modules/mceditlib/export.html#extractZipSchematicFromIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.export.extractZipSchematicFromIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.export.extractAnySchematic">
+<tt class="descclassname">mceditlib.export.</tt><tt class="descname">extractAnySchematic</tt><big>(</big><em>level</em>, <em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/export.html#extractAnySchematic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.export.extractAnySchematic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.export.extractAnySchematicIter">
+<tt class="descclassname">mceditlib.export.</tt><tt class="descname">extractAnySchematicIter</tt><big>(</big><em>level</em>, <em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/export.html#extractAnySchematicIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.export.extractAnySchematicIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.export.adjustExtractionParameters">
+<tt class="descclassname">mceditlib.export.</tt><tt class="descname">adjustExtractionParameters</tt><big>(</big><em>dim</em>, <em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/export.html#adjustExtractionParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.export.adjustExtractionParameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.faces">
+<span id="faces-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">faces</span></tt> Module<a class="headerlink" href="#module-mceditlib.faces" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mceditlib.faces.Face">
+<em class="property">class </em><tt class="descclassname">mceditlib.faces.</tt><tt class="descname">Face</tt><a class="reference internal" href="_modules/mceditlib/faces.html#Face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.faces.Face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">int</span></tt></p>
+<dl class="attribute">
+<dt id="mceditlib.faces.Face.dimension">
+<tt class="descname">dimension</tt><a class="reference internal" href="_modules/mceditlib/faces.html#Face.dimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.faces.Face.dimension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.faces.Face.direction">
+<tt class="descname">direction</tt><a class="reference internal" href="_modules/mceditlib/faces.html#Face.direction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.faces.Face.direction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.faces.Face.name">
+<tt class="descname">name</tt><a class="reference internal" href="_modules/mceditlib/faces.html#Face.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.faces.Face.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mceditlib.faces.Face.fromVector">
+<em class="property">classmethod </em><tt class="descname">fromVector</tt><big>(</big><em>v</em><big>)</big><a class="reference internal" href="_modules/mceditlib/faces.html#Face.fromVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.faces.Face.fromVector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.faces.Face.vector">
+<tt class="descname">vector</tt><a class="reference internal" href="_modules/mceditlib/faces.html#Face.vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.faces.Face.vector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.minecraft_server">
+<span id="minecraft-server-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">minecraft_server</span></tt> Module<a class="headerlink" href="#module-mceditlib.minecraft_server" title="Permalink to this headline">¶</a></h2>
+<p>minecraft_server.py</p>
+<p>Launches the Minecraft Server to generate chunks in a world.
+Generates chunks directly into the world, or generates them into
+a cached temporary world and copies only the requested chunks.</p>
+<p>Also downloads the latest minecraft server and stores it in a
+~/.mceditlib/ServerJarStorage directory in the user&#8217;s home folder.
+Can check for updates and download them, and can launch user-supplied
+servers once placed in the storage directory.</p>
+<p>Very embarrassing code here.</p>
+<dl class="function">
+<dt id="mceditlib.minecraft_server.which">
+<tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">which</tt><big>(</big><em>program</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#which"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.which" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.minecraft_server.convert">
+<tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">convert</tt><big>(</big><em>text</em><big>)</big><a class="headerlink" href="#mceditlib.minecraft_server.convert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.minecraft_server.alphanum_key">
+<tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">alphanum_key</tt><big>(</big><em>key</em><big>)</big><a class="headerlink" href="#mceditlib.minecraft_server.alphanum_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.minecraft_server.sort_nicely">
+<tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">sort_nicely</tt><big>(</big><em>l</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#sort_nicely"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.sort_nicely" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort the given list in the way that humans expect.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.minecraft_server.ServerJarStorage">
+<em class="property">class </em><tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">ServerJarStorage</tt><big>(</big><em>cacheDir=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.defaultCacheDir">
+<tt class="descname">defaultCacheDir</tt><em class="property"> = u'C:\\Users\\Rio\\AppData\\Roaming\\mceditlib\\ServerJarStorage'</em><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.defaultCacheDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.reloadVersions">
+<tt class="descname">reloadVersions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage.reloadVersions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.reloadVersions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.downloadCurrentServer">
+<tt class="descname">downloadCurrentServer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage.downloadCurrentServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.downloadCurrentServer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.cacheNewVersion">
+<tt class="descname">cacheNewVersion</tt><big>(</big><em>filename</em>, <em>allowDuplicate=True</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage.cacheNewVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.cacheNewVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the version number from the server jar at filename and copies
+it into the proper subfolder of the server jar cache folder</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.jarfileForVersion">
+<tt class="descname">jarfileForVersion</tt><big>(</big><em>v</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage.jarfileForVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.jarfileForVersion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.checksumForVersion">
+<tt class="descname">checksumForVersion</tt><big>(</big><em>v</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage.checksumForVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.checksumForVersion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.broken_versions">
+<tt class="descname">broken_versions</tt><em class="property"> = ['Beta 1.9 Prerelease 1', 'Beta 1.9 Prerelease 2', 'Beta 1.9 Prerelease 3']</em><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.broken_versions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.latestVersion">
+<tt class="descname">latestVersion</tt><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage.latestVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.latestVersion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.getJarfile">
+<tt class="descname">getJarfile</tt><big>(</big><em>version=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#ServerJarStorage.getJarfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.getJarfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.ServerJarStorage.i">
+<tt class="descname">i</tt><em class="property"> = 3</em><a class="headerlink" href="#mceditlib.minecraft_server.ServerJarStorage.i" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.minecraft_server.JavaNotFound">
+<em class="property">exception </em><tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">JavaNotFound</tt><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#JavaNotFound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.JavaNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.RuntimeError</span></tt></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.minecraft_server.VersionNotFound">
+<em class="property">exception </em><tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">VersionNotFound</tt><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#VersionNotFound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.VersionNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.RuntimeError</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.minecraft_server.readProperties">
+<tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">readProperties</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#readProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.readProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.minecraft_server.saveProperties">
+<tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">saveProperties</tt><big>(</big><em>filename</em>, <em>properties</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#saveProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.saveProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.minecraft_server.findJava">
+<tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">findJava</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#findJava"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.findJava" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator">
+<em class="property">class </em><tt class="descclassname">mceditlib.minecraft_server.</tt><tt class="descname">MCServerChunkGenerator</tt><big>(</big><em>version=None</em>, <em>jarfile=None</em>, <em>jarStorage=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Generates chunks using minecraft_server.jar. Uses a ServerJarStorage to
+store different versions of minecraft_server.jar in an application support
+folder.</p>
+<blockquote>
+<div>from mceditlib import *</div></blockquote>
+<p>Example usage:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>gen = MCServerChunkGenerator()  # with no arguments, use the newest</dt>
+<dd># server version in the cache, or download
+# the newest one automatically</dd>
+</dl>
+<p>level = loadWorldNamed(&#8220;MyWorld&#8221;)</p>
+<p>gen.generateChunkInLevel(level, 12, 24)</p>
+</div></blockquote>
+<p>Using an older version:</p>
+<blockquote>
+<div>gen = MCServerChunkGenerator(&#8220;Beta 1.6.5&#8221;)</div></blockquote>
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.defaultJarStorage">
+<tt class="descname">defaultJarStorage</tt><em class="property"> = None</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.defaultJarStorage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.javaExe">
+<tt class="descname">javaExe</tt><em class="property"> = 'c:\\Program Files\\Java\\jdk1.7.0_07\\bin\\java.exe'</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.javaExe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.tempWorldCache">
+<tt class="descname">tempWorldCache</tt><em class="property"> = {}</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.tempWorldCache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.jarStorage">
+<tt class="descname">jarStorage</tt><em class="property"> = None</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.jarStorage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.getDefaultJarStorage">
+<em class="property">classmethod </em><tt class="descname">getDefaultJarStorage</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.getDefaultJarStorage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.getDefaultJarStorage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.clearWorldCache">
+<em class="property">classmethod </em><tt class="descname">clearWorldCache</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.clearWorldCache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.clearWorldCache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.createReadme">
+<tt class="descname">createReadme</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.createReadme"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.createReadme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.worldCacheDir">
+<tt class="descname">worldCacheDir</tt><em class="property"> = 'c:\\users\\rio\\appdata\\local\\temp\\mceditlib_MCServerChunkGenerator'</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.worldCacheDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.tempWorldForLevel">
+<tt class="descname">tempWorldForLevel</tt><big>(</big><em>level</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.tempWorldForLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.tempWorldForLevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.generateAtPosition">
+<tt class="descname">generateAtPosition</tt><big>(</big><em>tempWorld</em>, <em>tempDir</em>, <em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.generateAtPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.generateAtPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.generateAtPositionIter">
+<tt class="descname">generateAtPositionIter</tt><big>(</big><em>tempWorld</em>, <em>tempDir</em>, <em>cx</em>, <em>cz</em>, <em>simulate=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.generateAtPositionIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.generateAtPositionIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.copyChunkAtPosition">
+<tt class="descname">copyChunkAtPosition</tt><big>(</big><em>tempWorld</em>, <em>level</em>, <em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.copyChunkAtPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.copyChunkAtPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.generateChunkInLevel">
+<tt class="descname">generateChunkInLevel</tt><big>(</big><em>level</em>, <em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.generateChunkInLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.generateChunkInLevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.minRadius">
+<tt class="descname">minRadius</tt><em class="property"> = 5</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.minRadius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.maxRadius">
+<tt class="descname">maxRadius</tt><em class="property"> = 20</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.maxRadius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.createLevel">
+<tt class="descname">createLevel</tt><big>(</big><em>level</em>, <em>box</em>, <em>simulate=False</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.createLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.createLevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.createLevelIter">
+<tt class="descname">createLevelIter</tt><big>(</big><em>level</em>, <em>box</em>, <em>simulate=False</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.createLevelIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.createLevelIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.generateChunksInLevel">
+<tt class="descname">generateChunksInLevel</tt><big>(</big><em>level</em>, <em>chunks</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.generateChunksInLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.generateChunksInLevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.generateChunksInLevelIter">
+<tt class="descname">generateChunksInLevelIter</tt><big>(</big><em>level</em>, <em>chunks</em>, <em>simulate=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.generateChunksInLevelIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.generateChunksInLevelIter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.runServer">
+<tt class="descname">runServer</tt><big>(</big><em>startingDir</em><big>)</big><a class="reference internal" href="_modules/mceditlib/minecraft_server.html#MCServerChunkGenerator.runServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.runServer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.minecraft_server.MCServerChunkGenerator.lowMemory">
+<tt class="descname">lowMemory</tt><em class="property"> = False</em><a class="headerlink" href="#mceditlib.minecraft_server.MCServerChunkGenerator.lowMemory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.util">
+<span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-mceditlib.util" title="Permalink to this headline">¶</a></h2>
+<p>util.py</p>
+<dl class="function">
+<dt id="mceditlib.util.notclosing">
+<tt class="descclassname">mceditlib.util.</tt><tt class="descname">notclosing</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/mceditlib/util.html#notclosing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.util.notclosing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.util.chunk_pos">
+<tt class="descclassname">mceditlib.util.</tt><tt class="descname">chunk_pos</tt><big>(</big><em>x</em>, <em>z</em><big>)</big><a class="reference internal" href="_modules/mceditlib/util.html#chunk_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.util.chunk_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.util.exhaust">
+<tt class="descclassname">mceditlib.util.</tt><tt class="descname">exhaust</tt><big>(</big><em>_iter</em><big>)</big><a class="reference internal" href="_modules/mceditlib/util.html#exhaust"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.util.exhaust" title="Permalink to this definition">¶</a></dt>
+<dd><p>Functions named ending in &#8220;Iter&#8221; return an iterable object that does
+long-running work and yields progress information on each call. exhaust()
+is used to implement the non-Iter equivalents</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.util.displayName">
+<tt class="descclassname">mceditlib.util.</tt><tt class="descname">displayName</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/util.html#displayName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.util.displayName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.util.win32_appdata">
+<tt class="descclassname">mceditlib.util.</tt><tt class="descname">win32_appdata</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/util.html#win32_appdata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.util.win32_appdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to use win32 api to get the AppData folder since python doesn&#8217;t populate os.environ with unicode strings.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.util.matchEntityTags">
+<tt class="descclassname">mceditlib.util.</tt><tt class="descname">matchEntityTags</tt><big>(</big><em>ref</em>, <em>kw</em><big>)</big><a class="reference internal" href="_modules/mceditlib/util.html#matchEntityTags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.util.matchEntityTags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="nbt-util-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">nbt_util</span></tt> Module<a class="headerlink" href="#nbt-util-module" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Support Modules</a><ul>
+<li><a class="reference internal" href="#module-mceditlib.exceptions"><tt class="docutils literal"><span class="pre">exceptions</span></tt> Module</a></li>
+<li><a class="reference internal" href="#box-module"><tt class="docutils literal"><span class="pre">box</span></tt> Module</a></li>
+<li><a class="reference internal" href="#entity-module"><tt class="docutils literal"><span class="pre">entity</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.items"><tt class="docutils literal"><span class="pre">items</span></tt> Module</a></li>
+<li><a class="reference internal" href="#blocktypes-module"><tt class="docutils literal"><span class="pre">blocktypes</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.heightmaps"><tt class="docutils literal"><span class="pre">heightmaps</span></tt> Module</a></li>
+<li><a class="reference internal" href="#biome-types-module"><tt class="docutils literal"><span class="pre">biome_types</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.block_copy"><tt class="docutils literal"><span class="pre">block_copy</span></tt> Module</a></li>
+<li><a class="reference internal" href="#block-fill-module"><tt class="docutils literal"><span class="pre">block_fill</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.blockrotation"><tt class="docutils literal"><span class="pre">blockrotation</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.cachefunc"><tt class="docutils literal"><span class="pre">cachefunc</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.export"><tt class="docutils literal"><span class="pre">export</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.faces"><tt class="docutils literal"><span class="pre">faces</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.minecraft_server"><tt class="docutils literal"><span class="pre">minecraft_server</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+<li><a class="reference internal" href="#nbt-util-module"><tt class="docutils literal"><span class="pre">nbt_util</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="storage.html"
+                        title="previous chapter">Storage Modules</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mce.html"
+                        title="next chapter">Command-line Editor</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/support.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mce.html" title="Command-line Editor"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="storage.html" title="Storage Modules"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

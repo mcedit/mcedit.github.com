@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.editortools.edit_chunk &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="mcedit2.editortools" href="../editortools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" accesskey="U">mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.editortools.edit_chunk</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    player</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.editortools</span> <span class="kn">import</span> <span class="n">EditorTool</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.selection</span> <span class="kn">import</span> <span class="n">SelectionBoxNode</span>
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.nbttree.nbttreemodel</span> <span class="kn">import</span> <span class="n">NBTTreeModel</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">scenegraph</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.load_ui</span> <span class="kn">import</span> <span class="n">load_ui</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ChunkTool"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool">[docs]</a><span class="k">class</span> <span class="nc">ChunkTool</span><span class="p">(</span><span class="n">EditorTool</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Edit Chunk&quot;</span>
+    <span class="n">iconName</span> <span class="o">=</span> <span class="s">&quot;edit_chunk&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type editorSession: EditorSession</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChunkTool</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span> <span class="o">=</span> <span class="n">load_ui</span><span class="p">(</span><span class="s">&quot;editortools/edit_chunk.ui&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabDidChange</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">terrainPopulatedInput</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">terrainPopulatedDidChange</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">lightPopulatedInput</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lightPopulatedDidChange</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">inhabitedTimeInput</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inhabitedTimeDidChange</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">updateTimeInput</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateTimeDidChange</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">cxSpinBox</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkPositionDidChange</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">czSpinBox</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkPositionDidChange</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">nbtEditor</span><span class="o">.</span><span class="n">editorSession</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateChunkWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateNBTView</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ChunkTool.toolInactive"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.toolInactive">[docs]</a>    <span class="k">def</span> <span class="nf">toolInactive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span><span class="o">.</span><span class="n">removeChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateChunkWidget</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="ChunkTool.updateChunkWidget"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.updateChunkWidget">[docs]</a>    <span class="k">def</span> <span class="nf">updateChunkWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span><span class="p">:</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">terrainPopulatedInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">terrainPopulatedInput</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">TerrainPopulated</span><span class="p">)</span>
+
+            <span class="n">levelTag</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&quot;LightPopulated&quot;</span> <span class="ow">in</span> <span class="n">levelTag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">lightPopulatedInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">lightPopulatedInput</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;LightPopulated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">lightPopulatedInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s">&quot;InhabitedTime&quot;</span> <span class="ow">in</span> <span class="n">levelTag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">inhabitedTimeInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">inhabitedTimeInput</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;InhabitedTime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">inhabitedTimeInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s">&quot;LastUpdate&quot;</span> <span class="ow">in</span> <span class="n">levelTag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">updateTimeInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">updateTimeInput</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;LastUpdate&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">updateTimeInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">terrainPopulatedInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">lightPopulatedInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">inhabitedTimeInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">updateTimeInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ChunkTool.terrainPopulatedDidChange"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.terrainPopulatedDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">terrainPopulatedDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span><span class="o">.</span><span class="n">TerrainPopulated</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.lightPopulatedDidChange"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.lightPopulatedDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">lightPopulatedDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;LightPopulated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.inhabitedTimeDidChange"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.inhabitedTimeDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">inhabitedTimeDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;InhabitedTime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.updateTimeDidChange"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.updateTimeDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">updateTimeDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;LastUpdate&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.tabDidChange"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.tabDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">tabDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c"># Chunk tab</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateChunkWidget</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c"># NBT tab</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.mousePress"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.mousePress">[docs]</a>    <span class="k">def</span> <span class="nf">mousePress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.selectChunk"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.selectChunk">[docs]</a>    <span class="k">def</span> <span class="nf">selectChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span>
+        <span class="k">if</span> <span class="n">dim</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setSelectedChunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.setSelectedChunk"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.setSelectedChunk">[docs]</a>    <span class="k">def</span> <span class="nf">setSelectedChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span> <span class="o">=</span> <span class="n">SelectionBoxNode</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span><span class="o">.</span><span class="n">filled</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionNode</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span> <span class="o">=</span> <span class="n">chunk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateChunkWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateNBTView</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.updateNBTView"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.updateNBTView">[docs]</a>    <span class="k">def</span> <span class="nf">updateNBTView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentChunk</span>
+        <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">nbtEditor</span><span class="o">.</span><span class="n">setRootTag</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">nbtEditor</span><span class="o">.</span><span class="n">setRootTag</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">rootTag</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">cxSpinBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">cx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">czSpinBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">cz</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ChunkTool.chunkPositionDidChange"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_chunk.ChunkTool.chunkPositionDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositionDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">cxSpinBox</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">czSpinBox</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" >mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

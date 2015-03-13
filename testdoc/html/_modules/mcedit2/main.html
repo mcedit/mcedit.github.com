@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.main &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.main</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    main.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#!/usr/bin/env python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">import</span> <span class="nn">OpenGL</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">custom_traceback</span>
+
+
+<span class="n">custom_traceback</span><span class="o">.</span><span class="n">install</span><span class="p">()</span>
+
+<span class="c"># IMPORTANT: Must set OpenGL.BLAH_BLAH **BEFORE** importing OpenGL.GL</span>
+<span class="k">if</span> <span class="s">&quot;-log&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;-log&#39;</span><span class="p">)</span>
+    <span class="n">OpenGL</span><span class="o">.</span><span class="n">FULL_LOGGING</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="k">if</span> <span class="s">&quot;-debug&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+    <span class="n">OpenGL</span><span class="o">.</span><span class="n">ERROR_CHECKING</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="c"># ugly ugly hack. has_binding uses imp.find_module to find QtGui, but imp.find_module doesn&#39;t work for pyinstaller</span>
+<span class="c"># packed apps since pyi renames all the modules - QtGui becomes &quot;PySide.QtGui.pyd&quot; without any directory structure.</span>
+<span class="kn">from</span> <span class="nn">IPython.external</span> <span class="kn">import</span> <span class="n">qt_loaders</span>
+<span class="n">qt_loaders</span><span class="o">.</span><span class="n">has_binding</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span> <span class="o">==</span> <span class="s">&quot;pyside&quot;</span>
+
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.bugfixes</span> <span class="kn">import</span> <span class="n">QObject_tr_unicode_literals_fix</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">profiler</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="n">QObject_tr_unicode_literals_fix</span><span class="p">()</span>
+
+<span class="n">log_debug</span> <span class="o">=</span> <span class="k">print</span>
+<span class="c"># log_debug = lambda *a, **kw: None</span>
+
+<div class="viewcode-block" id="setup_logging"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.main.setup_logging">[docs]</a><span class="k">def</span> <span class="nf">setup_logging</span><span class="p">():</span>
+    <span class="n">root_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+    <span class="n">root_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Logging level set&quot;</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">mcedit2.util.directories</span> <span class="kn">import</span> <span class="n">getUserFilesDirectory</span>
+    <span class="n">mceditUserData</span> <span class="o">=</span> <span class="n">getUserFilesDirectory</span><span class="p">()</span>
+    <span class="n">logfilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mceditUserData</span><span class="p">,</span> <span class="s">&#39;mcedit.log&#39;</span><span class="p">)</span>
+
+    <span class="n">abslogfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">logfilename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s">&#39;frozen&#39;</span><span class="p">):</span>
+        <span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;sys.frozen is set&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&quot;darwin&quot;</span><span class="p">:</span>
+            <span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;OS X found.&quot;</span><span class="p">)</span>
+            <span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~/Library/Logs/&quot;</span> <span class="o">+</span> <span class="n">logfilename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logfile</span> <span class="o">=</span> <span class="n">abslogfile</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logfile</span> <span class="o">=</span> <span class="n">abslogfile</span>
+
+    <span class="n">fmt</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+        <span class="s">&#39;[</span><span class="si">%(levelname)s</span><span class="s">][</span><span class="si">%(filename)s</span><span class="s">:</span><span class="si">%(lineno)d</span><span class="s">]:</span><span class="si">%(message)s</span><span class="s">&#39;</span>
+    <span class="p">)</span>
+    <span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Logging to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">logfile</span><span class="p">)</span>
+
+    <span class="n">logfileHandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">logfileHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">logfileHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+    <span class="n">root_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logfileHandler</span><span class="p">)</span>
+
+    <span class="n">closeStdouterr</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">closeStdouterr</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">logfileHandler</span><span class="o">.</span><span class="n">stream</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">logfileHandler</span><span class="o">.</span><span class="n">stream</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log_debug</span><span class="p">(</span><span class="s">&quot;Setting up console handler&quot;</span><span class="p">)</span>
+
+        <span class="n">consoleHandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="n">consoleHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&quot;-v&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;-v&quot;</span><span class="p">)</span>
+            <span class="n">consoleHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;-vv&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;-vv&quot;</span><span class="p">)</span>
+            <span class="n">consoleHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+            <span class="n">logfileHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+        <span class="n">consoleHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="n">root_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">consoleHandler</span><span class="p">)</span>
+
+</div>
+<span class="n">editorApp</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">if</span> <span class="s">&quot;-debug&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;-debug&quot;</span><span class="p">)</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+<span class="nd">@profiler.function</span><span class="p">(</span><span class="s">&quot;startup&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="startup"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.main.startup">[docs]</a><span class="k">def</span> <span class="nf">startup</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">editorApp</span>
+    <span class="n">setup_logging</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">excepthook</span> <span class="o">=</span> <span class="n">excepthook</span>
+
+    <span class="kn">import</span> <span class="nn">pygments.lexers</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pygments</span><span class="o">.</span><span class="n">lexers</span><span class="p">,</span> <span class="s">&#39;newmod&#39;</span><span class="p">):</span>
+        <span class="c"># pyinstaller hack - must call before importing from mcedit2</span>
+        <span class="n">pygments</span><span class="o">.</span><span class="n">lexers</span><span class="o">.</span><span class="n">PythonLexer</span> <span class="o">=</span> <span class="n">pygments</span><span class="o">.</span><span class="n">lexers</span><span class="o">.</span><span class="n">newmod</span><span class="o">.</span><span class="n">PythonLexer</span>
+
+    <span class="kn">from</span> <span class="nn">mcedit2.editorapp</span> <span class="kn">import</span> <span class="n">MCEditApp</span>
+
+    <span class="n">editorApp</span> <span class="o">=</span> <span class="n">MCEditApp</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">editorApp</span>
+</div>
+<div class="viewcode-block" id="excepthook"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.main.excepthook">[docs]</a><span class="k">def</span> <span class="nf">excepthook</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+    <span class="c"># When an error is caught during a Qt signal call, PySide calls PyErr_Print to</span>
+    <span class="c"># display the error traceback. PyErr_Print calls sys.excepthook to actually print the</span>
+    <span class="c"># exception, so we override it to send the error to the logging module and exit with an error,</span>
+    <span class="c"># since PySide foolishly tries to continue after catching the error.</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Unhandled Exception: </span><span class="se">\n\t</span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">))</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;An error has occured.</span><span class="se">\n\n</span><span class="s">Unhandled exception: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exc_value</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s">&#39;frozen&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">editorApp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">editorApp</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
+                <span class="n">editorApp</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="n">editorApp</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">editorApp</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Critical</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">startup</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

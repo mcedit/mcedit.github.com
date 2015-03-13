@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.anvil.worldfolder &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.anvil.worldfolder</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    worldfolder</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">ChunkNotPresent</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">mceditlib.pc.regionfile</span> <span class="kn">import</span> <span class="n">RegionFile</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="AnvilWorldFolder"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder">[docs]</a><span class="k">class</span> <span class="nc">AnvilWorldFolder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        :type filename: str or unicode</span>
+<span class="sd">        :type create: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;World not found&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;AnvilWorldFolder: Not a folder: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regionFiles</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dimensionNames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_findDimensions</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_regionPositionsByDim</span> <span class="o">=</span> <span class="p">{</span><span class="n">dimName</span><span class="p">:</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_listRegionFiles</span><span class="p">(</span><span class="n">dimName</span><span class="p">))</span>
+                                      <span class="k">for</span> <span class="n">dimName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimensionNames</span><span class="p">}</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;AnvilWorldFolder(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c"># --- File paths ---</span>
+
+<div class="viewcode-block" id="AnvilWorldFolder.getFilePath"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.getFilePath">[docs]</a>    <span class="k">def</span> <span class="nf">getFilePath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.getFolderPath"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.getFolderPath">[docs]</a>    <span class="k">def</span> <span class="nf">getFolderPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path</span>
+
+    <span class="c"># --- Ordinary files ---</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.containsFile"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.containsFile">[docs]</a>    <span class="k">def</span> <span class="nf">containsFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.deleteFile"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.deleteFile">[docs]</a>    <span class="k">def</span> <span class="nf">deleteFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.readFile"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.readFile">[docs]</a>    <span class="k">def</span> <span class="nf">readFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.writeFile"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.writeFile">[docs]</a>    <span class="k">def</span> <span class="nf">writeFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">dirpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.listFolder"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.listFolder">[docs]</a>    <span class="k">def</span> <span class="nf">listFolder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getFolderPath</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+            <span class="k">yield</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.listAllFiles"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.listAllFiles">[docs]</a>    <span class="k">def</span> <span class="nf">listAllFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s">&quot;/&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.mca&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.mcr&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;##MCEDIT&quot;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="c"># --- Region files and dimensions ---</span>
+</div>
+    <span class="k">def</span> <span class="nf">_findDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="s">&quot;&quot;</span>
+        <span class="n">worldDirs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dirname</span> <span class="ow">in</span> <span class="n">worldDirs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dirname</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;##&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="s">&quot;region&quot;</span><span class="p">)):</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Found dimension {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dirname</span><span class="p">))</span>
+                    <span class="k">yield</span> <span class="n">dirname</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">u&quot;Error detecting dimension {0}: {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+<div class="viewcode-block" id="AnvilWorldFolder.listDimensions"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.listDimensions">[docs]</a>    <span class="k">def</span> <span class="nf">listDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dimensionNames</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.getRegionFolderPath"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFolderPath">[docs]</a>    <span class="k">def</span> <span class="nf">getRegionFolderPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dimName</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFolderPath</span><span class="p">(</span><span class="s">&quot;region&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFolderPath</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">/region&quot;</span> <span class="o">%</span> <span class="n">dimName</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_listRegionFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="n">regionDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionFolderPath</span><span class="p">(</span><span class="n">dimName</span><span class="p">)</span>
+
+        <span class="n">regionFiles</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">regionDir</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">regionFiles</span><span class="p">:</span>
+            <span class="n">bits</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">or</span> <span class="n">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">or</span> <span class="n">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&quot;mca&quot;</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Unexpected file in region folder: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">rx</span><span class="p">,</span> <span class="n">rz</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Unexpected file in region folder: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">yield</span> <span class="n">rx</span><span class="p">,</span> <span class="n">rz</span>
+
+<div class="viewcode-block" id="AnvilWorldFolder.getRegionFilename"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFilename">[docs]</a>    <span class="k">def</span> <span class="nf">getRegionFilename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getRegionFolderPath</span><span class="p">(</span><span class="n">dimName</span><span class="p">),</span> <span class="s">&quot;r.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="s">&quot;mca&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.getRegionFile"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFile">[docs]</a>    <span class="k">def</span> <span class="nf">getRegionFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type rx: int or dtype</span>
+<span class="sd">        :type rz: int or dtype</span>
+<span class="sd">        :type dimName: unicode or str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: RegionFile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">regionFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regionFiles</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">regionFile</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">regionFile</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionFilename</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dimensionNames</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dimName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_regionPositionsByDim</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">))</span>
+        <span class="n">regionFile</span> <span class="o">=</span> <span class="n">RegionFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regionFiles</span><span class="p">[</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">]</span> <span class="o">=</span> <span class="n">regionFile</span>
+        <span class="k">return</span> <span class="n">regionFile</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.getRegionForChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionForChunk">[docs]</a>    <span class="k">def</span> <span class="nf">getRegionForChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="n">rx</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span>
+        <span class="n">rz</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionFile</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.close"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regionFiles</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># --- Chunks and chunk listing ---</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.chunkCount"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.chunkCount">[docs]</a>    <span class="k">def</span> <span class="nf">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param dimName: Name of dimension</span>
+<span class="sd">        :type dimName: unicode or str</span>
+<span class="sd">        :return: Number of chunks in given dimension</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">rx</span><span class="p">,</span> <span class="n">rz</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regionPositionsByDim</span><span class="p">[</span><span class="n">dimName</span><span class="p">]:</span>
+            <span class="n">regionFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionFile</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="n">regionFile</span><span class="o">.</span><span class="n">chunkCount</span>
+        <span class="k">return</span> <span class="n">count</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.chunkPositions"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over chunk positions</span>
+<span class="sd">        :type dimName: unicode or str</span>
+<span class="sd">        :return: iterator</span>
+<span class="sd">        :rtype: iterator [(int, int)]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">rx</span><span class="p">,</span> <span class="n">rz</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_regionPositionsByDim</span><span class="p">[</span><span class="n">dimName</span><span class="p">]):</span>
+            <span class="n">regionFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionFile</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">regionFile</span><span class="o">.</span><span class="n">chunkCount</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">regionFile</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">():</span>
+                    <span class="n">cx</span> <span class="o">+=</span> <span class="n">rx</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span>
+                    <span class="n">cz</span> <span class="o">+=</span> <span class="n">rz</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">regionFile</span><span class="o">.</span><span class="n">path</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">u&quot;Removing empty region file {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_regionPositionsByDim</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">((</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">))</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">regionFiles</span><span class="p">[</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">]</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">regionFile</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.containsChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="n">rx</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span>
+        <span class="n">rz</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regionPositionsByDim</span><span class="p">[</span><span class="n">dimName</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.deleteChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.deleteChunk">[docs]</a>    <span class="k">def</span> <span class="nf">deleteChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="n">rx</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span>
+        <span class="n">rz</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionFile</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rf</span><span class="p">:</span>
+            <span class="n">rf</span><span class="o">.</span><span class="n">deleteChunk</span><span class="p">(</span><span class="n">cx</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">,</span> <span class="n">cz</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rf</span><span class="o">.</span><span class="n">chunkCount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">regionFiles</span><span class="p">[</span><span class="n">rx</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">]</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">rf</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.readChunkBytes"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.readChunkBytes">[docs]</a>    <span class="k">def</span> <span class="nf">readChunkBytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ChunkNotPresent</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRegionForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span><span class="o">.</span><span class="n">readChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.writeChunkBytes"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.writeChunkBytes">[docs]</a>    <span class="k">def</span> <span class="nf">writeChunkBytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getRegionForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span><span class="o">.</span><span class="n">writeChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldFolder.copyChunkFrom"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.worldfolder.AnvilWorldFolder.copyChunkFrom">[docs]</a>    <span class="k">def</span> <span class="nf">copyChunkFrom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceFolder</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Copy chunk from another source folder without decompression</span>
+<span class="sd">        :param sourceFolder:</span>
+<span class="sd">        :type sourceFolder: AnvilWorldFolder</span>
+<span class="sd">        :param cx:</span>
+<span class="sd">        :type cx: int</span>
+<span class="sd">        :param cz:</span>
+<span class="sd">        :type cz: int</span>
+<span class="sd">        :param dimName:</span>
+<span class="sd">        :type dimName: unicode</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">fmt</span> <span class="o">=</span> <span class="n">sourceFolder</span><span class="o">.</span><span class="n">getRegionForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span><span class="o">.</span><span class="n">readChunkCompressed</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getRegionForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span><span class="o">.</span><span class="n">writeChunkCompressed</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fmt</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

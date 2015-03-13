@@ -1,0 +1,762 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.editorsession &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.editorsession</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2</span> <span class="kn">import</span> <span class="n">editortools</span>
+<span class="kn">from</span> <span class="nn">mcedit2.command</span> <span class="kn">import</span> <span class="n">SimpleRevisionCommand</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.blockmodels</span> <span class="kn">import</span> <span class="n">BlockModels</span>
+<span class="kn">from</span> <span class="nn">mcedit2.editorcommands.find_replace</span> <span class="kn">import</span> <span class="n">FindReplaceDialog</span>
+<span class="kn">from</span> <span class="nn">mcedit2.editortools.select</span> <span class="kn">import</span> <span class="n">SelectCommand</span>
+<span class="kn">from</span> <span class="nn">mcedit2.panels.player</span> <span class="kn">import</span> <span class="n">PlayerPanel</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.dialogs</span> <span class="kn">import</span> <span class="n">NotImplementedYet</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.raycast</span> <span class="kn">import</span> <span class="n">rayCastInBounds</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.resources</span> <span class="kn">import</span> <span class="n">resourcePath</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.showprogress</span> <span class="kn">import</span> <span class="n">showProgress</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.undostack</span> <span class="kn">import</span> <span class="n">MCEUndoStack</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.viewaction</span> <span class="kn">import</span> <span class="n">UseToolMouseAction</span><span class="p">,</span> <span class="n">TrackingMouseAction</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">chunkloader</span><span class="p">,</span> <span class="n">scenegraph</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.geometrycache</span> <span class="kn">import</span> <span class="n">GeometryCache</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.textureatlas</span> <span class="kn">import</span> <span class="n">TextureAtlas</span>
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.layout</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Row</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.settings</span> <span class="kn">import</span> <span class="n">Settings</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.camera</span> <span class="kn">import</span> <span class="n">CameraWorldViewFrame</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.cutaway</span> <span class="kn">import</span> <span class="n">CutawayWorldViewFrame</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.minimap</span> <span class="kn">import</span> <span class="n">MinimapWorldView</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.overhead</span> <span class="kn">import</span> <span class="n">OverheadWorldViewFrame</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">PlayerNotFound</span>
+<span class="kn">from</span> <span class="nn">mceditlib.revisionhistory</span> <span class="kn">import</span> <span class="n">UndoFolderExists</span>
+<span class="kn">from</span> <span class="nn">mceditlib.worldeditor</span> <span class="kn">import</span> <span class="n">WorldEditor</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An EditorSession is a world currently opened for editing, the state of the editor including the current</span>
+<span class="sd">selection box, the editor tab containing its viewports, its command history, a separate instance of each editor</span>
+<span class="sd">tool (why?), and the ChunkLoader that coordinates loading chunks into its viewports.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PendingImport"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.PendingImport">[docs]</a><span class="k">class</span> <span class="nc">PendingImport</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schematic</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schematic</span> <span class="o">=</span> <span class="n">schematic</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">schematic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="PendingImport.bounds"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.PendingImport.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">getDimension</span><span class="p">()</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="PasteImportCommand"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.PasteImportCommand">[docs]</a><span class="k">class</span> <span class="nc">PasteImportCommand</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QUndoCommand</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editorSession</span><span class="p">,</span> <span class="n">pendingImport</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PasteImportCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span> <span class="o">=</span> <span class="n">editorSession</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span> <span class="o">=</span> <span class="n">pendingImport</span>
+
+<div class="viewcode-block" id="PasteImportCommand.undo"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.PasteImportCommand.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">removePendingImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PasteImportCommand.redo"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.PasteImportCommand.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">moveTool</span><span class="o">.</span><span class="n">addPendingImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pendingImport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">chooseTool</span><span class="p">(</span><span class="s">&quot;Move&quot;</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="EditorSession"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession">[docs]</a><span class="k">class</span> <span class="nc">EditorSession</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">versionInfo</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span> <span class="o">=</span> <span class="n">MCEUndoStack</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidgets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoBlock</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">copiedSchematic</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="sd">&quot;&quot;&quot;:type : WorldEditor&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">versionInfo</span> <span class="o">=</span> <span class="n">versionInfo</span>
+
+        <span class="c"># --- Open world editor ---</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span> <span class="o">=</span> <span class="n">WorldEditor</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="n">readonly</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">UndoFolderExists</span><span class="p">:</span>
+            <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">()</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Warning</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;MCEdit tech demo&quot;</span><span class="p">))</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;This world was not properly closed by MCEdit.&quot;</span><span class="p">))</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                <span class="s">&quot;MCEdit may have crashed. An undo history was found for this world. You may try to resume editing &quot;</span>
+                <span class="s">&quot;with the saved undo history, or start over with the current state of the world.&quot;</span><span class="p">))</span>
+            <span class="n">resumeBtn</span> <span class="o">=</span> <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="s">&quot;Resume Editing&quot;</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">ApplyRole</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="s">&quot;Discard History&quot;</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">DestructiveRole</span><span class="p">)</span>
+            <span class="c"># msgBox.exec_()</span>
+            <span class="c"># clicked = msgBox.clickedButton()</span>
+            <span class="n">clicked</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># xxxxx</span>
+            <span class="n">resume</span> <span class="o">=</span> <span class="n">clicked</span> <span class="ow">is</span> <span class="n">resumeBtn</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span> <span class="o">=</span> <span class="n">WorldEditor</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="n">readonly</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+                <span class="n">NotImplementedYet</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;Uh-oh&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">requireRevisions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">getDimension</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="n">chunkloader</span><span class="o">.</span><span class="n">ChunkLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">chunkCompleted</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkDidComplete</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">allChunksDone</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">())</span>
+
+        <span class="c"># --- Menus ---</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">menus</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Edit&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;menuEdit&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCut</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Cut&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cut</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCut</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Cut</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCut</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;actionCut&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCopy</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Copy&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCopy</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Copy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCopy</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;actionCopy&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Paste&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">paste</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Paste</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;actionPaste&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Blocks</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Paste Blocks&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pasteBlocks</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Blocks</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s">&quot;Ctrl+Shift+V&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Blocks</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;actionPaste_Blocks&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Entities</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Paste Entities&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pasteEntities</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Entities</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s">&quot;Ctrl+Alt+V&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Entities</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;actionPaste_Entities&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Clear&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Delete</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;actionClear&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindReplace</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Find/Replace&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">findReplace</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindReplace</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Find</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindReplace</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&quot;actionFindReplace&quot;</span><span class="p">)</span>
+
+        <span class="n">undoAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">createUndoAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="p">)</span>
+        <span class="n">undoAction</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Undo</span><span class="p">)</span>
+        <span class="n">redoAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">createRedoAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="p">)</span>
+        <span class="n">redoAction</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Redo</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">undoAction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">redoAction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionCut</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionCopy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionPaste</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Blocks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Entities</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionFindReplace</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">menus</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menuEdit</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuSelect</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Select&quot;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Select All&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selectAll</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">SelectAll</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menuSelect</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">menus</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menuSelect</span><span class="p">)</span>
+
+        <span class="c"># --- Resources ---</span>
+
+        <span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">versionInfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resourceLoader</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">getResourceLoader</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometryCache</span> <span class="o">=</span> <span class="n">GeometryCache</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockModels</span> <span class="o">=</span> <span class="n">BlockModels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resourceLoader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span> <span class="o">=</span> <span class="n">TextureAtlas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resourceLoader</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockModels</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorOverlay</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">()</span>
+
+        <span class="c"># --- Panels ---</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">playerPanel</span> <span class="o">=</span> <span class="n">PlayerPanel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">playerPanel</span><span class="p">]</span>
+
+        <span class="c"># --- Tools ---</span>
+        <span class="k">def</span> <span class="nf">PickToolAction</span><span class="p">(</span><span class="n">tool</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">iconName</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">iconName</span>
+            <span class="k">if</span> <span class="n">iconName</span><span class="p">:</span>
+                <span class="n">iconPath</span> <span class="o">=</span> <span class="n">resourcePath</span><span class="p">(</span><span class="s">&quot;mcedit2/assets/mcedit2/toolicons/</span><span class="si">%s</span><span class="s">.png&quot;</span> <span class="o">%</span> <span class="n">iconName</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">iconPath</span><span class="p">):</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Tool icon </span><span class="si">%s</span><span class="s"> not found&quot;</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">)</span>
+                    <span class="n">icon</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">iconPath</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">icon</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="k">def</span> <span class="nf">_triggered</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chooseTool</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="c">#shortcut=self.toolShortcut(name),  # xxxx coordinate with view movement keys</span>
+                <span class="n">triggered</span><span class="o">=</span><span class="n">_triggered</span><span class="p">,</span>
+                <span class="n">checkable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">icon</span><span class="o">=</span><span class="n">icon</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">toolName</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">_triggered</span> <span class="o">=</span> <span class="n">_triggered</span>  <span class="c"># Needed because connecting _triggered doesn&#39;t increase its refcount</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolActionGroup</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">action</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolClasses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">editortools</span><span class="o">.</span><span class="n">ToolClasses</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolActionGroup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QActionGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolActions</span> <span class="o">=</span> <span class="p">[</span><span class="n">PickToolAction</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span> <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolClasses</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionsByName</span> <span class="o">=</span> <span class="p">{</span><span class="n">action</span><span class="o">.</span><span class="n">toolName</span><span class="p">:</span> <span class="n">action</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolActions</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="o">=</span> <span class="p">{</span><span class="n">cls</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">cls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolClasses</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionTool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">[</span><span class="s">&quot;Select&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveTool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">[</span><span class="s">&quot;Move&quot;</span><span class="p">]</span>
+
+        <span class="c"># --- Editor stuff ---</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span> <span class="o">=</span> <span class="n">EditorTab</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">toolDidChange</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">indexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">undoIndexChanged</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolActions</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolActions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span>  <span class="c"># Must be called after toolChanged is connected to editorTab</span>
+
+<div class="viewcode-block" id="EditorSession.dispose"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.dispose">[docs]</a>    <span class="k">def</span> <span class="nf">dispose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="EditorSession.focusWorldView"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.focusWorldView">[docs]</a>    <span class="k">def</span> <span class="nf">focusWorldView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+
+    <span class="c"># --- Selection ---</span>
+</div>
+    <span class="n">selectionChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">)</span>
+    <span class="n">_currentSelection</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">currentSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentSelection</span>
+
+    <span class="nd">@currentSelection.setter</span>
+<div class="viewcode-block" id="EditorSession.currentSelection"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.currentSelection">[docs]</a>    <span class="k">def</span> <span class="nf">currentSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currentSelection</span> <span class="o">=</span> <span class="n">box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableSelectionCommands</span><span class="p">(</span><span class="n">box</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">box</span><span class="o">.</span><span class="n">volume</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.enableSelectionCommands"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.enableSelectionCommands">[docs]</a>    <span class="k">def</span> <span class="nf">enableSelectionCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enable</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCopy</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Blocks</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPaste_Entities</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+
+    <span class="c"># --- Menu commands ---</span>
+
+    <span class="c"># - World -</span>
+</div>
+<div class="viewcode-block" id="EditorSession.save"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">clearUndoBlock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">saveChanges</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="c"># - Edit -</span>
+</div>
+<div class="viewcode-block" id="EditorSession.cut"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.cut">[docs]</a>    <span class="k">def</span> <span class="nf">cut</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">SimpleRevisionCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Cut&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">command</span><span class="o">.</span><span class="n">begin</span><span class="p">():</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">exportSchematicIter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSelection</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">copiedSchematic</span> <span class="o">=</span> <span class="n">showProgress</span><span class="p">(</span><span class="s">&quot;Cutting...&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">fillBlocksIter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSelection</span><span class="p">,</span> <span class="s">&quot;air&quot;</span><span class="p">)</span>
+            <span class="n">showProgress</span><span class="p">(</span><span class="s">&quot;Cutting...&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.copy"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">exportSchematicIter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSelection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copiedSchematic</span> <span class="o">=</span> <span class="n">showProgress</span><span class="p">(</span><span class="s">&quot;Copying...&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.paste"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.paste">[docs]</a>    <span class="k">def</span> <span class="nf">paste</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copiedSchematic</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">imp</span> <span class="o">=</span> <span class="n">PendingImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copiedSchematic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentSelection</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;&lt;Pasted Object&gt;&quot;</span><span class="p">))</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">PasteImportCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imp</span><span class="p">,</span> <span class="s">&quot;Paste&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.pasteBlocks"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.pasteBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">pasteBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">NotImplementedYet</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.pasteEntities"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.pasteEntities">[docs]</a>    <span class="k">def</span> <span class="nf">pasteEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">NotImplementedYet</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.clear"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionTool</span><span class="o">.</span><span class="n">deleteSelection</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.findReplace"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.findReplace">[docs]</a>    <span class="k">def</span> <span class="nf">findReplace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dialog</span> <span class="o">=</span> <span class="n">FindReplaceDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+    <span class="c"># - Select -</span>
+</div>
+<div class="viewcode-block" id="EditorSession.selectAll"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.selectAll">[docs]</a>    <span class="k">def</span> <span class="nf">selectAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">SelectCommand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionTool</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Select All&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushCommand</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="c"># --- Library support ---</span>
+</div>
+<div class="viewcode-block" id="EditorSession.importSchematic"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.importSchematic">[docs]</a>    <span class="k">def</span> <span class="nf">importSchematic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">schematic</span> <span class="o">=</span> <span class="n">WorldEditor</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">ray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">rayAtCenter</span><span class="p">()</span>
+        <span class="n">pos</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">rayCastInBounds</span><span class="p">(</span><span class="n">ray</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">point</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">imp</span> <span class="o">=</span> <span class="n">PendingImport</span><span class="p">(</span><span class="n">schematic</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">PasteImportCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imp</span><span class="p">,</span> <span class="s">&quot;Import </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="c"># --- Undo support ---</span>
+</div>
+    <span class="n">revisionChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EditorSession.undoIndexChanged"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.undoIndexChanged">[docs]</a>    <span class="k">def</span> <span class="nf">undoIndexChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.pushCommand"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.pushCommand">[docs]</a>    <span class="k">def</span> <span class="nf">pushCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.setUndoBlock"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.setUndoBlock">[docs]</a>    <span class="k">def</span> <span class="nf">setUndoBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">setUndoBlock</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.removeUndoBlock"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.removeUndoBlock">[docs]</a>    <span class="k">def</span> <span class="nf">removeUndoBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">removeUndoBlock</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.beginUndo"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.beginUndo">[docs]</a>    <span class="k">def</span> <span class="nf">beginUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undoStack</span><span class="o">.</span><span class="n">clearUndoBlock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">beginUndo</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.commitUndo"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.commitUndo">[docs]</a>    <span class="k">def</span> <span class="nf">commitUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">commitUndo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revisionChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">currentRevision</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.undoForward"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.undoForward">[docs]</a>    <span class="k">def</span> <span class="nf">undoForward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revisionChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">currentRevision</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.undoBackward"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.undoBackward">[docs]</a>    <span class="k">def</span> <span class="nf">undoBackward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revisionChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">currentRevision</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.gotoRevision"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.gotoRevision">[docs]</a>    <span class="k">def</span> <span class="nf">gotoRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">gotoRevision</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">revisionChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">currentRevision</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="EditorSession.currentRevision"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.currentRevision">[docs]</a>    <span class="k">def</span> <span class="nf">currentRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">currentRevision</span>
+
+    <span class="c"># --- Misplaced startup code? ---</span>
+</div>
+<div class="viewcode-block" id="EditorSession.loadDone"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.loadDone">[docs]</a>    <span class="k">def</span> <span class="nf">loadDone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Called by MCEditApp after the view is on screen to make sure view.center() works correctly xxx used depth</span>
+        <span class="c">#  buffer read for that, now what?</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">player</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">getPlayer</span><span class="p">()</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="n">player</span><span class="o">.</span><span class="n">Position</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Centering on single-player player.&quot;</span><span class="p">)</span>
+            <span class="n">rotation</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">Rotation</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">yawPitch</span> <span class="o">=</span> <span class="n">rotation</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">except</span> <span class="n">PlayerNotFound</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">worldSpawnPosition</span><span class="p">()</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Centering on spawn position.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Centering on world center&quot;</span><span class="p">)</span>
+                <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">origin</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">miniMap</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+
+    <span class="c"># --- Tools ---</span>
+</div>
+<div class="viewcode-block" id="EditorSession.toolShortcut"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.toolShortcut">[docs]</a>    <span class="k">def</span> <span class="nf">toolShortcut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">toolShortcuts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&quot;Select&quot;</span><span class="p">:</span> <span class="s">&quot;S&quot;</span><span class="p">,</span>
+            <span class="s">&quot;Create&quot;</span><span class="p">:</span> <span class="s">&quot;D&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">toolShortcuts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.chooseTool"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.chooseTool">[docs]</a>    <span class="k">def</span> <span class="nf">chooseTool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">oldTool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">oldTool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">oldTool</span><span class="p">:</span>
+                <span class="n">oldTool</span><span class="o">.</span><span class="n">toolInactive</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="o">.</span><span class="n">toolActive</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionsByName</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</div>
+    <span class="n">toolChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EditorSession.chunkDidComplete"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.chunkDidComplete">[docs]</a>    <span class="k">def</span> <span class="nf">chunkDidComplete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mcedit2</span> <span class="kn">import</span> <span class="n">editorapp</span>
+        <span class="n">editorapp</span><span class="o">.</span><span class="n">MCEditApp</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">updateStatusLabel</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">cps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">fps</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.updateStatusFromEvent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.updateStatusFromEvent">[docs]</a>    <span class="k">def</span> <span class="nf">updateStatusFromEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mcedit2</span> <span class="kn">import</span> <span class="n">editorapp</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span><span class="p">:</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">getBlockID</span><span class="p">(</span><span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDimension</span><span class="o">.</span><span class="n">getBlockData</span><span class="p">(</span><span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span><span class="p">)</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">[</span><span class="nb">id</span><span class="p">,</span> <span class="n">data</span><span class="p">]</span>
+            <span class="n">editorapp</span><span class="o">.</span><span class="n">MCEditApp</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">updateStatusLabel</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">cps</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">fps</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">editorapp</span><span class="o">.</span><span class="n">MCEditApp</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">updateStatusLabel</span><span class="p">(</span><span class="s">&#39;(N/A)&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">cps</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">fps</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.viewMousePress"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.viewMousePress">[docs]</a>    <span class="k">def</span> <span class="nf">viewMousePress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStatusFromEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="p">,</span> <span class="s">&#39;mousePress&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="o">.</span><span class="n">mousePress</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.viewMouseMove"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.viewMouseMove">[docs]</a>    <span class="k">def</span> <span class="nf">viewMouseMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStatusFromEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="p">,</span> <span class="s">&#39;mouseMove&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="o">.</span><span class="n">mouseMove</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.viewMouseDrag"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.viewMouseDrag">[docs]</a>    <span class="k">def</span> <span class="nf">viewMouseDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStatusFromEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="p">,</span> <span class="s">&#39;mouseDrag&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="o">.</span><span class="n">mouseDrag</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorSession.viewMouseRelease"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.viewMouseRelease">[docs]</a>    <span class="k">def</span> <span class="nf">viewMouseRelease</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStatusFromEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="p">,</span> <span class="s">&#39;mouseRelease&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentTool</span><span class="o">.</span><span class="n">mouseRelease</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+    <span class="c"># --- EditorTab handling ---</span>
+</div>
+<div class="viewcode-block" id="EditorSession.tabCaption"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.tabCaption">[docs]</a>    <span class="k">def</span> <span class="nf">tabCaption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">displayName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorSession.closeTab"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorSession.closeTab">[docs]</a>    <span class="k">def</span> <span class="nf">closeTab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span><span class="p">:</span>
+            <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">window</span><span class="p">())</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;The world has been modified.&quot;</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="s">&quot;Do you want to save your changes?&quot;</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Save</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Discard</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Save</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">msgBox</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Save</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorTab</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+</div></div>
+<div class="viewcode-block" id="EditorTab"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab">[docs]</a><span class="k">class</span> <span class="nc">EditorTab</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    EditorTab is the widget containing the editor viewports, the minimap, and</span>
+<span class="sd">    the settings panel for the currently selected tool.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editorSession</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type editorSession: mcedit2.editorsession.EditorSession</span>
+<span class="sd">        :rtype: EditorTab</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span> <span class="o">=</span> <span class="n">editorSession</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debugLastCenters</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewButtonGroup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QButtonGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewButtonToolbar</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolBar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewButtons</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">views</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">handler</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s">&quot;2D&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showCutawayView</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">&quot;Over&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showOverheadView</span><span class="p">),</span>
+            <span class="c"># (&quot;Iso&quot;, self.showIsoView),</span>
+            <span class="p">(</span><span class="s">&quot;Cam&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showCameraView</span><span class="p">),</span>
+            <span class="c"># (&quot;4-up&quot;, self.showFourUpView),</span>
+        <span class="p">):</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">checkable</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewButtonGroup</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewButtonToolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewButtons</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">button</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewStack</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStackedWidget</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span> <span class="o">=</span> <span class="n">MinimapWorldView</span><span class="p">(</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">textureAtlas</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">geometryCache</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">miniMapDockWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDockWidget</span><span class="p">(</span><span class="s">&quot;Minimap&quot;</span><span class="p">,</span> <span class="n">objectName</span><span class="o">=</span><span class="s">&quot;MinimapWidget&quot;</span><span class="p">,</span> <span class="n">floating</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">miniMapDockWidget</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">miniMapDockWidget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsArea</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QScrollArea</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsDockWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDockWidget</span><span class="p">(</span><span class="s">&quot;Tool Options&quot;</span><span class="p">,</span> <span class="n">objectName</span><span class="o">=</span><span class="s">&quot;ToolOptionsWidget&quot;</span><span class="p">,</span> <span class="n">floating</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsDockWidget</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsArea</span><span class="p">)</span>
+        <span class="n">editorSession</span><span class="o">.</span><span class="n">dockWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftDockWidgetArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">miniMapDockWidget</span><span class="p">))</span>
+        <span class="n">editorSession</span><span class="o">.</span><span class="n">dockWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftDockWidgetArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsDockWidget</span><span class="p">))</span>
+
+        <span class="n">editorSession</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">addClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">overheadViewFrame</span> <span class="o">=</span> <span class="n">OverheadWorldViewFrame</span><span class="p">(</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">textureAtlas</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">geometryCache</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overheadViewFrame</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">viewID</span> <span class="o">=</span> <span class="s">&quot;Over&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overheadViewFrame</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutawayViewFrame</span> <span class="o">=</span> <span class="n">CutawayWorldViewFrame</span><span class="p">(</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">textureAtlas</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">geometryCache</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutawayViewFrame</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">viewID</span> <span class="o">=</span> <span class="s">&quot;2D&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cutawayViewFrame</span><span class="p">)</span>
+        <span class="c">#</span>
+        <span class="c"># self.fourUpViewFrame = FourUpWorldViewFrame(editorSession.currentDimension, editorSession.textureAtlas, editorSession.geometryCache, self.miniMap)</span>
+        <span class="c"># self.fourUpViewFrame.worldView.viewID = &quot;4-up&quot;</span>
+        <span class="c"># self._addView(self.fourUpViewFrame)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cameraViewFrame</span> <span class="o">=</span> <span class="n">CameraWorldViewFrame</span><span class="p">(</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">textureAtlas</span><span class="p">,</span> <span class="n">editorSession</span><span class="o">.</span><span class="n">geometryCache</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cameraViewFrame</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">viewID</span> <span class="o">=</span> <span class="s">&quot;Cam&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cameraView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cameraViewFrame</span><span class="o">.</span><span class="n">worldView</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cameraViewFrame</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewStack</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_viewChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewDidChange</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewButtonToolbar</span><span class="p">,</span>
+                              <span class="n">Row</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewStack</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">margin</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">currentViewName</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="s">&quot;mainwindow/currentview&quot;</span><span class="p">,</span> <span class="s">&quot;Cam&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">currentViewName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewButtons</span><span class="p">:</span>
+            <span class="n">currentViewName</span> <span class="o">=</span> <span class="s">&quot;Cam&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewButtons</span><span class="p">[</span><span class="n">currentViewName</span><span class="p">]</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+
+<div class="viewcode-block" id="EditorTab.destroy"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="p">:</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">EditorTab</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="EditorTab.toolDidChange"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.toolDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">toolDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tool</span><span class="o">.</span><span class="n">toolWidget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsArea</span><span class="o">.</span><span class="n">takeWidget</span><span class="p">()</span>  <span class="c"># setWidget gives ownership to the scroll area</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">tool</span><span class="o">.</span><span class="n">toolWidget</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolOptionsDockWidget</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot; Tool Options&quot;</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Setting cursor </span><span class="si">%r</span><span class="s"> for tool </span><span class="si">%r</span><span class="s"> on view </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">tool</span><span class="o">.</span><span class="n">cursorNode</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentView</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">setToolCursor</span><span class="p">(</span><span class="n">tool</span><span class="o">.</span><span class="n">cursorNode</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorTab.saveState"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.saveState">[docs]</a>    <span class="k">def</span> <span class="nf">saveState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</div>
+    <span class="n">viewChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_viewChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentView</span><span class="p">())</span>
+
+<div class="viewcode-block" id="EditorTab.viewDidChange"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.viewDidChange">[docs]</a>    <span class="k">def</span> <span class="nf">viewDidChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">())</span>
+        <span class="n">Settings</span><span class="p">()</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="s">&quot;mainwindow/currentview&quot;</span><span class="p">,</span> <span class="n">view</span><span class="o">.</span><span class="n">viewID</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentTool</span><span class="p">:</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">setToolCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentTool</span><span class="o">.</span><span class="n">cursorNode</span><span class="p">)</span>
+
+        <span class="n">overlayNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">overlayNode</span>
+                        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">tool</span><span class="o">.</span><span class="n">overlayNode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+
+        <span class="n">overlayNodes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">editorOverlay</span><span class="p">)</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">setToolOverlays</span><span class="p">(</span><span class="n">overlayNodes</span><span class="p">)</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="EditorTab.viewOffsetChanged"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.viewOffsetChanged">[docs]</a>    <span class="k">def</span> <span class="nf">viewOffsetChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_offsetChanged</span><span class="p">(</span><span class="n">offset</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">miniMap</span><span class="o">.</span><span class="n">currentViewMatrixChanged</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_offsetChanged</span>
+</div>
+    <span class="k">def</span> <span class="nf">_addView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">stackIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewStack</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewOffsetChanged</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">worldView</span><span class="p">))</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">viewActions</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+            <span class="n">UseToolMouseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="p">),</span>
+            <span class="n">TrackingMouseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="p">)</span>
+        <span class="p">])</span>
+
+<div class="viewcode-block" id="EditorTab.currentView"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.currentView">[docs]</a>    <span class="k">def</span> <span class="nf">currentView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype: mcedit2.worldview.worldview.WorldView</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewStack</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">worldView</span>
+</div>
+<div class="viewcode-block" id="EditorTab.showViewFrame"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.showViewFrame">[docs]</a>    <span class="k">def</span> <span class="nf">showViewFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debugLastCenters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Going from </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">: Center was </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentView</span><span class="p">(),</span> <span class="n">frame</span><span class="o">.</span><span class="n">worldView</span><span class="p">,</span> <span class="n">center</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">removeClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentView</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">addClient</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">worldView</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewStack</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">stackIndex</span><span class="p">)</span>
+
+        <span class="n">frame</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Center is now </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentView</span><span class="p">()</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="EditorTab.showOverheadView"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.showOverheadView">[docs]</a>    <span class="k">def</span> <span class="nf">showOverheadView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showViewFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overheadViewFrame</span><span class="p">)</span>
+    <span class="c">#</span>
+    <span class="c"># def showIsoView(self):</span>
+    <span class="c">#     self.showViewFrame(self.isoViewFrame)</span>
+    <span class="c">#</span>
+    <span class="c"># def showFourUpView(self):</span>
+    <span class="c">#     self.showViewFrame(self.fourUpViewFrame)</span>
+</div>
+<div class="viewcode-block" id="EditorTab.showCutawayView"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.showCutawayView">[docs]</a>    <span class="k">def</span> <span class="nf">showCutawayView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showViewFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cutawayViewFrame</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EditorTab.showCameraView"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.editorsession.EditorTab.showCameraView">[docs]</a>    <span class="k">def</span> <span class="nf">showCameraView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showViewFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cameraViewFrame</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

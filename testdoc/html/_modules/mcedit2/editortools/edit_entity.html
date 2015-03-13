@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.editortools.edit_entity &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="mcedit2.editortools" href="../editortools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" accesskey="U">mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.editortools.edit_entity</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    select</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.editortools</span> <span class="kn">import</span> <span class="n">EditorTool</span>
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.nbttree.nbttreemodel</span> <span class="kn">import</span> <span class="n">NBTTreeModel</span><span class="p">,</span> <span class="n">NBTFilterProxyModel</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.bresenham</span> <span class="kn">import</span> <span class="n">bresenham</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.load_ui</span> <span class="kn">import</span> <span class="n">load_ui</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SelectEntityCommand"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.SelectEntityCommand">[docs]</a><span class="k">class</span> <span class="nc">SelectEntityCommand</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QUndoCommand</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QUndoCommand</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Select Entity&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ray</span> <span class="o">=</span> <span class="n">ray</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">tool</span>
+
+<div class="viewcode-block" id="SelectEntityCommand.undo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.SelectEntityCommand.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">setSelectionRay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SelectEntityCommand.redo"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.SelectEntityCommand.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previousRay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">selectionRay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">setSelectionRay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="EntityTool"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.EntityTool">[docs]</a><span class="k">class</span> <span class="nc">EntityTool</span><span class="p">(</span><span class="n">EditorTool</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Edit Entity&quot;</span>
+    <span class="n">iconName</span> <span class="o">=</span> <span class="s">&quot;edit_entity&quot;</span>
+    <span class="n">selectionRay</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">currentEntity</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :type editorSession: EditorSession</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EntityTool</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">editorSession</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createToolWidget</span><span class="p">()</span>
+
+<div class="viewcode-block" id="EntityTool.createToolWidget"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.EntityTool.createToolWidget">[docs]</a>    <span class="k">def</span> <span class="nf">createToolWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span> <span class="o">=</span> <span class="n">load_ui</span><span class="p">(</span><span class="s">&quot;editortools/select_entity.ui&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">entityListBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setSelectedEntity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">nbtEditor</span><span class="o">.</span><span class="n">editorSession</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">nbtEditor</span><span class="o">.</span><span class="n">editMade</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editWasMade</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EntityTool.editWasMade"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.EntityTool.editWasMade">[docs]</a>    <span class="k">def</span> <span class="nf">editWasMade</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEntity</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEntity</span><span class="o">.</span><span class="n">chunk</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEntity</span><span class="o">.</span><span class="n">chunk</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="EntityTool.mousePress"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.EntityTool.mousePress">[docs]</a>    <span class="k">def</span> <span class="nf">mousePress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">SelectEntityCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span><span class="o">.</span><span class="n">pushCommand</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EntityTool.setSelectionRay"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.EntityTool.setSelectionRay">[docs]</a>    <span class="k">def</span> <span class="nf">setSelectionRay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ray</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionRay</span> <span class="o">=</span> <span class="n">ray</span>
+        <span class="n">editorSession</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorSession</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="n">entitiesOnRay</span><span class="p">(</span><span class="n">editorSession</span><span class="o">.</span><span class="n">currentDimension</span><span class="p">,</span> <span class="n">ray</span><span class="p">)</span>
+
+        <span class="n">entityListBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">entityListBox</span>
+        <span class="n">entityListBox</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedEntities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedEntities</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedEntities</span><span class="p">:</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">Position</span>
+                <span class="n">entityListBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> at </span><span class="si">%0.2f</span><span class="s">, </span><span class="si">%0.2f</span><span class="s">, </span><span class="si">%0.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">setSelectedEntity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="EntityTool.setSelectedEntity"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.EntityTool.setSelectedEntity">[docs]</a>    <span class="k">def</span> <span class="nf">setSelectedEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedEntities</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEntity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedEntities</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">nbtEditor</span><span class="o">.</span><span class="n">setRootTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentEntity</span><span class="o">.</span><span class="n">raw_tag</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolWidget</span><span class="o">.</span><span class="n">nbtEditor</span><span class="o">.</span><span class="n">setRootTag</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="entitiesOnRay"><a class="viewcode-back" href="../../../mcedit2.editortools.html#mcedit2.editortools.edit_entity.entitiesOnRay">[docs]</a><span class="k">def</span> <span class="nf">entitiesOnRay</span><span class="p">(</span><span class="n">dimension</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">rayWidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">maxDistance</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+    <span class="n">pos</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="n">ray</span>
+
+    <span class="n">endpos</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">+</span> <span class="n">vec</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span> <span class="o">*</span> <span class="n">maxDistance</span>
+
+    <span class="n">ray_dir</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
+    <span class="c"># Visit each chunk along the ray</span>
+    <span class="k">def</span> <span class="nf">chunks</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">endpos</span><span class="p">):</span>
+        <span class="n">last_cpos</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">bresenham</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">endpos</span><span class="p">):</span>
+            <span class="n">cpos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+            <span class="k">if</span> <span class="n">cpos</span> <span class="o">!=</span> <span class="n">last_cpos</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">cpos</span>
+                <span class="n">last_cpos</span> <span class="o">=</span> <span class="n">cpos</span>
+
+    <span class="k">class</span> <span class="nc">RaySelection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunks</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">endpos</span><span class="p">))</span>
+        <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span>
+
+        <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+            <span class="n">evec</span> <span class="o">=</span> <span class="p">(</span><span class="n">position</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">-</span> <span class="n">pos</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">ray_dir</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">evec</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">rayWidth</span>
+
+
+    <span class="n">sr</span> <span class="o">=</span> <span class="n">RaySelection</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dimension</span><span class="o">.</span><span class="n">getEntities</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span> <span class="n">dimension</span><span class="o">.</span><span class="n">getTileEntities</span><span class="p">(</span><span class="n">sr</span><span class="p">))</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../editortools.html" >mcedit2.editortools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

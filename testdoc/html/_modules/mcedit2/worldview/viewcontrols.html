@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.worldview.viewcontrols &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.worldview.viewcontrols</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    viewcontrols</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.layout</span> <span class="kn">import</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.viewaction</span> <span class="kn">import</span> <span class="n">ViewAction</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="ModifierInputWidget"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ModifierInputWidget">[docs]</a><span class="k">class</span> <span class="nc">ModifierInputWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputButton</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Popup widget to change the binding for a view action.</span>
+
+<span class="sd">        :type inputButton: ButtonModifierInput</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModifierInputWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">Popup</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span>
+
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Box</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">inputButton</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">describeKeys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span><span class="o">.</span><span class="n">font</span><span class="p">()</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="n">font</span><span class="o">.</span><span class="n">pointSize</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">)</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setBold</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">inputButton</span><span class="o">.</span><span class="n">viewAction</span><span class="p">,</span> <span class="s">&quot;button&quot;</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Click a mouse button or press a key, while holding any number of modifier keys (Shift, Ctrl, Alt)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Press a key while holding any number of modifier keys (Shift, Ctrl, Alt)&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helpLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">helpLabel</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helpLabel</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePressEvent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span> <span class="o">=</span> <span class="n">inputButton</span>
+
+<div class="viewcode-block" id="ModifierInputWidget.mousePressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ModifierInputWidget.mousePressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mouseEvent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type mouseEvent: QtGui.QMouseEvent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">mouseEvent</span><span class="o">.</span><span class="n">pos</span><span class="p">()):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">ModifierInputWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="n">mouseEvent</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">mouseEvent</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="c"># Forbid binding left button</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span><span class="o">.</span><span class="n">setBinding</span><span class="p">(</span><span class="n">mouseEvent</span><span class="o">.</span><span class="n">button</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mouseEvent</span><span class="o">.</span><span class="n">modifiers</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">describeKeys</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="ModifierInputWidget.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ModifierInputWidget.keyPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyEvent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param keyEvent:</span>
+<span class="sd">        :type keyEvent: QtGui.QKeyEvent</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">keyEvent</span><span class="o">.</span><span class="n">key</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Escape</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">modifiers</span> <span class="o">=</span> <span class="n">keyEvent</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Control change: key </span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">) modifiers </span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">modifiers</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">modifiers</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span><span class="o">.</span><span class="n">setBinding</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoButton</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">describeKeys</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="ModifierInputWidget.wheelEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ModifierInputWidget.wheelEvent">[docs]</a>    <span class="k">def</span> <span class="nf">wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wheelEvent</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">acceptsMouseWheel</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">wheelEvent</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">delta</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">delta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">ViewAction</span><span class="o">.</span><span class="n">WHEEL_UP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">ViewAction</span><span class="o">.</span><span class="n">WHEEL_DOWN</span>
+
+        <span class="n">modifiers</span> <span class="o">=</span> <span class="n">wheelEvent</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Control change: button </span><span class="si">%s</span><span class="s"> modifiers </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">button</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">modifiers</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span><span class="o">.</span><span class="n">setBinding</span><span class="p">(</span><span class="n">button</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputButton</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">describeKeys</span><span class="p">())</span>
+
+</div></div>
+<div class="viewcode-block" id="ButtonModifierInput"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ButtonModifierInput">[docs]</a><span class="k">class</span> <span class="nc">ButtonModifierInput</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewAction</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Button that displays the current key/mouse binding for a view action. Click the button to change the binding.</span>
+
+<span class="sd">        :type viewAction: mcedit2.worldview.viewaction.ViewAction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ButtonModifierInput</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">viewAction</span><span class="o">.</span><span class="n">describeKeys</span><span class="p">(),</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        :disabled {</span>
+<span class="s">            color: #000000;</span>
+<span class="s">        }</span>
+
+<span class="s">        :enabled {</span>
+<span class="s">            background-color: #DDDDFF;</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonClicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewAction</span> <span class="o">=</span> <span class="n">viewAction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputWidget</span> <span class="o">=</span> <span class="n">ModifierInputWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ButtonModifierInput.buttonClicked"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ButtonModifierInput.buttonClicked">[docs]</a>    <span class="k">def</span> <span class="nf">buttonClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inputWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputWidget</span>
+        <span class="n">inputWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">inputWidget</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">inputWidget</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span>
+        <span class="n">topRight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">bottomRight</span><span class="p">())</span>
+        <span class="n">rect</span><span class="o">.</span><span class="n">moveTopRight</span><span class="p">(</span><span class="n">topRight</span><span class="p">)</span>
+        <span class="n">inputWidget</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ButtonModifierInput.updateText"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ButtonModifierInput.updateText">[docs]</a>    <span class="k">def</span> <span class="nf">updateText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">describeKeys</span><span class="p">())</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ButtonModifierInput.key"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ButtonModifierInput.key">[docs]</a>    <span class="k">def</span> <span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">key</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ButtonModifierInput.modifiers"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ButtonModifierInput.modifiers">[docs]</a>    <span class="k">def</span> <span class="nf">modifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">modifiers</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ButtonModifierInput.button"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ButtonModifierInput.button">[docs]</a>    <span class="k">def</span> <span class="nf">button</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">button</span>
+</div>
+<div class="viewcode-block" id="ButtonModifierInput.setBinding"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ButtonModifierInput.setBinding">[docs]</a>    <span class="k">def</span> <span class="nf">setBinding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewAction</span><span class="o">.</span><span class="n">setBinding</span><span class="p">(</span><span class="n">button</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateText</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="ViewControls"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ViewControls">[docs]</a><span class="k">class</span> <span class="nc">ViewControls</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldView</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Popup window for quickly reviewing and assigning movement controls for a world view.</span>
+
+<span class="sd">        :type worldView: WorldView</span>
+<span class="sd">        :param worldView:</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ViewControls</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">Popup</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span> <span class="o">=</span> <span class="n">worldView</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFormLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controlInputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">viewActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">hidden</span><span class="p">:</span>
+                <span class="n">modInput</span> <span class="o">=</span> <span class="n">ButtonModifierInput</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controlInputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modInput</span><span class="p">)</span>
+                <span class="n">layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">labelText</span><span class="p">),</span> <span class="n">modInput</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hideTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Controls&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggleShowHide</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">controlsButton</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controlsButton</span><span class="o">.</span><span class="n">setDefaultAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlockButton</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Edit Controls&quot;</span><span class="p">),</span> <span class="n">clicked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">toggleUnlockControls</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlockButton</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlocked</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="ViewControls.toggleUnlockControls"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ViewControls.toggleUnlockControls">[docs]</a>    <span class="k">def</span> <span class="nf">toggleUnlockControls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lockUnlockControls</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlocked</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ViewControls.lockUnlockControls"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ViewControls.lockUnlockControls">[docs]</a>    <span class="k">def</span> <span class="nf">lockUnlockControls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unlocked</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlocked</span> <span class="o">=</span> <span class="n">unlocked</span>
+        <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">controlInputs</span><span class="p">:</span>
+            <span class="n">ci</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">unlocked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unlockButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Done Editing&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">unlocked</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Edit Controls&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ViewControls.getShowHideButton"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ViewControls.getShowHideButton">[docs]</a>    <span class="k">def</span> <span class="nf">getShowHideButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controlsButton</span>
+</div>
+<div class="viewcode-block" id="ViewControls.hideEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ViewControls.hideEvent">[docs]</a>    <span class="k">def</span> <span class="nf">hideEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hideTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lockUnlockControls</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ViewControls.toggleShowHide"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.viewcontrols.ViewControls.toggleShowHide">[docs]</a>    <span class="k">def</span> <span class="nf">toggleShowHide</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isHidden</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideTime</span> <span class="o">&gt;</span> <span class="mf">0.25</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span>
+                <span class="n">bottomRight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controlsButton</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controlsButton</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">bottomRight</span><span class="p">())</span>
+                <span class="n">rect</span><span class="o">.</span><span class="n">moveTopRight</span><span class="p">(</span><span class="n">bottomRight</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

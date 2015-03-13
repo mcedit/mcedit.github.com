@@ -1,0 +1,521 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering.selection &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.rendering.selection</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    selection</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">OpenGL</span> <span class="kn">import</span> <span class="n">GL</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">scenegraph</span><span class="p">,</span> <span class="n">rendergraph</span><span class="p">,</span> <span class="n">cubes</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.chunknode</span> <span class="kn">import</span> <span class="n">ChunkGroupNode</span><span class="p">,</span> <span class="n">ChunkNode</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.depths</span> <span class="kn">import</span> <span class="n">DepthOffset</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.renderstates</span> <span class="kn">import</span> <span class="n">_RenderstateAlphaBlendNode</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.scenegraph</span> <span class="kn">import</span> <span class="n">VertexNode</span><span class="p">,</span> <span class="n">RenderstateNode</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.vertexarraybuffer</span> <span class="kn">import</span> <span class="n">VertexArrayBuffer</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">profiler</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.glutils</span> <span class="kn">import</span> <span class="n">gl</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">faces</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">ChunkNotPresent</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">SectionBox</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">SelectionBox</span><span class="p">,</span> <span class="n">rayIntersectsBox</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CullFaceRenderNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.CullFaceRenderNode">[docs]</a><span class="k">class</span> <span class="nc">CullFaceRenderNode</span><span class="p">(</span><span class="n">rendergraph</span><span class="o">.</span><span class="n">RenderstateRenderNode</span><span class="p">):</span>
+<div class="viewcode-block" id="CullFaceRenderNode.enter"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.CullFaceRenderNode.enter">[docs]</a>    <span class="k">def</span> <span class="nf">enter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_CULL_FACE</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CullFaceRenderNode.exit"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.CullFaceRenderNode.exit">[docs]</a>    <span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glDisable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_CULL_FACE</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="NonAirMaskSelection"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.NonAirMaskSelection">[docs]</a><span class="k">class</span> <span class="nc">NonAirMaskSelection</span><span class="p">(</span><span class="n">SelectionBox</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param dimension:</span>
+<span class="sd">        :type dimension: mceditlib.worldeditor.WorldEditorDimension</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NonAirMaskSelection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincx</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">mincx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincy</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">mincy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincz</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">mincz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcx</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">maxcx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcy</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">maxcy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcz</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">maxcz</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+
+<div class="viewcode-block" id="NonAirMaskSelection.box_mask"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.NonAirMaskSelection.box_mask">[docs]</a>    <span class="k">def</span> <span class="nf">box_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param box:</span>
+<span class="sd">        :type box: BoundingBox</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#if self.volume &gt; 40:</span>
+        <span class="c">#    import pdb; pdb.set_trace()</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">box</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ChunkNotPresent</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">cy</span> <span class="ow">in</span> <span class="n">box</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">section</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">sectionBox</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">SectionBox</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">sectionBox</span><span class="o">.</span><span class="n">volume</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">slices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span>
+                    <span class="n">sectionBox</span><span class="o">.</span><span class="n">miny</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">:(</span><span class="n">sectionBox</span><span class="o">.</span><span class="n">miny</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span> <span class="o">+</span> <span class="n">sectionBox</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+                    <span class="n">sectionBox</span><span class="o">.</span><span class="n">minz</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">:(</span><span class="n">sectionBox</span><span class="o">.</span><span class="n">minz</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span> <span class="o">+</span> <span class="n">sectionBox</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                    <span class="n">sectionBox</span><span class="o">.</span><span class="n">minx</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">:(</span><span class="n">sectionBox</span><span class="o">.</span><span class="n">minx</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span> <span class="o">+</span> <span class="n">sectionBox</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                <span class="p">]</span>
+                <span class="n">maskSlices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span>
+                    <span class="n">sectionBox</span><span class="o">.</span><span class="n">miny</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">miny</span><span class="p">:</span><span class="n">sectionBox</span><span class="o">.</span><span class="n">maxy</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">miny</span><span class="p">,</span>
+                    <span class="n">sectionBox</span><span class="o">.</span><span class="n">minz</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minz</span><span class="p">:</span><span class="n">sectionBox</span><span class="o">.</span><span class="n">maxz</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minz</span><span class="p">,</span>
+                    <span class="n">sectionBox</span><span class="o">.</span><span class="n">minx</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minx</span><span class="p">:</span><span class="n">sectionBox</span><span class="o">.</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minx</span><span class="p">,</span>
+                <span class="p">]</span>
+                <span class="n">blocks</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">Blocks</span>
+                <span class="n">mask</span><span class="p">[</span><span class="n">maskSlices</span><span class="p">]</span> <span class="o">=</span> <span class="n">blocks</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">mask</span>
+
+
+</div></div>
+<div class="viewcode-block" id="SelectionScene"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene">[docs]</a><span class="k">class</span> <span class="nc">SelectionScene</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SelectionScene</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cullNode</span> <span class="o">=</span> <span class="n">RenderstateNode</span><span class="p">(</span><span class="n">CullFaceRenderNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blendNode</span> <span class="o">=</span> <span class="n">RenderstateNode</span><span class="p">(</span><span class="n">_RenderstateAlphaBlendNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groupNode</span> <span class="o">=</span> <span class="n">ChunkGroupNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cullNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blendNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blendNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cullNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loadMore</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderSelection</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="n">_selection</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span>
+
+    <span class="nd">@selection.setter</span>
+<div class="viewcode-block" id="SelectionScene.selection"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.selection">[docs]</a>    <span class="k">def</span> <span class="nf">selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">selection</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span> <span class="o">=</span> <span class="n">selection</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateSelection</span><span class="p">()</span>
+</div>
+    <span class="n">_dimension</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimension</span>
+
+    <span class="nd">@dimension.setter</span>
+<div class="viewcode-block" id="SelectionScene.dimension"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.dimension">[docs]</a>    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimension</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dimension</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateSelection</span><span class="p">()</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cullNode</span><span class="o">.</span><span class="n">visible</span>
+
+    <span class="nd">@filled.setter</span>
+<div class="viewcode-block" id="SelectionScene.filled"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.filled">[docs]</a>    <span class="k">def</span> <span class="nf">filled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cullNode</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="SelectionScene.updateSelection"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.updateSelection">[docs]</a>    <span class="k">def</span> <span class="nf">updateSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderSelection</span> <span class="o">=</span> <span class="n">selection</span> <span class="o">&amp;</span> <span class="n">NonAirMaskSelection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groupNode</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loader</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">selection</span><span class="o">.</span><span class="n">chunkCount</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadSections</span><span class="p">():</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">333</span><span class="p">)</span>
+
+</div>
+    <span class="n">_loader</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="SelectionScene.loadMore"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.loadMore">[docs]</a>    <span class="k">def</span> <span class="nf">loadMore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loader</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadSections</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loader</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loader</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+    <span class="nd">@profiler.iterator</span><span class="p">(</span><span class="s">&quot;SelectionScene&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="SelectionScene.loadSections"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.loadSections">[docs]</a>    <span class="k">def</span> <span class="nf">loadSections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">renderSelection</span>
+        <span class="k">if</span> <span class="n">selection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">333</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">selection</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupNode</span><span class="o">.</span><span class="n">containsChunkNode</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)):</span>
+                <span class="k">continue</span>
+
+            <span class="n">vertexArrays</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">cy</span> <span class="ow">in</span> <span class="n">selection</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">SectionBox</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">box_mask</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">vertexArrays</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buildSection</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">cy</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertexArrays</span><span class="p">):</span>
+                <span class="n">chunkNode</span> <span class="o">=</span> <span class="n">ChunkNode</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+                <span class="n">vertexNode</span> <span class="o">=</span> <span class="n">VertexNode</span><span class="p">(</span><span class="n">vertexArrays</span><span class="p">)</span>
+                <span class="n">chunkNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">vertexNode</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">groupNode</span><span class="o">.</span><span class="n">addChunkNode</span><span class="p">(</span><span class="n">chunkNode</span><span class="p">)</span>
+            <span class="k">yield</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">333</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SelectionScene.exposedBlockMasks"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.exposedBlockMasks">[docs]</a>    <span class="k">def</span> <span class="nf">exposedBlockMasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compare adjacent cells in the 3d mask along all three axes and return one mask for each cardinal direction.</span>
+<span class="sd">        The returned masks contain the faces of each cell which are exposed in that direction and should be rendered.</span>
+
+<span class="sd">        :param mask:</span>
+<span class="sd">        :type mask: ndarray</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: list[ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">sx</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="n">exposedY</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">sy</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">sx</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">exposedZ</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">sx</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">exposedX</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">sx</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="n">exposedY</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span>   <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mask</span><span class="p">[</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">exposedZ</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:,</span>   <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">exposedX</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span>  <span class="p">]</span> <span class="o">!=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">exposedByFace</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">exposedX</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:],</span>
+            <span class="n">exposedX</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">exposedY</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="n">exposedY</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">exposedZ</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span>
+            <span class="n">exposedZ</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">exposedByFace</span>
+</div>
+<div class="viewcode-block" id="SelectionScene.buildSection"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionScene.buildSection">[docs]</a>    <span class="k">def</span> <span class="nf">buildSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sectionMask</span><span class="p">,</span> <span class="n">cy</span><span class="p">):</span>
+        <span class="n">vertexArrays</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">exposedFaceMask</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposedBlockMasks</span><span class="p">(</span><span class="n">sectionMask</span><span class="p">)):</span>
+            <span class="n">blockIndices</span> <span class="o">=</span> <span class="n">sectionMask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">exposedFaceMask</span>
+
+            <span class="n">vertexBuffer</span> <span class="o">=</span> <span class="n">VertexArrayBuffer</span><span class="o">.</span><span class="n">fromIndices</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">blockIndices</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="o">.</span><span class="n">vertex</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">rgb</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">faceShades</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+            <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">alpha</span><span class="p">[:]</span> <span class="o">=</span> <span class="mh">0x77</span>
+            <span class="n">vertexBuffer</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cy</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+            <span class="n">vertexArrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vertexArrays</span>
+
+</div></div>
+<span class="n">faceShades</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">faces</span><span class="o">.</span><span class="n">FaceNorth</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x33</span><span class="p">,</span> <span class="mh">0x33</span><span class="p">,</span> <span class="mh">0x99</span><span class="p">),</span>
+    <span class="n">faces</span><span class="o">.</span><span class="n">FaceSouth</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x33</span><span class="p">,</span> <span class="mh">0x33</span><span class="p">,</span> <span class="mh">0x99</span><span class="p">),</span>
+    <span class="n">faces</span><span class="o">.</span><span class="n">FaceEast</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x44</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">,</span> <span class="mh">0xCC</span><span class="p">),</span>
+    <span class="n">faces</span><span class="o">.</span><span class="n">FaceWest</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x44</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">,</span> <span class="mh">0xCC</span><span class="p">),</span>
+    <span class="n">faces</span><span class="o">.</span><span class="n">FaceUp</span><span class="p">:</span>    <span class="p">(</span><span class="mh">0x55</span><span class="p">,</span> <span class="mh">0x55</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">),</span>
+    <span class="n">faces</span><span class="o">.</span><span class="n">FaceDown</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x22</span><span class="p">,</span> <span class="mh">0x22</span><span class="p">,</span> <span class="mh">0x77</span><span class="p">),</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="SelectionBoxRenderNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionBoxRenderNode">[docs]</a><span class="k">class</span> <span class="nc">SelectionBoxRenderNode</span><span class="p">(</span><span class="n">rendergraph</span><span class="o">.</span><span class="n">RenderNode</span><span class="p">):</span>
+<div class="viewcode-block" id="SelectionBoxRenderNode.drawSelf"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionBoxRenderNode.drawSelf">[docs]</a>    <span class="k">def</span> <span class="nf">drawSelf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">selectionBox</span>
+        <span class="k">if</span> <span class="n">box</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">color</span>
+        <span class="k">with</span> <span class="n">gl</span><span class="o">.</span><span class="n">glPushAttrib</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_BUFFER_BIT</span> <span class="o">|</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_ENABLE_BIT</span> <span class="o">|</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_POLYGON_BIT</span><span class="p">):</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glDepthMask</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_BLEND</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glPolygonOffset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">depth</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">filled</span><span class="p">:</span>
+                <span class="c"># Filled box</span>
+                <span class="n">GL</span><span class="o">.</span><span class="n">glColor</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+                <span class="n">cubes</span><span class="o">.</span><span class="n">drawBox</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">wire</span><span class="p">:</span>
+                <span class="c"># Wire box, thinner behind terrain</span>
+                <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">wireColor</span>
+                <span class="n">GL</span><span class="o">.</span><span class="n">glColor</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+                <span class="n">GL</span><span class="o">.</span><span class="n">glLineWidth</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+                <span class="n">cubes</span><span class="o">.</span><span class="n">drawBox</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">cubeType</span><span class="o">=</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_LINES</span><span class="p">)</span>
+                <span class="n">GL</span><span class="o">.</span><span class="n">glDisable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_TEST</span><span class="p">)</span>
+                <span class="n">GL</span><span class="o">.</span><span class="n">glLineWidth</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">cubes</span><span class="o">.</span><span class="n">drawBox</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">cubeType</span><span class="o">=</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_LINES</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="SelectionBoxNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionBoxNode">[docs]</a><span class="k">class</span> <span class="nc">SelectionBoxNode</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="n">RenderNodeClass</span> <span class="o">=</span> <span class="n">SelectionBoxRenderNode</span>
+    <span class="n">_selectionBox</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">DepthOffset</span><span class="o">.</span><span class="n">Selection</span>
+    <span class="n">wire</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">_filled</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filled</span>
+
+    <span class="nd">@filled.setter</span>
+<div class="viewcode-block" id="SelectionBoxNode.filled"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionBoxNode.filled">[docs]</a>    <span class="k">def</span> <span class="nf">filled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filled</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">selectionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionBox</span>
+
+    <span class="nd">@selectionBox.setter</span>
+<div class="viewcode-block" id="SelectionBoxNode.selectionBox"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionBoxNode.selectionBox">[docs]</a>    <span class="k">def</span> <span class="nf">selectionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectionBox</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="n">_color</span> <span class="o">=</span> <span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color</span>
+
+    <span class="nd">@color.setter</span>
+<div class="viewcode-block" id="SelectionBoxNode.color"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionBoxNode.color">[docs]</a>    <span class="k">def</span> <span class="nf">color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="n">_wireColor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">6</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">wireColor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wireColor</span>
+
+    <span class="nd">@wireColor.setter</span>
+<div class="viewcode-block" id="SelectionBoxNode.wireColor"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionBoxNode.wireColor">[docs]</a>    <span class="k">def</span> <span class="nf">wireColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wireColor</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+</div></div>
+<div class="viewcode-block" id="SelectionFaceRenderNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionFaceRenderNode">[docs]</a><span class="k">class</span> <span class="nc">SelectionFaceRenderNode</span><span class="p">(</span><span class="n">rendergraph</span><span class="o">.</span><span class="n">RenderNode</span><span class="p">):</span>
+<div class="viewcode-block" id="SelectionFaceRenderNode.drawSelf"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionFaceRenderNode.drawSelf">[docs]</a>    <span class="k">def</span> <span class="nf">drawSelf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">selectionBox</span>
+        <span class="k">if</span> <span class="n">box</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.16</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">color</span>
+        <span class="k">with</span> <span class="n">gl</span><span class="o">.</span><span class="n">glPushAttrib</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_BUFFER_BIT</span> <span class="o">|</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_ENABLE_BIT</span> <span class="o">|</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_LINE_BIT</span><span class="p">):</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glDisable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_TEST</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glDepthMask</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_BLEND</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glPolygonOffset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">depth</span><span class="p">)</span>
+
+            <span class="n">GL</span><span class="o">.</span><span class="n">glColor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glLineWidth</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+            <span class="n">cubes</span><span class="o">.</span><span class="n">drawFace</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">face</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_LINE_STRIP</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glColor</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_TEST</span><span class="p">)</span>
+            <span class="n">cubes</span><span class="o">.</span><span class="n">drawFace</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">face</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="SelectionFaceNode"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionFaceNode">[docs]</a><span class="k">class</span> <span class="nc">SelectionFaceNode</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="n">RenderNodeClass</span> <span class="o">=</span> <span class="n">SelectionFaceRenderNode</span>
+    <span class="n">_selectionBox</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_face</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">FaceYIncreasing</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">DepthOffset</span><span class="o">.</span><span class="n">Selection</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">selectionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionBox</span>
+
+    <span class="nd">@selectionBox.setter</span>
+<div class="viewcode-block" id="SelectionFaceNode.selectionBox"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionFaceNode.selectionBox">[docs]</a>    <span class="k">def</span> <span class="nf">selectionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectionBox</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">face</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_face</span>
+
+    <span class="nd">@face.setter</span>
+<div class="viewcode-block" id="SelectionFaceNode.face"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionFaceNode.face">[docs]</a>    <span class="k">def</span> <span class="nf">face</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_face</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="n">_color</span> <span class="o">=</span> <span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color</span>
+
+    <span class="nd">@color.setter</span>
+<div class="viewcode-block" id="SelectionFaceNode.color"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.SelectionFaceNode.color">[docs]</a>    <span class="k">def</span> <span class="nf">color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+</div></div>
+<div class="viewcode-block" id="boxFaceUnderCursor"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.selection.boxFaceUnderCursor">[docs]</a><span class="k">def</span> <span class="nf">boxFaceUnderCursor</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">mouseRay</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the nearest face of the given bounding box that intersects with the given mouse ray</span>
+<span class="sd">    and return (point, face)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nearPoint</span><span class="p">,</span> <span class="n">mouseVector</span> <span class="o">=</span> <span class="n">mouseRay</span>
+
+    <span class="n">intersections</span> <span class="o">=</span> <span class="n">rayIntersectsBox</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">mouseRay</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">intersections</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+
+    <span class="n">point</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">intersections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c"># if the point is near the edge of the face, and the edge is facing away,</span>
+    <span class="c"># return the away-facing face</span>
+
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">dimension</span>
+
+    <span class="n">dim1</span> <span class="o">=</span> <span class="p">(</span><span class="n">dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span>
+    <span class="n">dim2</span> <span class="o">=</span> <span class="p">(</span><span class="n">dim</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span>
+
+    <span class="c"># determine if a click was within self.edge_factor of the edge of a selection box side. if so, click through</span>
+    <span class="c"># to the opposite side</span>
+    <span class="n">edge_factor</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dim1</span><span class="p">,</span> <span class="n">dim2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="bp">False</span>
+        <span class="n">edge_width</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">*</span> <span class="n">edge_factor</span>
+        <span class="n">faceNormal</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">cameraBehind</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">point</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">edge_width</span><span class="p">:</span>
+            <span class="n">faceNormal</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">cameraBehind</span> <span class="o">=</span> <span class="n">nearPoint</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">point</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">edge_width</span><span class="p">:</span>
+            <span class="n">faceNormal</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">cameraBehind</span> <span class="o">=</span> <span class="n">nearPoint</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">faceNormal</span><span class="p">,</span> <span class="n">mouseVector</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">cameraBehind</span><span class="p">:</span>
+            <span class="c"># the face adjacent to the clicked edge faces away from the cam</span>
+            <span class="c"># xxxx this is where to allow iso views in face-on angles to grab edges</span>
+            <span class="c"># xxxx also change face highlight node to highlight this area</span>
+            <span class="k">return</span> <span class="n">intersections</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">intersections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">point</span><span class="p">,</span> <span class="n">face</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

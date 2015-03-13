@@ -1,0 +1,2229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mcedit2 package" href="mcedit2.html" />
+    <link rel="next" title="mcedit2.rendering.chunkmeshes package" href="mcedit2.rendering.chunkmeshes.html" />
+    <link rel="prev" title="mcedit2.prefs package" href="mcedit2.prefs.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.rendering.chunkmeshes.html" title="mcedit2.rendering.chunkmeshes package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.prefs.html" title="mcedit2.prefs package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" accesskey="U">mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mcedit2-rendering-package">
+<h1>mcedit2.rendering package<a class="headerlink" href="#mcedit2-rendering-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcedit2.rendering.chunkmeshes.html">mcedit2.rendering.chunkmeshes package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mcedit2.rendering.chunkmeshes.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcedit2.rendering.chunkmeshes.html#module-mcedit2.rendering.chunkmeshes.entitymesh">mcedit2.rendering.chunkmeshes.entitymesh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcedit2.rendering.chunkmeshes.html#module-mcedit2.rendering.chunkmeshes.lowdetail">mcedit2.rendering.chunkmeshes.lowdetail module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcedit2.rendering.chunkmeshes.html#module-mcedit2.rendering.chunkmeshes.terrainpop">mcedit2.rendering.chunkmeshes.terrainpop module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcedit2.rendering.chunkmeshes.html#module-mcedit2.rendering.chunkmeshes.tileticks">mcedit2.rendering.chunkmeshes.tileticks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcedit2.rendering.chunkmeshes.html#module-mcedit2.rendering.chunkmeshes">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mcedit2.rendering.blockmeshes">
+<span id="mcedit2-rendering-blockmeshes-module"></span><h2>mcedit2.rendering.blockmeshes module<a class="headerlink" href="#module-mcedit2.rendering.blockmeshes" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mcedit2.rendering.blockmeshes.makeVertexTemplates">
+<tt class="descclassname">mcedit2.rendering.blockmeshes.</tt><tt class="descname">makeVertexTemplates</tt><big>(</big><em>xmin=0</em>, <em>ymin=0</em>, <em>zmin=0</em>, <em>xmax=1</em>, <em>ymax=1</em>, <em>zmax=1</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/blockmeshes.html#makeVertexTemplates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.blockmeshes.makeVertexTemplates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.blockmeshes.</tt><tt class="descname">MeshBase</tt><a class="reference internal" href="_modules/mcedit2/rendering/blockmeshes.html#MeshBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.detailLevels">
+<tt class="descname">detailLevels</tt><em class="property"> = (0,)</em><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.detailLevels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.detailLevel">
+<tt class="descname">detailLevel</tt><em class="property"> = 0</em><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.detailLevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.layer">
+<tt class="descname">layer</tt><em class="property"> = u'Blocks'</em><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.renderType">
+<tt class="descname">renderType</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.renderType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.extraTextures">
+<tt class="descname">extraTextures</tt><em class="property"> = ()</em><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.extraTextures" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.renderstate">
+<tt class="descname">renderstate</tt><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.renderstate" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">RenderstateAlphaTestNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.vertexArrays">
+<tt class="descname">vertexArrays</tt><em class="property"> = ()</em><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.vertexArrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.blockmeshes.MeshBase.bufferSize">
+<tt class="descname">bufferSize</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/blockmeshes.html#MeshBase.bufferSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.blockmeshes.MeshBase.bufferSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.blockmeshes.ChunkMeshBase">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.blockmeshes.</tt><tt class="descname">ChunkMeshBase</tt><big>(</big><em>chunkUpdate</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/blockmeshes.html#ChunkMeshBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.blockmeshes.ChunkMeshBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.blockmeshes.MeshBase" title="mcedit2.rendering.blockmeshes.MeshBase"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.blockmeshes.MeshBase</span></tt></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.blockmodels">
+<span id="mcedit2-rendering-blockmodels-module"></span><h2>mcedit2.rendering.blockmodels module<a class="headerlink" href="#module-mcedit2.rendering.blockmodels" title="Permalink to this headline">¶</a></h2>
+<p>blockmodels</p>
+<dl class="class">
+<dt id="mcedit2.rendering.blockmodels.BlockModels">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.blockmodels.</tt><tt class="descname">BlockModels</tt><a class="headerlink" href="#mcedit2.rendering.blockmodels.BlockModels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.rendering.blockmodels.BlockModels.cookFluidQuads">
+<tt class="descname">cookFluidQuads</tt><big>(</big><big>)</big><a class="headerlink" href="#mcedit2.rendering.blockmodels.BlockModels.cookFluidQuads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.blockmodels.BlockModels.cookQuads">
+<tt class="descname">cookQuads</tt><big>(</big><big>)</big><a class="headerlink" href="#mcedit2.rendering.blockmodels.BlockModels.cookQuads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.blockmodels.BlockModels.firstTextures">
+<tt class="descname">firstTextures</tt><a class="headerlink" href="#mcedit2.rendering.blockmodels.BlockModels.firstTextures" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.blockmodels.BlockModels.getTextureNames">
+<tt class="descname">getTextureNames</tt><big>(</big><big>)</big><a class="headerlink" href="#mcedit2.rendering.blockmodels.BlockModels.getTextureNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.blockmodels.FaceInfo">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.blockmodels.</tt><tt class="descname">FaceInfo</tt><a class="headerlink" href="#mcedit2.rendering.blockmodels.FaceInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.blockmodels.npRotate">
+<tt class="descclassname">mcedit2.rendering.blockmodels.</tt><tt class="descname">npRotate</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#mcedit2.rendering.blockmodels.npRotate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.chunkloader">
+<span id="mcedit2-rendering-chunkloader-module"></span><h2>mcedit2.rendering.chunkloader module<a class="headerlink" href="#module-mcedit2.rendering.chunkloader" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoaderInfo">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkloader.</tt><tt class="descname">ChunkLoaderInfo</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoaderInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoaderInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.widgets.html#mcedit2.widgets.infopanel.InfoPanel" title="mcedit2.widgets.infopanel.InfoPanel"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.widgets.infopanel.InfoPanel</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoaderInfo.client">
+<tt class="descname">client</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoaderInfo.client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoaderInfo.client" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoaderInfo.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000058B7C88&gt;</em><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoaderInfo.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunkloader.IChunkLoaderClient">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkloader.</tt><tt class="descname">IChunkLoaderClient</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#IChunkLoaderClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.IChunkLoaderClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.IChunkLoaderClient.requestChunk">
+<tt class="descname">requestChunk</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#IChunkLoaderClient.requestChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.IChunkLoaderClient.requestChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the coordinates of the chunk requested by the client. Each
+call may return a different set of coordinates. Return None to request no chunks.
+:rtype: (cx, cz)
+:return: Chunk coordinates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.IChunkLoaderClient.wantsChunk">
+<tt class="descname">wantsChunk</tt><big>(</big><em>(cx</em>, <em>cz)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#IChunkLoaderClient.wantsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.IChunkLoaderClient.wantsChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional.</p>
+<p>Return False to skip loading the chunk at the given position.
+If all clients return False, the chunk is not loaded.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.IChunkLoaderClient.recieveChunk">
+<tt class="descname">recieveChunk</tt><big>(</big><em>chunk</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#IChunkLoaderClient.recieveChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.IChunkLoaderClient.recieveChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the chunk. May be implemented as a generator function or a function that returns an iterable - if
+<tt class="xref py py-obj docutils literal"><span class="pre">recieve</span> <span class="pre">chunk</span></tt> returns an iterable, it will be exhausted</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chunk</strong> &#8211; returned by level.getChunk()</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">See description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None or iterator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.IChunkLoaderClient.chunkNotLoaded">
+<tt class="descname">chunkNotLoaded</tt><big>(</big><em>(cx</em>, <em>cz)</em>, <em>exc</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#IChunkLoaderClient.chunkNotLoaded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.IChunkLoaderClient.chunkNotLoaded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notifies the client that a chunk failed to load with an exception.
+:param (cx, cz): chunk position</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkloader.</tt><tt class="descname">ChunkLoader</tt><big>(</big><em>dimension</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtCore.QObject</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.chunkCompleted">
+<tt class="descname">chunkCompleted</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x00000000046D0A78&gt;</em><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.chunkCompleted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.allChunksDone">
+<tt class="descname">allChunksDone</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x00000000046D0AB0&gt;</em><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.allChunksDone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.cps">
+<tt class="descname">cps</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader.cps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.cps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.addClient">
+<tt class="descname">addClient</tt><big>(</big><em>client</em>, <em>index=-1</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader.addClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.addClient" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.removeClient">
+<tt class="descname">removeClient</tt><big>(</big><em>client</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader.removeClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.removeClient" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.removeAllClients">
+<tt class="descname">removeAllClients</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader.removeAllClients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.removeAllClients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.discardChunks">
+<tt class="descname">discardChunks</tt><big>(</big><em>chunks</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader.discardChunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.discardChunks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.discardChunk">
+<tt class="descname">discardChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkloader.html#ChunkLoader.discardChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.discardChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkloader.ChunkLoader.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000046CF088&gt;</em><a class="headerlink" href="#mcedit2.rendering.chunkloader.ChunkLoader.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.chunknode">
+<span id="mcedit2-rendering-chunknode-module"></span><h2>mcedit2.rendering.chunknode module<a class="headerlink" href="#module-mcedit2.rendering.chunknode" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.chunknode.ChunkRenderInfo">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunknode.</tt><tt class="descname">ChunkRenderInfo</tt><big>(</big><em>worldScene</em>, <em>chunkPosition</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkRenderInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkRenderInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunknode.ChunkRenderInfo.maxlod">
+<tt class="descname">maxlod</tt><em class="property"> = 2</em><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkRenderInfo.maxlod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunknode.ChunkRenderInfo.minlod">
+<tt class="descname">minlod</tt><em class="property"> = 0</em><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkRenderInfo.minlod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkRenderInfo.getChunkVertexNodes">
+<tt class="descname">getChunkVertexNodes</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkRenderInfo.getChunkVertexNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkRenderInfo.getChunkVertexNodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunknode.ChunkRenderInfo.visibleLayers">
+<tt class="descname">visibleLayers</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkRenderInfo.visibleLayers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkRenderInfo.visibleLayers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunknode.ChunkRenderInfo.done">
+<tt class="descname">done</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkRenderInfo.done"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkRenderInfo.done" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunknode.ChunkNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunknode.</tt><tt class="descname">ChunkNode</tt><big>(</big><em>chunkPosition</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunknode.ChunkNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">TranslateRenderNode</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunknode.</tt><tt class="descname">ChunkGroupNode</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.NamedChildrenNode" title="mcedit2.rendering.scenegraph.NamedChildrenNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.NamedChildrenNode</span></tt></a></p>
+<dl class="docutils">
+<dt>Stores chunks in a group of subnodes, each storing 4x4 chunks. Reduces the number of chunk nodes whose parent</dt>
+<dd>node must be redrawn when a chunk is added or removed.</dd>
+</dl>
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.getChunkArea">
+<tt class="descname">getChunkArea</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>create=True</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.getChunkArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.getChunkArea" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.dropChunkArea">
+<tt class="descname">dropChunkArea</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.dropChunkArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.dropChunkArea" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.containsChunkNode">
+<tt class="descname">containsChunkNode</tt><big>(</big><em>(cx</em>, <em>cz)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.containsChunkNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.containsChunkNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.getChunkNode">
+<tt class="descname">getChunkNode</tt><big>(</big><em>(cx</em>, <em>cz)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.getChunkNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.getChunkNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.addChunkNode">
+<tt class="descname">addChunkNode</tt><big>(</big><em>chunkNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.addChunkNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.addChunkNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.discardChunkNode">
+<tt class="descname">discardChunkNode</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.discardChunkNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.discardChunkNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.chunkPositions">
+<tt class="descname">chunkPositions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.chunkPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunknode.ChunkGroupNode.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunknode.html#ChunkGroupNode.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunknode.ChunkGroupNode.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.chunkupdate">
+<span id="mcedit2-rendering-chunkupdate-module"></span><h2>mcedit2.rendering.chunkupdate module<a class="headerlink" href="#module-mcedit2.rendering.chunkupdate" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkupdate.</tt><tt class="descname">ChunkUpdate</tt><big>(</big><em>updateTask</em>, <em>chunkInfo</em>, <em>chunk</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#ChunkUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate.neighboringChunks">
+<tt class="descname">neighboringChunks</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#ChunkUpdate.neighboringChunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate.neighboringChunks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate.textureAtlas">
+<tt class="descname">textureAtlas</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#ChunkUpdate.textureAtlas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate.textureAtlas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate.fastLeaves">
+<tt class="descname">fastLeaves</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#ChunkUpdate.fastLeaves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate.fastLeaves" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate.roughGraphics">
+<tt class="descname">roughGraphics</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#ChunkUpdate.roughGraphics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate.roughGraphics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate.wholeChunkMeshClasses">
+<tt class="descname">wholeChunkMeshClasses</tt><em class="property"> = [&lt;class 'mcedit2.rendering.chunkmeshes.entitymesh.TileEntityMesh'&gt;, &lt;class 'mcedit2.rendering.chunkmeshes.entitymesh.MonsterRenderer'&gt;, &lt;class 'mcedit2.rendering.chunkmeshes.entitymesh.ItemRenderer'&gt;, &lt;class 'mcedit2.rendering.chunkmeshes.tileticks.TileTicksRenderer'&gt;, &lt;class 'mcedit2.rendering.chunkmeshes.terrainpop.TerrainPopulatedRenderer'&gt;, &lt;class 'mcedit2.rendering.chunkmeshes.lowdetail.LowDetailBlockMesh'&gt;, &lt;class 'mcedit2.rendering.chunkmeshes.lowdetail.OverheadBlockMesh'&gt;]</em><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate.wholeChunkMeshClasses" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate.buildChunkMeshes">
+<tt class="descname">buildChunkMeshes</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#ChunkUpdate.buildChunkMeshes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate.buildChunkMeshes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebuild the meshes which render the entire chunk from top to bottom
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkupdate.ChunkUpdate.buildSectionMeshes">
+<tt class="descname">buildSectionMeshes</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#ChunkUpdate.buildSectionMeshes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.ChunkUpdate.buildSectionMeshes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebuild the section meshes.</p>
+<p>Creates a SectionUpdate instance for each section found in this ChunkUpdate&#8217;s chunk and iterates it.
+Returns an iterator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.chunkupdate.</tt><tt class="descname">SectionUpdate</tt><big>(</big><em>chunkUpdate</em>, <em>chunkSection</em>, <em>blockMeshes</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.fastLeaves">
+<tt class="descname">fastLeaves</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.fastLeaves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.fastLeaves" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.roughGraphics">
+<tt class="descname">roughGraphics</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.roughGraphics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.roughGraphics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.areaBlocks">
+<tt class="descname">areaBlocks</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.areaBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.areaBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.areaData">
+<tt class="descname">areaData</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.areaData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.areaData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.areaBlocksOrData">
+<tt class="descname">areaBlocksOrData</tt><big>(</big><em>arrayName</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.areaBlocksOrData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.areaBlocksOrData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the blocks in an 18-wide cube centered on this section. Only retrieves blocks from the
+6 sections neighboring this one along a major axis, so the corners are empty. That&#8217;s fine since they
+aren&#8217;t needed for any calculation we do.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Array of blocks in this chunk and six of its neighbors.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">numpy.ndarray(shape=(18, 18, 18), dtype=&#8217;uint16&#8217;)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.blocktypes">
+<tt class="descname">blocktypes</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.blocktypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.blocktypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.renderType">
+<tt class="descname">renderType</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.renderType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.renderType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.exposedBlockMasks">
+<tt class="descname">exposedBlockMasks</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.exposedBlockMasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.exposedBlockMasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.areaLights">
+<tt class="descname">areaLights</tt><big>(</big><em>lightName</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.areaLights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.areaLights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.areaBlockLights">
+<tt class="descname">areaBlockLights</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.areaBlockLights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.areaBlockLights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.areaSkyLights">
+<tt class="descname">areaSkyLights</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.areaSkyLights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.areaSkyLights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.Blocks">
+<tt class="descname">Blocks</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.Blocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.Blocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.chunkupdate.SectionUpdate.Data">
+<tt class="descname">Data</tt><a class="reference internal" href="_modules/mcedit2/rendering/chunkupdate.html#SectionUpdate.Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.chunkupdate.SectionUpdate.Data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.compass">
+<span id="mcedit2-rendering-compass-module"></span><h2>mcedit2.rendering.compass module<a class="headerlink" href="#module-mcedit2.rendering.compass" title="Permalink to this headline">¶</a></h2>
+<p>compass</p>
+<dl class="function">
+<dt id="mcedit2.rendering.compass.makeQuad">
+<tt class="descclassname">mcedit2.rendering.compass.</tt><tt class="descname">makeQuad</tt><big>(</big><em>minx</em>, <em>miny</em>, <em>width</em>, <em>height</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/compass.html#makeQuad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.compass.makeQuad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.compass.CompassRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.compass.</tt><tt class="descname">CompassRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/compass.html#CompassRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.compass.CompassRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.compass.CompassRenderNode.compile">
+<tt class="descname">compile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/compass.html#CompassRenderNode.compile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.compass.CompassRenderNode.compile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.compass.CompassRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/compass.html#CompassRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.compass.CompassRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.compass.CompassNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.compass.</tt><tt class="descname">CompassNode</tt><big>(</big><em>small=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/compass.html#CompassNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.compass.CompassNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.compass.CompassNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.compass.CompassNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#mcedit2.rendering.compass.CompassRenderNode" title="mcedit2.rendering.compass.CompassRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">CompassRenderNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.compass.CompassNode.yawPitch">
+<tt class="descname">yawPitch</tt><a class="reference internal" href="_modules/mcedit2/rendering/compass.html#CompassNode.yawPitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.compass.CompassNode.yawPitch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.cubes">
+<span id="mcedit2-rendering-cubes-module"></span><h2>mcedit2.rendering.cubes module<a class="headerlink" href="#module-mcedit2.rendering.cubes" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.rendering.cubes.drawBox">
+<tt class="descclassname">mcedit2.rendering.cubes.</tt><tt class="descname">drawBox</tt><big>(</big><em>box</em>, <em>cubeType=GL_QUADS</em>, <em>texture=None</em>, <em>textureVertices=None</em>, <em>selectionBox=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/cubes.html#drawBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.cubes.drawBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>pass a different cubeType e.g. GL_LINE_STRIP for wireframes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.cubes.drawFace">
+<tt class="descclassname">mcedit2.rendering.cubes.</tt><tt class="descname">drawFace</tt><big>(</big><em>box</em>, <em>face</em>, <em>elementType=GL_QUADS</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/cubes.html#drawFace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.cubes.drawFace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.cubes.drawConstructionCube">
+<tt class="descclassname">mcedit2.rendering.cubes.</tt><tt class="descname">drawConstructionCube</tt><big>(</big><em>box</em>, <em>color</em>, <em>texture=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/cubes.html#drawConstructionCube"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.cubes.drawConstructionCube" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.cubes.drawTerrainCuttingWire">
+<tt class="descclassname">mcedit2.rendering.cubes.</tt><tt class="descname">drawTerrainCuttingWire</tt><big>(</big><em>box</em>, <em>c0=(0.75</em>, <em>0.75</em>, <em>0.75</em>, <em>0.4)</em>, <em>c1=(1.0</em>, <em>1.0</em>, <em>1.0</em>, <em>1.0)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/cubes.html#drawTerrainCuttingWire"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.cubes.drawTerrainCuttingWire" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.depths">
+<span id="mcedit2-rendering-depths-module"></span><h2>mcedit2.rendering.depths module<a class="headerlink" href="#module-mcedit2.rendering.depths" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (c) 2010-2012 David Rio Vierra</p>
+<p>Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.</p>
+<p>THE SOFTWARE IS PROVIDED &#8220;AS IS&#8221; AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.</p>
+<dl class="class">
+<dt id="mcedit2.rendering.depths.DepthOffset">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.depths.</tt><tt class="descname">DepthOffset</tt><a class="reference internal" href="_modules/mcedit2/rendering/depths.html#DepthOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.ChunkMarkers">
+<tt class="descname">ChunkMarkers</tt><em class="property"> = 2</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.ChunkMarkers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.Renderer">
+<tt class="descname">Renderer</tt><em class="property"> = 1</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.Renderer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.PreviewRenderer">
+<tt class="descname">PreviewRenderer</tt><em class="property"> = 0</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.PreviewRenderer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.TerrainWire">
+<tt class="descname">TerrainWire</tt><em class="property"> = -1</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.TerrainWire" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.Selection">
+<tt class="descname">Selection</tt><em class="property"> = -1</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.Selection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.ClonePreview">
+<tt class="descname">ClonePreview</tt><em class="property"> = -2</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.ClonePreview" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.SelectionCorners">
+<tt class="descname">SelectionCorners</tt><em class="property"> = -2</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.SelectionCorners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.PotentialSelection">
+<tt class="descname">PotentialSelection</tt><em class="property"> = -3</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.PotentialSelection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.FillMarkers">
+<tt class="descname">FillMarkers</tt><em class="property"> = -3</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.FillMarkers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.CloneMarkers">
+<tt class="descname">CloneMarkers</tt><em class="property"> = -3</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.CloneMarkers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.CloneCursor">
+<tt class="descname">CloneCursor</tt><em class="property"> = -3</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.CloneCursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.depths.DepthOffset.SelectionCursor">
+<tt class="descname">SelectionCursor</tt><em class="property"> = -4</em><a class="headerlink" href="#mcedit2.rendering.depths.DepthOffset.SelectionCursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.frustum">
+<span id="mcedit2-rendering-frustum-module"></span><h2>mcedit2.rendering.frustum module<a class="headerlink" href="#module-mcedit2.rendering.frustum" title="Permalink to this headline">¶</a></h2>
+<p>View frustum modeling as series of clipping planes</p>
+<dl class="docutils">
+<dt>Based on code from:</dt>
+<dd><a class="reference external" href="http://www.markmorley.com/opengl/frustumculling.html">http://www.markmorley.com/opengl/frustumculling.html</a></dd>
+</dl>
+<dl class="function">
+<dt id="mcedit2.rendering.frustum.viewingMatrix">
+<tt class="descclassname">mcedit2.rendering.frustum.</tt><tt class="descname">viewingMatrix</tt><big>(</big><em>projection=None</em>, <em>model=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/frustum.html#viewingMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.frustum.viewingMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the total viewing matrix from given data</p>
+<dl class="docutils">
+<dt>projection &#8211; the projection matrix, if not provided</dt>
+<dd>than the result of glGetDoublev( GL_PROJECTION_MATRIX)
+will be used.</dd>
+<dt>model &#8211; the model-view matrix, if not provided</dt>
+<dd>than the result of glGetDoublev( GL_MODELVIEW_MATRIX )
+will be used.</dd>
+<dt>Note:</dt>
+<dd>Unless there is a valid projection and model-view
+matrix, the function will raise a RuntimeError</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.frustum.Frustum">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.frustum.</tt><tt class="descname">Frustum</tt><a class="reference internal" href="_modules/mcedit2/rendering/frustum.html#Frustum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.frustum.Frustum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Holder for frustum specification for intersection tests</p>
+<dl class="docutils">
+<dt>Note:</dt>
+<dd>the Frustum can include an arbitrary number of
+clipping planes, though the most common usage
+is to define 6 clipping planes from the OpenGL
+model-view matrices.</dd>
+</dl>
+<dl class="method">
+<dt id="mcedit2.rendering.frustum.Frustum.visible">
+<tt class="descname">visible</tt><big>(</big><em>points</em>, <em>radius</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/frustum.html#Frustum.visible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.frustum.Frustum.visible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine whether this sphere is visible in frustum</p>
+<dl class="docutils">
+<dt>frustum &#8211; Frustum object holding the clipping planes</dt>
+<dd>for the view</dd>
+<dt>matrix &#8211; a matrix which transforms the local</dt>
+<dd>coordinates to the (world-space) coordinate
+system in which the frustum is defined.</dd>
+</dl>
+<p>This version of the method uses a pure-python loop
+to do the actual culling once the points are
+multiplied by the matrix. (i.e. it does not use the
+frustcullaccel C extension module)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.frustum.Frustum.visible1">
+<tt class="descname">visible1</tt><big>(</big><em>point</em>, <em>radius</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/frustum.html#Frustum.visible1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.frustum.Frustum.visible1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.rendering.frustum.Frustum.fromViewingMatrix">
+<em class="property">classmethod </em><tt class="descname">fromViewingMatrix</tt><big>(</big><em>matrix=None</em>, <em>normalize=1</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/frustum.html#Frustum.fromViewingMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.frustum.Frustum.fromViewingMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract and calculate frustum clipping planes from OpenGL</p>
+<p>The default initializer allows you to create
+Frustum objects with arbitrary clipping planes,
+while this alternate initializer provides
+automatic clipping-plane extraction from the
+model-view matrix.</p>
+<p>matrix &#8211; the combined model-view matrix
+normalize &#8211; whether to normalize the plane equations</p>
+<blockquote>
+<div>to allow for sphere bounding-volumes and use of
+distance equations for LOD-style operations.</div></blockquote>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.rendering.frustum.Frustum.normalize">
+<em class="property">classmethod </em><tt class="descname">normalize</tt><big>(</big><em>frustum</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/frustum.html#Frustum.normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.frustum.Frustum.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize clipping plane equations</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.geometrycache">
+<span id="mcedit2-rendering-geometrycache-module"></span><h2>mcedit2.rendering.geometrycache module<a class="headerlink" href="#module-mcedit2.rendering.geometrycache" title="Permalink to this headline">¶</a></h2>
+<p>geometrycache</p>
+<dl class="class">
+<dt id="mcedit2.rendering.geometrycache.GeometryCache">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.geometrycache.</tt><tt class="descname">GeometryCache</tt><big>(</big><em>*a</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/geometrycache.html#GeometryCache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.geometrycache.GeometryCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.geometrycache.cache_stats">
+<tt class="descclassname">mcedit2.rendering.geometrycache.</tt><tt class="descname">cache_stats</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/geometrycache.html#cache_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.geometrycache.cache_stats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.layers">
+<span id="mcedit2-rendering-layers-module"></span><h2>mcedit2.rendering.layers module<a class="headerlink" href="#module-mcedit2.rendering.layers" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.layers.Layer">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.layers.</tt><tt class="descname">Layer</tt><a class="reference internal" href="_modules/mcedit2/rendering/layers.html#Layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.layers.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.Blocks">
+<tt class="descname">Blocks</tt><em class="property"> = u'Blocks'</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.Blocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.Entities">
+<tt class="descname">Entities</tt><em class="property"> = u'Entities'</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.Entities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.Monsters">
+<tt class="descname">Monsters</tt><em class="property"> = u'Monsters'</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.Monsters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.Items">
+<tt class="descname">Items</tt><em class="property"> = u'Items'</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.Items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.TileEntities">
+<tt class="descname">TileEntities</tt><em class="property"> = u'TileEntities'</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.TileEntities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.TileTicks">
+<tt class="descname">TileTicks</tt><em class="property"> = u'TileTicks'</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.TileTicks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.TerrainPopulated">
+<tt class="descname">TerrainPopulated</tt><em class="property"> = u'TerrainPopulated'</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.TerrainPopulated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.layers.Layer.AllLayers">
+<tt class="descname">AllLayers</tt><em class="property"> = (u'Blocks', u'Entities', u'Monsters', u'Items', u'TileEntities', u'TileTicks')</em><a class="headerlink" href="#mcedit2.rendering.layers.Layer.AllLayers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.lightmap">
+<span id="mcedit2-rendering-lightmap-module"></span><h2>mcedit2.rendering.lightmap module<a class="headerlink" href="#module-mcedit2.rendering.lightmap" title="Permalink to this headline">¶</a></h2>
+<p>lightmap</p>
+<dl class="function">
+<dt id="mcedit2.rendering.lightmap.generateLightBrightnessTable">
+<tt class="descclassname">mcedit2.rendering.lightmap.</tt><tt class="descname">generateLightBrightnessTable</tt><big>(</big><em>minLight=0.0</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/lightmap.html#generateLightBrightnessTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.lightmap.generateLightBrightnessTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.lightmap.generateLightmap">
+<tt class="descclassname">mcedit2.rendering.lightmap.</tt><tt class="descname">generateLightmap</tt><big>(</big><em>darkness</em>, <em>theEnd=False</em>, <em>gamma=0.5</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/lightmap.html#generateLightmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.lightmap.generateLightmap" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.lightmap.main">
+<tt class="descclassname">mcedit2.rendering.lightmap.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/lightmap.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.lightmap.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.loadablechunks">
+<span id="mcedit2-rendering-loadablechunks-module"></span><h2>mcedit2.rendering.loadablechunks module<a class="headerlink" href="#module-mcedit2.rendering.loadablechunks" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.loadablechunks.LoadableChunksRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.loadablechunks.</tt><tt class="descname">LoadableChunksRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/loadablechunks.html#LoadableChunksRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.loadablechunks.LoadableChunksRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.loadablechunks.LoadableChunksRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/loadablechunks.html#LoadableChunksRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.loadablechunks.LoadableChunksRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.loadablechunks.LoadableChunksRenderNode.floorTexture">
+<tt class="descname">floorTexture</tt><a class="reference internal" href="_modules/mcedit2/rendering/loadablechunks.html#LoadableChunksRenderNode.floorTexture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.loadablechunks.LoadableChunksRenderNode.floorTexture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.loadablechunks.LoadableChunksNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.loadablechunks.</tt><tt class="descname">LoadableChunksNode</tt><big>(</big><em>dimension</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/loadablechunks.html#LoadableChunksNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.loadablechunks.LoadableChunksNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.loadablechunks.LoadableChunksNode.skipLargeLevels">
+<tt class="descname">skipLargeLevels</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.rendering.loadablechunks.LoadableChunksNode.skipLargeLevels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.loadablechunks.LoadableChunksNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.loadablechunks.LoadableChunksNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#mcedit2.rendering.loadablechunks.LoadableChunksRenderNode" title="mcedit2.rendering.loadablechunks.LoadableChunksRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">LoadableChunksRenderNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.loadablechunks.LoadableChunksNode.createVertexArrays">
+<tt class="descname">createVertexArrays</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/loadablechunks.html#LoadableChunksNode.createVertexArrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.loadablechunks.LoadableChunksNode.createVertexArrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.loadablechunks.makeFloorTex">
+<tt class="descclassname">mcedit2.rendering.loadablechunks.</tt><tt class="descname">makeFloorTex</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/loadablechunks.html#makeFloorTex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.loadablechunks.makeFloorTex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.loadablechunks.chunkMarkers">
+<tt class="descclassname">mcedit2.rendering.loadablechunks.</tt><tt class="descname">chunkMarkers</tt><big>(</big><em>chunkSet</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/loadablechunks.html#chunkMarkers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.loadablechunks.chunkMarkers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a mapping { size: [position, ...] } for different powers of 2
+as size.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="mcedit2-rendering-modelmesh-module">
+<h2>mcedit2.rendering.modelmesh module<a class="headerlink" href="#mcedit2-rendering-modelmesh-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mcedit2.rendering.modelmesh"></span><p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.modelmesh.BlockModelMesh">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.modelmesh.</tt><tt class="descname">BlockModelMesh</tt><a class="headerlink" href="#mcedit2.rendering.modelmesh.BlockModelMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.rendering.modelmesh.BlockModelMesh.createVertexArrays">
+<tt class="descname">createVertexArrays</tt><big>(</big><big>)</big><a class="headerlink" href="#mcedit2.rendering.modelmesh.BlockModelMesh.createVertexArrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.modelmesh.BlockModelMesh.renderstate">
+<tt class="descname">renderstate</tt><a class="headerlink" href="#mcedit2.rendering.modelmesh.BlockModelMesh.renderstate" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">RenderstateAlphaTestNode</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.rendergraph">
+<span id="mcedit2-rendering-rendergraph-module"></span><h2>mcedit2.rendering.rendergraph module<a class="headerlink" href="#module-mcedit2.rendering.rendergraph" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.RenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">RenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.parent">
+<tt class="descname">parent</tt><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.addChild">
+<tt class="descname">addChild</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.addChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.addChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.insertNode">
+<tt class="descname">insertNode</tt><big>(</big><em>index</em>, <em>node</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.insertNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.insertNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.removeChild">
+<tt class="descname">removeChild</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.removeChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.removeChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.invalidate">
+<tt class="descname">invalidate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.touch">
+<tt class="descname">touch</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.touch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.touch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.getList">
+<tt class="descname">getList</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.getList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.getList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.callList">
+<tt class="descname">callList</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.callList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.callList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.compile">
+<tt class="descname">compile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.compile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.compile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.draw">
+<tt class="descname">draw</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.drawChildren">
+<tt class="descname">drawChildren</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.drawChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.drawChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderNode.destroyLists">
+<tt class="descname">destroyLists</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderNode.destroyLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderNode.destroyLists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.RenderstateRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">RenderstateRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderstateRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderstateRenderNode.draw">
+<tt class="descname">draw</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderstateRenderNode.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderstateRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderstateRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.RenderstateRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#RenderstateRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.TextureAtlasRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">TextureAtlasRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#TextureAtlasRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.TextureAtlasRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.TextureAtlasRenderNode.compile">
+<tt class="descname">compile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#TextureAtlasRenderNode.compile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.TextureAtlasRenderNode.compile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.TextureAtlasRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#TextureAtlasRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.TextureAtlasRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.TextureAtlasRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#TextureAtlasRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.TextureAtlasRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.TranslateRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">TranslateRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#TranslateRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.TranslateRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.TranslateRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#TranslateRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.TranslateRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.TranslateRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#TranslateRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.TranslateRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.VertexRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">VertexRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#VertexRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.VertexRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.VertexRenderNode.invalidate">
+<tt class="descname">invalidate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#VertexRenderNode.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.VertexRenderNode.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.VertexRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#VertexRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.VertexRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.VertexRenderNode.drawArrays">
+<tt class="descname">drawArrays</tt><big>(</big><em>vertexArrays</em>, <em>textures</em>, <em>lights</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#VertexRenderNode.drawArrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.VertexRenderNode.drawArrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.OrthoRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">OrthoRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#OrthoRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.OrthoRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.OrthoRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#OrthoRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.OrthoRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.OrthoRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#OrthoRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.OrthoRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.ClearRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">ClearRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#ClearRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.ClearRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.ClearRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#ClearRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.ClearRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.DepthMaskRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">DepthMaskRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#DepthMaskRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.DepthMaskRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.DepthMaskRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#DepthMaskRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.DepthMaskRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.DepthMaskRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#DepthMaskRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.DepthMaskRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.BoxRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">BoxRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#BoxRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.BoxRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.BoxRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#BoxRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.BoxRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.BoxFaceRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">BoxFaceRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#BoxFaceRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.BoxFaceRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.BoxFaceRenderNode.drawBoxFace">
+<tt class="descname">drawBoxFace</tt><big>(</big><em>box</em>, <em>face</em>, <em>color=(0.9</em>, <em>0.6</em>, <em>0.2</em>, <em>0.5)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#BoxFaceRenderNode.drawBoxFace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.BoxFaceRenderNode.drawBoxFace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.rendergraph.DepthOffsetRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">DepthOffsetRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#DepthOffsetRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.DepthOffsetRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.DepthOffsetRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#DepthOffsetRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.DepthOffsetRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.rendergraph.DepthOffsetRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#DepthOffsetRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.DepthOffsetRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.rendergraph.updateRenderNode">
+<tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">updateRenderNode</tt><big>(</big><em>renderNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#updateRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.updateRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.rendergraph.createRenderNode">
+<tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">createRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#createRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.createRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">mcedit2.rendering.rendergraph.RenderNode</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.rendergraph.updateChildren">
+<tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">updateChildren</tt><big>(</big><em>renderNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#updateChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.updateChildren" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.rendergraph.renderScene">
+<tt class="descclassname">mcedit2.rendering.rendergraph.</tt><tt class="descname">renderScene</tt><big>(</big><em>renderNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/rendergraph.html#renderScene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.rendergraph.renderScene" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.renderstates">
+<span id="mcedit2-rendering-renderstates-module"></span><h2>mcedit2.rendering.renderstates module<a class="headerlink" href="#module-mcedit2.rendering.renderstates" title="Permalink to this headline">¶</a></h2>
+<p>renderstates</p>
+<dl class="class">
+<dt id="mcedit2.rendering.renderstates.RenderstatePlainNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.renderstates.</tt><tt class="descname">RenderstatePlainNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstatePlainNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstatePlainNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstatePlainNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstatePlainNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstatePlainNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstatePlainNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstatePlainNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstatePlainNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.renderstates.RenderstateVinesNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.renderstates.</tt><tt class="descname">RenderstateVinesNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateVinesNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateVinesNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateVinesNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateVinesNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateVinesNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateVinesNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateVinesNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateVinesNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.renderstates.RenderstateLowDetailNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.renderstates.</tt><tt class="descname">RenderstateLowDetailNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateLowDetailNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateLowDetailNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateLowDetailNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateLowDetailNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateLowDetailNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateLowDetailNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateLowDetailNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateLowDetailNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.renderstates.RenderstateAlphaTestNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.renderstates.</tt><tt class="descname">RenderstateAlphaTestNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateAlphaTestNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateAlphaTestNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateAlphaTestNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateAlphaTestNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateAlphaTestNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateAlphaTestNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateAlphaTestNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateAlphaTestNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.renderstates.RenderstateWaterNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.renderstates.</tt><tt class="descname">RenderstateWaterNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateWaterNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateWaterNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.renderstates._RenderstateAlphaBlendNode</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.renderstates.RenderstateIceNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.renderstates.</tt><tt class="descname">RenderstateIceNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateIceNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateIceNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.renderstates._RenderstateAlphaBlendNode</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.renderstates.RenderstateEntityNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.renderstates.</tt><tt class="descname">RenderstateEntityNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateEntityNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateEntityNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateEntityNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateEntityNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateEntityNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.renderstates.RenderstateEntityNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/renderstates.html#RenderstateEntityNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.renderstates.RenderstateEntityNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.scenegraph">
+<span id="mcedit2-rendering-scenegraph-module"></span><h2>mcedit2.rendering.scenegraph module<a class="headerlink" href="#module-mcedit2.rendering.scenegraph" title="Permalink to this headline">¶</a></h2>
+<p>scenegraph</p>
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.Node">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">Node</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.Node.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">RenderNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.Node.parent">
+<tt class="descname">parent</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.Node.touchChildren">
+<tt class="descname">touchChildren</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.touchChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.touchChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.Node.addChild">
+<tt class="descname">addChild</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.addChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.addChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.Node.insertChild">
+<tt class="descname">insertChild</tt><big>(</big><em>index</em>, <em>node</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.insertChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.insertChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.Node.removeChild">
+<tt class="descname">removeChild</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.removeChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.removeChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.Node.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.Node.children">
+<tt class="descname">children</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.children" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.Node.dirty">
+<tt class="descname">dirty</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.dirty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.dirty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.Node.visible">
+<tt class="descname">visible</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#Node.visible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.Node.visible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">NamedChildrenNode</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#NamedChildrenNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">RenderNode</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode.addChild">
+<tt class="descname">addChild</tt><big>(</big><em>name</em>, <em>node</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#NamedChildrenNode.addChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode.addChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode.insertChild">
+<tt class="descname">insertChild</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode.insertChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode.removeChild">
+<tt class="descname">removeChild</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#NamedChildrenNode.removeChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode.removeChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode.getChild">
+<tt class="descname">getChild</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#NamedChildrenNode.getChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode.getChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#NamedChildrenNode.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.NamedChildrenNode.children">
+<tt class="descname">children</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#NamedChildrenNode.children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.NamedChildrenNode.children" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.RenderstateNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">RenderstateNode</tt><big>(</big><em>nodeClass</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#RenderstateNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.RenderstateNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.TextureAtlasNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">TextureAtlasNode</tt><big>(</big><em>textureAtlas</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#TextureAtlasNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.TextureAtlasNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.TextureAtlasNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.TextureAtlasNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">TextureAtlasRenderNode</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.TranslateNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">TranslateNode</tt><big>(</big><em>translateOffset=(0.0</em>, <em>0.0</em>, <em>0.0)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#TranslateNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.TranslateNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.TranslateNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.TranslateNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">TranslateRenderNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.TranslateNode.translateOffset">
+<tt class="descname">translateOffset</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#TranslateNode.translateOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.TranslateNode.translateOffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.DepthMaskNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">DepthMaskNode</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#DepthMaskNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.DepthMaskNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.DepthMaskNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.DepthMaskNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">DepthMaskRenderNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.DepthMaskNode.mask">
+<tt class="descname">mask</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.rendering.scenegraph.DepthMaskNode.mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.ClearNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">ClearNode</tt><big>(</big><em>clearColor=(0</em>, <em>0</em>, <em>0</em>, <em>1)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#ClearNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.ClearNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.ClearNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.ClearNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">ClearRenderNode</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.OrthoNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">OrthoNode</tt><big>(</big><em>size=(1</em>, <em>1)</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#OrthoNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.OrthoNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.OrthoNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.OrthoNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">OrthoRenderNode</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.OrthoNode.size">
+<tt class="descname">size</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#OrthoNode.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.OrthoNode.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.VertexNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">VertexNode</tt><big>(</big><em>vertexArrays</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#VertexNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.VertexNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.VertexNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.VertexNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">VertexRenderNode</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.MatrixRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">MatrixRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#MatrixRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.MatrixRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.MatrixRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#MatrixRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.MatrixRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.scenegraph.MatrixRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#MatrixRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.MatrixRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.MatrixNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">MatrixNode</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#MatrixNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.MatrixNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.MatrixNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.MatrixNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#mcedit2.rendering.scenegraph.MatrixRenderNode" title="mcedit2.rendering.scenegraph.MatrixRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">MatrixRenderNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.MatrixNode.projection">
+<tt class="descname">projection</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#MatrixNode.projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.MatrixNode.projection" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">QMatrix4x4</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.MatrixNode.modelview">
+<tt class="descname">modelview</tt><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#MatrixNode.modelview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.MatrixNode.modelview" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">QMatrix4x4</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.scenegraph.DepthOffsetNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.scenegraph.</tt><tt class="descname">DepthOffsetNode</tt><big>(</big><em>depthOffset</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/scenegraph.html#DepthOffsetNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.scenegraph.DepthOffsetNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.scenegraph.DepthOffsetNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.scenegraph.DepthOffsetNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">DepthOffsetRenderNode</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.selection">
+<span id="mcedit2-rendering-selection-module"></span><h2>mcedit2.rendering.selection module<a class="headerlink" href="#module-mcedit2.rendering.selection" title="Permalink to this headline">¶</a></h2>
+<p>selection</p>
+<dl class="class">
+<dt id="mcedit2.rendering.selection.CullFaceRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">CullFaceRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#CullFaceRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.CullFaceRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderstateRenderNode" title="mcedit2.rendering.rendergraph.RenderstateRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderstateRenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.selection.CullFaceRenderNode.enter">
+<tt class="descname">enter</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#CullFaceRenderNode.enter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.CullFaceRenderNode.enter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.selection.CullFaceRenderNode.exit">
+<tt class="descname">exit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#CullFaceRenderNode.exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.CullFaceRenderNode.exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.selection.NonAirMaskSelection">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">NonAirMaskSelection</tt><big>(</big><em>dimension</em>, <em>box</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#NonAirMaskSelection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.NonAirMaskSelection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mceditlib.selection.html#mceditlib.selection.SelectionBox" title="mceditlib.selection.SelectionBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.SelectionBox</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.selection.NonAirMaskSelection.box_mask">
+<tt class="descname">box_mask</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#NonAirMaskSelection.box_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.NonAirMaskSelection.box_mask" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>box</strong> (<em>BoundingBox</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.selection.SelectionScene">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">SelectionScene</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionScene.selection">
+<tt class="descname">selection</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.selection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.selection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionScene.dimension">
+<tt class="descname">dimension</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.dimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.dimension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionScene.filled">
+<tt class="descname">filled</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.filled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.filled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.selection.SelectionScene.updateSelection">
+<tt class="descname">updateSelection</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.updateSelection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.updateSelection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.selection.SelectionScene.loadMore">
+<tt class="descname">loadMore</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.loadMore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.loadMore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.selection.SelectionScene.loadSections">
+<tt class="descname">loadSections</tt><big>(</big><em>*a</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.loadSections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.loadSections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.selection.SelectionScene.exposedBlockMasks">
+<tt class="descname">exposedBlockMasks</tt><big>(</big><em>mask</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.exposedBlockMasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.exposedBlockMasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare adjacent cells in the 3d mask along all three axes and return one mask for each cardinal direction.
+The returned masks contain the faces of each cell which are exposed in that direction and should be rendered.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mask</strong> (<em>ndarray</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list[ndarray]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.selection.SelectionScene.buildSection">
+<tt class="descname">buildSection</tt><big>(</big><em>sectionMask</em>, <em>cy</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionScene.buildSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionScene.buildSection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.selection.SelectionBoxRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">SelectionBoxRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionBoxRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.selection.SelectionBoxRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionBoxRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">SelectionBoxNode</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionBoxNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#mcedit2.rendering.selection.SelectionBoxRenderNode" title="mcedit2.rendering.selection.SelectionBoxRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">SelectionBoxRenderNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode.depth">
+<tt class="descname">depth</tt><em class="property"> = -1</em><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode.depth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode.wire">
+<tt class="descname">wire</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode.wire" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode.filled">
+<tt class="descname">filled</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionBoxNode.filled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode.filled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode.selectionBox">
+<tt class="descname">selectionBox</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionBoxNode.selectionBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode.selectionBox" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode.color">
+<tt class="descname">color</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionBoxNode.color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode.color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionBoxNode.wireColor">
+<tt class="descname">wireColor</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionBoxNode.wireColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionBoxNode.wireColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.selection.SelectionFaceRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">SelectionFaceRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionFaceRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.selection.SelectionFaceRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionFaceRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.selection.SelectionFaceNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">SelectionFaceNode</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionFaceNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionFaceNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#mcedit2.rendering.selection.SelectionFaceRenderNode" title="mcedit2.rendering.selection.SelectionFaceRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">SelectionFaceRenderNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionFaceNode.depth">
+<tt class="descname">depth</tt><em class="property"> = -1</em><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceNode.depth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionFaceNode.selectionBox">
+<tt class="descname">selectionBox</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionFaceNode.selectionBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceNode.selectionBox" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionFaceNode.face">
+<tt class="descname">face</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionFaceNode.face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceNode.face" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.selection.SelectionFaceNode.color">
+<tt class="descname">color</tt><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#SelectionFaceNode.color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.SelectionFaceNode.color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.selection.boxFaceUnderCursor">
+<tt class="descclassname">mcedit2.rendering.selection.</tt><tt class="descname">boxFaceUnderCursor</tt><big>(</big><em>box</em>, <em>mouseRay</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/selection.html#boxFaceUnderCursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.selection.boxFaceUnderCursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the nearest face of the given bounding box that intersects with the given mouse ray
+and return (point, face)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.sky">
+<span id="mcedit2-rendering-sky-module"></span><h2>mcedit2.rendering.sky module<a class="headerlink" href="#module-mcedit2.rendering.sky" title="Permalink to this headline">¶</a></h2>
+<p>sky</p>
+<dl class="class">
+<dt id="mcedit2.rendering.sky.SkyRenderNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.sky.</tt><tt class="descname">SkyRenderNode</tt><big>(</big><em>sceneNode</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/sky.html#SkyRenderNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.sky.SkyRenderNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.rendergraph.RenderNode" title="mcedit2.rendering.rendergraph.RenderNode"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.rendergraph.RenderNode</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.sky.SkyRenderNode.drawSelf">
+<tt class="descname">drawSelf</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/sky.html#SkyRenderNode.drawSelf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.sky.SkyRenderNode.drawSelf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.sky.SkyNode">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.sky.</tt><tt class="descname">SkyNode</tt><a class="reference internal" href="_modules/mcedit2/rendering/sky.html#SkyNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.sky.SkyNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.sky.SkyNode.RenderNodeClass">
+<tt class="descname">RenderNodeClass</tt><a class="headerlink" href="#mcedit2.rendering.sky.SkyNode.RenderNodeClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#mcedit2.rendering.sky.SkyRenderNode" title="mcedit2.rendering.sky.SkyRenderNode"><tt class="xref py py-class docutils literal"><span class="pre">SkyRenderNode</span></tt></a></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.slices">
+<span id="mcedit2-rendering-slices-module"></span><h2>mcedit2.rendering.slices module<a class="headerlink" href="#module-mcedit2.rendering.slices" title="Permalink to this headline">¶</a></h2>
+<p>slices</p>
+</div>
+<div class="section" id="module-mcedit2.rendering.textureatlas">
+<span id="mcedit2-rendering-textureatlas-module"></span><h2>mcedit2.rendering.textureatlas module<a class="headerlink" href="#module-mcedit2.rendering.textureatlas" title="Permalink to this headline">¶</a></h2>
+<p>textureatlas</p>
+<dl class="class">
+<dt id="mcedit2.rendering.textureatlas.TextureSlot">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.textureatlas.</tt><tt class="descname">TextureSlot</tt><big>(</big><em>left</em>, <em>top</em>, <em>right</em>, <em>bottom</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureSlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureSlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.textureatlas.TextureSlot.width">
+<tt class="descname">width</tt><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureSlot.width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureSlot.width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.textureatlas.TextureSlot.height">
+<tt class="descname">height</tt><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureSlot.height"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureSlot.height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.textureatlas.TextureSlot.addTexture">
+<tt class="descname">addTexture</tt><big>(</big><em>name</em>, <em>w</em>, <em>h</em>, <em>d</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureSlot.addTexture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureSlot.addTexture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.textureatlas.allTextureNames">
+<tt class="descclassname">mcedit2.rendering.textureatlas.</tt><tt class="descname">allTextureNames</tt><big>(</big><em>blocktypes</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#allTextureNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.allTextureNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.textureatlas.TextureAtlas">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.textureatlas.</tt><tt class="descname">TextureAtlas</tt><big>(</big><em>world</em>, <em>resourceLoader</em>, <em>blockModels</em>, <em>maxLOD=0</em>, <em>overrideMaxSize=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureAtlas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureAtlas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.rendering.textureatlas.TextureAtlas.load">
+<tt class="descname">load</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureAtlas.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureAtlas.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.textureatlas.TextureAtlas.bindTerrain">
+<tt class="descname">bindTerrain</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureAtlas.bindTerrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureAtlas.bindTerrain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.textureatlas.TextureAtlas.dayTime">
+<tt class="descname">dayTime</tt><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureAtlas.dayTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureAtlas.dayTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.textureatlas.TextureAtlas.minBrightness">
+<tt class="descname">minBrightness</tt><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureAtlas.minBrightness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureAtlas.minBrightness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.textureatlas.TextureAtlas.bindLight">
+<tt class="descname">bindLight</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureAtlas.bindLight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureAtlas.bindLight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.textureatlas.TextureAtlas.dispose">
+<tt class="descname">dispose</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#TextureAtlas.dispose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.TextureAtlas.dispose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.textureatlas.getGLMaximumTextureSize">
+<tt class="descclassname">mcedit2.rendering.textureatlas.</tt><tt class="descname">getGLMaximumTextureSize</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#getGLMaximumTextureSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.getGLMaximumTextureSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.rendering.textureatlas.test_TextureAtlas">
+<tt class="descclassname">mcedit2.rendering.textureatlas.</tt><tt class="descname">test_TextureAtlas</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/textureatlas.html#test_TextureAtlas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.textureatlas.test_TextureAtlas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.vertexarraybuffer">
+<span id="mcedit2-rendering-vertexarraybuffer-module"></span><h2>mcedit2.rendering.vertexarraybuffer module<a class="headerlink" href="#module-mcedit2.rendering.vertexarraybuffer" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="class">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.vertexarraybuffer.</tt><tt class="descname">VertexArrayBuffer</tt><big>(</big><em>count</em>, <em>textures=True</em>, <em>lights=True</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.texOffset">
+<tt class="descname">texOffset</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.texOffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.lightOffset">
+<tt class="descname">lightOffset</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.lightOffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.fromIndices">
+<em class="property">classmethod </em><tt class="descname">fromIndices</tt><big>(</big><em>face</em>, <em>blockIndices</em>, <em>textures=True</em>, <em>lights=True</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.fromIndices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.fromIndices" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>face</strong> &#8211; </li>
+<li><strong>blockIndices</strong> &#8211; </li>
+<li><strong>textures</strong> &#8211; </li>
+<li><strong>lights</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">VertexArrayBuffer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.setLights">
+<tt class="descname">setLights</tt><big>(</big><em>skyLight</em>, <em>blockLight</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.setLights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.setLights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.applyTexMap">
+<tt class="descname">applyTexMap</tt><big>(</big><em>ltwh</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.applyTexMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.applyTexMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.vertex">
+<tt class="descname">vertex</tt><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.vertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.vertex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.texcoord">
+<tt class="descname">texcoord</tt><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.texcoord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.texcoord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.lightcoord">
+<tt class="descname">lightcoord</tt><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.lightcoord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.lightcoord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.rgba">
+<tt class="descname">rgba</tt><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.rgba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.rgba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.rgb">
+<tt class="descname">rgb</tt><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.rgb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.rgb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.alpha">
+<tt class="descname">alpha</tt><a class="reference internal" href="_modules/mcedit2/rendering/vertexarraybuffer.html#VertexArrayBuffer.alpha"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer.alpha" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering.worldscene">
+<span id="mcedit2-rendering-worldscene-module"></span><h2>mcedit2.rendering.worldscene module<a class="headerlink" href="#module-mcedit2.rendering.worldscene" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.rendering.worldscene.layerProperty">
+<tt class="descclassname">mcedit2.rendering.worldscene.</tt><tt class="descname">layerProperty</tt><big>(</big><em>layer</em>, <em>default=True</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#layerProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.layerProperty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.worldscene.</tt><tt class="descname">SceneUpdateTask</tt><big>(</big><em>worldScene</em>, <em>textureAtlas</em>, <em>bounds=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#SceneUpdateTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.showRedraw">
+<tt class="descname">showRedraw</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.showRedraw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.showHiddenOres">
+<tt class="descname">showHiddenOres</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.showHiddenOres" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.showChunkRedraw">
+<tt class="descname">showChunkRedraw</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.showChunkRedraw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.spaceHeight">
+<tt class="descname">spaceHeight</tt><em class="property"> = 64</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.spaceHeight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.targetFPS">
+<tt class="descname">targetFPS</tt><em class="property"> = 30</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.targetFPS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.overheadMode">
+<tt class="descname">overheadMode</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.overheadMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.maxWorkFactor">
+<tt class="descname">maxWorkFactor</tt><em class="property"> = 64</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.maxWorkFactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.minWorkFactor">
+<tt class="descname">minWorkFactor</tt><em class="property"> = 1</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.minWorkFactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.workFactor">
+<tt class="descname">workFactor</tt><em class="property"> = 2</em><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.workFactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.wantsChunk">
+<tt class="descname">wantsChunk</tt><big>(</big><em>cPos</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#SceneUpdateTask.wantsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.wantsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.SceneUpdateTask.workOnChunk">
+<tt class="descname">workOnChunk</tt><big>(</big><em>chunk</em>, <em>visibleSections=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#SceneUpdateTask.workOnChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.SceneUpdateTask.workOnChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.rendering.worldscene.WorldScene">
+<em class="property">class </em><tt class="descclassname">mcedit2.rendering.worldscene.</tt><tt class="descname">WorldScene</tt><big>(</big><em>dimension</em>, <em>textureAtlas</em>, <em>geometryCache=None</em>, <em>bounds=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mcedit2.rendering.scenegraph.Node" title="mcedit2.rendering.scenegraph.Node"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.rendering.scenegraph.Node</span></tt></a></p>
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.chunkPositions">
+<tt class="descname">chunkPositions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.chunkPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.getRenderstateGroup">
+<tt class="descname">getRenderstateGroup</tt><big>(</big><em>rsClass</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.getRenderstateGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.getRenderstateGroup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.discardChunk">
+<tt class="descname">discardChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.discardChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.discardChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discard the chunk at the given position from the scene</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.discardChunks">
+<tt class="descname">discardChunks</tt><big>(</big><em>chunks</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.discardChunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.discardChunks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.discardAllChunks">
+<tt class="descname">discardAllChunks</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.discardAllChunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.discardAllChunks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.invalidateChunk">
+<tt class="descname">invalidateChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>invalidLayers=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.invalidateChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.invalidateChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark the chunk for regenerating vertex data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.WorldScene.fastLeaves">
+<tt class="descname">fastLeaves</tt><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.fastLeaves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.fastLeaves" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.WorldScene.roughGraphics">
+<tt class="descname">roughGraphics</tt><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.roughGraphics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.roughGraphics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.rendering.worldscene.WorldScene.showHiddenOres">
+<tt class="descname">showHiddenOres</tt><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.showHiddenOres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.showHiddenOres" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.wantsChunk">
+<tt class="descname">wantsChunk</tt><big>(</big><em>cPos</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.wantsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.wantsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.workOnChunk">
+<tt class="descname">workOnChunk</tt><big>(</big><em>chunk</em>, <em>visibleSections=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.workOnChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.workOnChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.rendering.worldscene.WorldScene.getChunkRenderInfo">
+<tt class="descname">getChunkRenderInfo</tt><big>(</big><em>cPos</em><big>)</big><a class="reference internal" href="_modules/mcedit2/rendering/worldscene.html#WorldScene.getChunkRenderInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.rendering.worldscene.WorldScene.getChunkRenderInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.rendering">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mcedit2.rendering" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mcedit2.rendering package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.blockmeshes">mcedit2.rendering.blockmeshes module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.blockmodels">mcedit2.rendering.blockmodels module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunkloader">mcedit2.rendering.chunkloader module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunknode">mcedit2.rendering.chunknode module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.chunkupdate">mcedit2.rendering.chunkupdate module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.compass">mcedit2.rendering.compass module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.cubes">mcedit2.rendering.cubes module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.depths">mcedit2.rendering.depths module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.frustum">mcedit2.rendering.frustum module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.geometrycache">mcedit2.rendering.geometrycache module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.layers">mcedit2.rendering.layers module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.lightmap">mcedit2.rendering.lightmap module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.loadablechunks">mcedit2.rendering.loadablechunks module</a></li>
+<li><a class="reference internal" href="#mcedit2-rendering-modelmesh-module">mcedit2.rendering.modelmesh module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.rendergraph">mcedit2.rendering.rendergraph module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.renderstates">mcedit2.rendering.renderstates module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.scenegraph">mcedit2.rendering.scenegraph module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.selection">mcedit2.rendering.selection module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.sky">mcedit2.rendering.sky module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.slices">mcedit2.rendering.slices module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.textureatlas">mcedit2.rendering.textureatlas module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.vertexarraybuffer">mcedit2.rendering.vertexarraybuffer module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering.worldscene">mcedit2.rendering.worldscene module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.rendering">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mcedit2.prefs.html"
+                        title="previous chapter">mcedit2.prefs package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mcedit2.rendering.chunkmeshes.html"
+                        title="next chapter">mcedit2.rendering.chunkmeshes package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mcedit2.rendering.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.rendering.chunkmeshes.html" title="mcedit2.rendering.chunkmeshes package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.prefs.html" title="mcedit2.prefs package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

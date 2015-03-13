@@ -1,0 +1,1013 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.anvil package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mceditlib package" href="mceditlib.html" />
+    <link rel="next" title="mceditlib.blocktypes package" href="mceditlib.blocktypes.html" />
+    <link rel="prev" title="mceditlib package" href="mceditlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.blocktypes.html" title="mceditlib.blocktypes package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.html" title="mceditlib package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" accesskey="U">mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mceditlib-anvil-package">
+<h1>mceditlib.anvil package<a class="headerlink" href="#mceditlib-anvil-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="mceditlib-anvil-adapter-module">
+<h2>mceditlib.anvil.adapter module<a class="headerlink" href="#mceditlib-anvil-adapter-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mceditlib.anvil.adapter"></span><p>adapter</p>
+<dl class="exception">
+<dt id="mceditlib.anvil.adapter.AnvilChunkFormatError">
+<em class="property">exception </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">AnvilChunkFormatError</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkFormatError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkFormatError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.IOError</span></tt></p>
+<p>Raised when an Anvil chunk&#8217;s data is not as expected</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mceditlib.anvil.adapter.SessionLockLost">
+<em class="property">exception </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">SessionLockLost</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#SessionLockLost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.SessionLockLost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.IOError</span></tt></p>
+<p>Raised when the session lock is lost because another program (Minecraft) opened the level
+while we were editing it.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.anvil.adapter.unpackNibbleArray">
+<tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">unpackNibbleArray</tt><big>(</big><em>dataArray</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#unpackNibbleArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.unpackNibbleArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.anvil.adapter.packNibbleArray">
+<tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">packNibbleArray</tt><big>(</big><em>unpackedData</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#packNibbleArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.packNibbleArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.anvil.adapter.deflate">
+<tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">deflate</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#deflate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.deflate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.anvil.adapter.inflate">
+<tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">inflate</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#inflate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.inflate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.anvil.adapter.sanitizeBlocks">
+<tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">sanitizeBlocks</tt><big>(</big><em>section</em>, <em>blocktypes</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#sanitizeBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.sanitizeBlocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.anvil.adapter.AnvilSection">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">AnvilSection</tt><big>(</big><em>section_tag=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilSection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Internal representation of a 16x16x16 chunk section. Arrays are indexed YZX.</p>
+<p>4-bit arrays are unpacked to byte arrays to make them work with numpy&#8217;s array routines.</p>
+<p>To create the full 12-bit block ID, the Blocks array is extended to 16 bits and the Add array is merged into
+the Blocks array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Y</strong> &#8211; section&#8217;s Y value [0..(world.Height+15) &gt;&gt; 4]</li>
+<li><strong>Blocks</strong> &#8211; Block IDs [0..4095]</li>
+<li><strong>Data</strong> &#8211; Block sub-data [0..15]</li>
+<li><strong>BlockLight</strong> &#8211; Light emitted by blocks [0..15]</li>
+<li><strong>SkyLight</strong> &#8211; Light emitted by the sun/moon [0..15]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilSection.buildNBTTag">
+<tt class="descname">buildNBTTag</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilSection.buildNBTTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilSection.buildNBTTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a TAG_Compound for saving this section to a chunk.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">AnvilChunkData</tt><big>(</big><em>adapter</em>, <em>cx</em>, <em>cz</em>, <em>dimName</em>, <em>rootTag=None</em>, <em>create=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This is the chunk data backing a WorldEditorChunk. Chunk data is retained by the WorldEditor until its
+WorldEditorChunk is no longer used, then it is either cached in memory, discarded, or written to disk according to
+resource limits.</p>
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.buildNBTTag">
+<tt class="descname">buildNBTTag</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.buildNBTTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.buildNBTTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>does not recalculate any data or light</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.sectionPositions">
+<tt class="descname">sectionPositions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.sectionPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.sectionPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.getSection">
+<tt class="descname">getSection</tt><big>(</big><em>cy</em>, <em>create=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.getSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.getSection" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cy</strong> &#8211; Section number (y coordinate &gt;&gt; 4)</li>
+<li><strong>create</strong> &#8211; If False, returns None if the section is not present, otherwise creates the section.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The requested section, or None if it wasn&#8217;t created.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">AnvilSection</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError if create is True and the requested section can&#8217;t be stored in this chunk.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.bounds">
+<tt class="descname">bounds</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.bounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.blocktypes">
+<tt class="descname">blocktypes</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.blocktypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.blocktypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.Biomes">
+<tt class="descname">Biomes</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.Biomes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.Biomes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.HeightMap">
+<tt class="descname">HeightMap</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.HeightMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.HeightMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilChunkData.TerrainPopulated">
+<tt class="descname">TerrainPopulated</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilChunkData.TerrainPopulated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilChunkData.TerrainPopulated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.anvil.adapter.AnvilWorldMetadata">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">AnvilWorldMetadata</tt><big>(</big><em>metadataTag</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldMetadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldMetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldMetadata.worldSpawnPosition">
+<tt class="descname">worldSpawnPosition</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldMetadata.worldSpawnPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldMetadata.worldSpawnPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldMetadata.setWorldSpawnPosition">
+<tt class="descname">setWorldSpawnPosition</tt><big>(</big><em>pos</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldMetadata.setWorldSpawnPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldMetadata.setWorldSpawnPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">AnvilWorldAdapter</tt><big>(</big><em>filename=None</em>, <em>create=False</em>, <em>readonly=False</em>, <em>resume=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Provides an interface to AnvilWorldFolder/RevisionHistory that is usable by WorldEditor</p>
+<p>This interface is the base used for all adapter classes. When writing a new adapter, make sure to
+implement all required methods and attributes. Required methods and attrs are the ones with docstrings.</p>
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.minHeight">
+<tt class="descname">minHeight</tt><em class="property"> = 0</em><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.minHeight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.maxHeight">
+<tt class="descname">maxHeight</tt><em class="property"> = 256</em><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.maxHeight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.blocktypes">
+<tt class="descname">blocktypes</tt><em class="property"> = &lt;BlockTypeSet (Alpha)&gt;</em><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.blocktypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.hasLights">
+<tt class="descname">hasLights</tt><em class="property"> = True</em><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.hasLights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.EntityRef">
+<tt class="descname">EntityRef</tt><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.EntityRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">PCEntityRef</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.TileEntityRef">
+<tt class="descname">TileEntityRef</tt><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.TileEntityRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">PCTileEntityRef</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.loadMetadata">
+<tt class="descname">loadMetadata</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.loadMetadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.loadMetadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.loadFMLMapping">
+<tt class="descname">loadFMLMapping</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.loadFMLMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.loadFMLMapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.syncToDisk">
+<tt class="descname">syncToDisk</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.syncToDisk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.syncToDisk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write cached items (metadata from level.dat and players in players/ folder) to the current revision.
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.saveChanges">
+<tt class="descname">saveChanges</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.saveChanges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.saveChanges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write all changes from all revisions into the world folder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the world, deleting temporary files and freeing resources. Operations on a closed world are undefined.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.requireRevisions">
+<tt class="descname">requireRevisions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.requireRevisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.requireRevisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enforce the creation of new revisions by making the world folder&#8217;s revision read-only.
+:return:
+:rtype:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.createRevision">
+<tt class="descname">createRevision</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.createRevision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.createRevision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new undo revision. Subsequent changes should be stored in the new revision.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.closeRevision">
+<tt class="descname">closeRevision</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.closeRevision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.closeRevision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the current revision and mark it read-only. Subsequent edits will not be possible until createRevision
+is called.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.setRevisionInfo">
+<tt class="descname">setRevisionInfo</tt><big>(</big><em>info</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.setRevisionInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.setRevisionInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attach some arbitrary JSON-serializable data to the current revision</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>info</strong> (<em>list | dict | str | unicode | int</em>) &#8211; JSON-serializable data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.getRevisionInfo">
+<tt class="descname">getRevisionInfo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.getRevisionInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.getRevisionInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return JSON-serializable data attached previously to the current revision via setRevisionInfo, or None if
+no data is attached.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list | dict | str | unicode | int | None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.selectRevision">
+<tt class="descname">selectRevision</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.selectRevision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.selectRevision" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Select the current revision by index. Return changes between the previous revision and this one. If</dt>
+<dd><p class="first">the index is invalid, returns None and does nothing.</p>
+<p class="last">(XXX use an ID instead of index?)</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">RevisionChanges</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.listRevisions">
+<tt class="descname">listRevisions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.listRevisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.listRevisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the revision indexes and infos as (index, info) tuples. Info is JSON-serializable data previously attached
+with setRevisionInfo, or None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">iterator[(int, list | dict | str | unicode | int)]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.acquireSessionLock">
+<tt class="descname">acquireSessionLock</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.acquireSessionLock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.acquireSessionLock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acquire the world&#8217;s session.lock. Formats without this file may do nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.checkSessionLock">
+<tt class="descname">checkSessionLock</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.checkSessionLock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.checkSessionLock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure the lock previously acquired by acquireSessionLock is still valid. Raise SessionLockLost if it is
+not. Raising the exception will abort any writes done to the main world folder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.canOpenFile">
+<em class="property">classmethod </em><tt class="descname">canOpenFile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.canOpenFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.canOpenFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ask this adapter if it can open the given file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str | unicode</em>) &#8211; File to identify</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.listDimensions">
+<tt class="descname">listDimensions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.listDimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.listDimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the names of all dimensions in this world.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">iterator of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.chunkCount">
+<tt class="descname">chunkCount</tt><big>(</big><em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.chunkCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.chunkCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count the chunks in the given dimension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dimName</strong> (<em>str</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.chunkPositions">
+<tt class="descname">chunkPositions</tt><big>(</big><em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.chunkPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the chunk positions (cx, cz) in the given dimension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Iterator of (int, int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.containsChunk">
+<tt class="descname">containsChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.containsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.containsChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the given chunk is present in the given dimension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.readChunk">
+<tt class="descname">readChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.readChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.readChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return chunk (cx, cz) in the given dimension as an AnvilChunkData. Raise ChunkNotPresent if not found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">AnvilChunkData</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.writeChunk">
+<tt class="descname">writeChunk</tt><big>(</big><em>chunk</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.writeChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.writeChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the given AnvilChunkData to the current revision.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.createChunk">
+<tt class="descname">createChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.createChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.createChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new empty chunk at the given position in the given dimension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">AnvilChunkData</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.deleteChunk">
+<tt class="descname">deleteChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.deleteChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.deleteChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the chunk at the given position in the given dimension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.listPlayers">
+<tt class="descname">listPlayers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.listPlayers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.listPlayers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the names of all players in this world (XXX players folder in dimension folders??)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Iterator of [str]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.getPlayer">
+<tt class="descname">getPlayer</tt><big>(</big><em>playerUUID=''</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.getPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.getPlayer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.getPlayerTag">
+<tt class="descname">getPlayerTag</tt><big>(</big><em>playerUUID=''</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.getPlayerTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.getPlayerTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the root NBT tag for the named player. Raise PlayerNotFound if not present.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>playerUUID</strong> (<em>unicode</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">PCPlayer</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.savePlayerTag">
+<tt class="descname">savePlayerTag</tt><big>(</big><em>tag</em>, <em>playerUUID</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.savePlayerTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.savePlayerTag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilWorldAdapter.createPlayer">
+<tt class="descname">createPlayer</tt><big>(</big><em>playerUUID=''</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilWorldAdapter.createPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilWorldAdapter.createPlayer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Create a new player with the given name and return the PlayerRef. Raises some kind of IOError if the player</dt>
+<dd>could not be created.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>playerUUID</strong> (<em>str</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">PCPlayer</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.anvil.adapter.PlayerAbilitiesAttrs">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">PlayerAbilitiesAttrs</tt><big>(</big><em>rootTag</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#PlayerAbilitiesAttrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.PlayerAbilitiesAttrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mceditlib.html#mceditlib.nbtattr.CompoundAttrs" title="mceditlib.nbtattr.CompoundAttrs"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.nbtattr.CompoundAttrs</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.adapter.</tt><tt class="descname">AnvilPlayerRef</tt><big>(</big><em>adapter</em>, <em>playerUUID</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilPlayerRef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.GAMETYPE_SURVIVAL">
+<tt class="descname">GAMETYPE_SURVIVAL</tt><em class="property"> = 0</em><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.GAMETYPE_SURVIVAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.GAMETYPE_CREATIVE">
+<tt class="descname">GAMETYPE_CREATIVE</tt><em class="property"> = 1</em><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.GAMETYPE_CREATIVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.GAMETYPE_ADVENTURE">
+<tt class="descname">GAMETYPE_ADVENTURE</tt><em class="property"> = 2</em><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.GAMETYPE_ADVENTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.setAbilities">
+<tt class="descname">setAbilities</tt><big>(</big><em>gametype</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilPlayerRef.setAbilities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.setAbilities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.setGameType">
+<tt class="descname">setGameType</tt><big>(</big><em>gametype</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilPlayerRef.setGameType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.setGameType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.Spawn">
+<tt class="descname">Spawn</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilPlayerRef.Spawn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.Spawn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilPlayerRef.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.adapter.AnvilPlayerRef.dimName">
+<tt class="descname">dimName</tt><a class="reference internal" href="_modules/mceditlib/anvil/adapter.html#AnvilPlayerRef.dimName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.adapter.AnvilPlayerRef.dimName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.anvil.biome_types">
+<span id="mceditlib-anvil-biome-types-module"></span><h2>mceditlib.anvil.biome_types module<a class="headerlink" href="#module-mceditlib.anvil.biome_types" title="Permalink to this headline">¶</a></h2>
+<p>biome_types.py</p>
+<p>Definitions for biome names, climate info, water color, and more.</p>
+<dl class="class">
+<dt id="mceditlib.anvil.biome_types.BiomeType">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.biome_types.</tt><tt class="descname">BiomeType</tt><a class="reference internal" href="_modules/mceditlib/anvil/biome_types.html#BiomeType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.biome_types.BiomeType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.anvil.biome_types.BiomeType" title="mceditlib.anvil.biome_types.BiomeType"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.anvil.biome_types.BiomeType</span></tt></a></p>
+<dl class="attribute">
+<dt id="mceditlib.anvil.biome_types.BiomeType.watercolor">
+<tt class="descname">watercolor</tt><a class="reference internal" href="_modules/mceditlib/anvil/biome_types.html#BiomeType.watercolor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.biome_types.BiomeType.watercolor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mceditlib-anvil-entities-module">
+<h2>mceditlib.anvil.entities module<a class="headerlink" href="#mceditlib-anvil-entities-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mceditlib.anvil.entities"></span><p>entities</p>
+<dl class="class">
+<dt id="mceditlib.anvil.entities.PCEntityRef">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.entities.</tt><tt class="descname">PCEntityRef</tt><big>(</big><em>rootTag</em>, <em>chunk=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCEntityRef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCEntityRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mceditlib.anvil.entities.PCEntityRef.raw_tag">
+<tt class="descname">raw_tag</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCEntityRef.raw_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCEntityRef.raw_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.entities.PCEntityRef.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCEntityRef.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCEntityRef.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.entities.PCEntityRef.copyWithOffset">
+<tt class="descname">copyWithOffset</tt><big>(</big><em>copyOffset</em>, <em>newEntityClass=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCEntityRef.copyWithOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCEntityRef.copyWithOffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.anvil.entities.PCTileEntityRef">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.entities.</tt><tt class="descname">PCTileEntityRef</tt><big>(</big><em>rootTag</em>, <em>chunk=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCTileEntityRef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCTileEntityRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mceditlib.anvil.entities.PCTileEntityRef.raw_tag">
+<tt class="descname">raw_tag</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCTileEntityRef.raw_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCTileEntityRef.raw_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.anvil.entities.PCTileEntityRef.Position">
+<tt class="descname">Position</tt><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCTileEntityRef.Position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCTileEntityRef.Position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.entities.PCTileEntityRef.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCTileEntityRef.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCTileEntityRef.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.entities.PCTileEntityRef.copyWithOffset">
+<tt class="descname">copyWithOffset</tt><big>(</big><em>copyOffset</em>, <em>newEntityClass=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/entities.html#PCTileEntityRef.copyWithOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.entities.PCTileEntityRef.copyWithOffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.anvil.worldfolder">
+<span id="mceditlib-anvil-worldfolder-module"></span><h2>mceditlib.anvil.worldfolder module<a class="headerlink" href="#module-mceditlib.anvil.worldfolder" title="Permalink to this headline">¶</a></h2>
+<p>worldfolder</p>
+<dl class="class">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder">
+<em class="property">class </em><tt class="descclassname">mceditlib.anvil.worldfolder.</tt><tt class="descname">AnvilWorldFolder</tt><big>(</big><em>filename</em>, <em>create=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.getFilePath">
+<tt class="descname">getFilePath</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.getFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.getFilePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.getFolderPath">
+<tt class="descname">getFolderPath</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.getFolderPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.getFolderPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.containsFile">
+<tt class="descname">containsFile</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.containsFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.containsFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.deleteFile">
+<tt class="descname">deleteFile</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.deleteFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.deleteFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.readFile">
+<tt class="descname">readFile</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.readFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.readFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.writeFile">
+<tt class="descname">writeFile</tt><big>(</big><em>path</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.writeFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.writeFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.listFolder">
+<tt class="descname">listFolder</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.listFolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.listFolder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.listAllFiles">
+<tt class="descname">listAllFiles</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.listAllFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.listAllFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.listDimensions">
+<tt class="descname">listDimensions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.listDimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.listDimensions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFolderPath">
+<tt class="descname">getRegionFolderPath</tt><big>(</big><em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.getRegionFolderPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFolderPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFilename">
+<tt class="descname">getRegionFilename</tt><big>(</big><em>rx</em>, <em>rz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.getRegionFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFilename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFile">
+<tt class="descname">getRegionFile</tt><big>(</big><em>rx</em>, <em>rz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.getRegionFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionFile" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">RegionFile</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionForChunk">
+<tt class="descname">getRegionForChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.getRegionForChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.getRegionForChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.chunkCount">
+<tt class="descname">chunkCount</tt><big>(</big><em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.chunkCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.chunkCount" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dimName</strong> (<em>unicode or str</em>) &#8211; Name of dimension</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Number of chunks in given dimension</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.chunkPositions">
+<tt class="descname">chunkPositions</tt><big>(</big><em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.chunkPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over chunk positions
+:type dimName: unicode or str
+:return: iterator
+:rtype: iterator [(int, int)]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.containsChunk">
+<tt class="descname">containsChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.containsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.containsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.deleteChunk">
+<tt class="descname">deleteChunk</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.deleteChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.deleteChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.readChunkBytes">
+<tt class="descname">readChunkBytes</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.readChunkBytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.readChunkBytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.writeChunkBytes">
+<tt class="descname">writeChunkBytes</tt><big>(</big><em>cx</em>, <em>cz</em>, <em>dimName</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.writeChunkBytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.writeChunkBytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.anvil.worldfolder.AnvilWorldFolder.copyChunkFrom">
+<tt class="descname">copyChunkFrom</tt><big>(</big><em>sourceFolder</em>, <em>cx</em>, <em>cz</em>, <em>dimName</em><big>)</big><a class="reference internal" href="_modules/mceditlib/anvil/worldfolder.html#AnvilWorldFolder.copyChunkFrom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.anvil.worldfolder.AnvilWorldFolder.copyChunkFrom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy chunk from another source folder without decompression
+:param sourceFolder:
+:type sourceFolder: AnvilWorldFolder
+:param cx:
+:type cx: int
+:param cz:
+:type cz: int
+:param dimName:
+:type dimName: unicode
+:return:
+:rtype:</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mceditlib.anvil">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mceditlib.anvil" title="Permalink to this headline">¶</a></h2>
+<p>Anvil world format introduced with Minecraft 1.2 for PC</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mceditlib.anvil package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#mceditlib-anvil-adapter-module">mceditlib.anvil.adapter module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.anvil.biome_types">mceditlib.anvil.biome_types module</a></li>
+<li><a class="reference internal" href="#mceditlib-anvil-entities-module">mceditlib.anvil.entities module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.anvil.worldfolder">mceditlib.anvil.worldfolder module</a></li>
+<li><a class="reference internal" href="#module-mceditlib.anvil">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mceditlib.html"
+                        title="previous chapter">mceditlib package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mceditlib.blocktypes.html"
+                        title="next chapter">mceditlib.blocktypes package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mceditlib.anvil.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.blocktypes.html" title="mceditlib.blocktypes package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.html" title="mceditlib package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" >mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

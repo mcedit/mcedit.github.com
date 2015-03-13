@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering.worldscene &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.rendering.worldscene</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ${NAME}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.layers</span> <span class="kn">import</span> <span class="n">Layer</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">chunkupdate</span><span class="p">,</span> <span class="n">scenegraph</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">renderstates</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.chunknode</span> <span class="kn">import</span> <span class="n">ChunkNode</span><span class="p">,</span> <span class="n">ChunkRenderInfo</span><span class="p">,</span> <span class="n">ChunkGroupNode</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.depths</span> <span class="kn">import</span> <span class="n">DepthOffset</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.geometrycache</span> <span class="kn">import</span> <span class="n">GeometryCache</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="layerProperty"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.layerProperty">[docs]</a><span class="k">def</span> <span class="nf">layerProperty</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">attr</span> <span class="o">=</span> <span class="nb">intern</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s">&quot;_draw&quot;</span> <span class="o">+</span> <span class="n">layer</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggleLayer</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get</span><span class="p">,</span> <span class="n">_set</span><span class="p">)</span>
+</div>
+<span class="n">DEBUG_WORLDMESH_LISTS</span> <span class="o">=</span> <span class="s">&quot;-debuglists&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+<div class="viewcode-block" id="SceneUpdateTask"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.SceneUpdateTask">[docs]</a><span class="k">class</span> <span class="nc">SceneUpdateTask</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">showRedraw</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">showHiddenOres</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">showChunkRedraw</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">spaceHeight</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">targetFPS</span> <span class="o">=</span> <span class="mi">30</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldScene</span><span class="p">,</span> <span class="n">textureAtlas</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type worldScene: WorldScene</span>
+<span class="sd">        :type bounds: BoundingBox</span>
+<span class="sd">        :type textureAtlas: TextureAtlas</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span> <span class="o">=</span> <span class="n">worldScene</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">render</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="mi">255</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span> <span class="o">=</span> <span class="n">textureAtlas</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderType</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">256</span><span class="o">*</span><span class="mi">256</span><span class="p">,),</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderType</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">renderType</span><span class="p">[</span><span class="n">block</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">renderType</span>
+
+    <span class="n">overheadMode</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">maxWorkFactor</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">minWorkFactor</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">workFactor</span> <span class="o">=</span> <span class="mi">2</span>
+
+
+<div class="viewcode-block" id="SceneUpdateTask.wantsChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.SceneUpdateTask.wantsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">wantsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cPos</span><span class="p">):</span>
+        <span class="n">chunkInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cPos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chunkInfo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="c">#log.info(&quot;Wants chunk %s? %s&quot;, cPos, len(chunkNode.invalidLayers))</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkInfo</span><span class="o">.</span><span class="n">invalidLayers</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SceneUpdateTask.workOnChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.SceneUpdateTask.workOnChunk">[docs]</a>    <span class="k">def</span> <span class="nf">workOnChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">visibleSections</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cPos</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">chunkPosition</span>
+
+        <span class="n">chunkInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">getChunkRenderInfo</span><span class="p">(</span><span class="n">cPos</span><span class="p">)</span>
+
+        <span class="n">chunkInfo</span><span class="o">.</span><span class="n">visibleSections</span> <span class="o">=</span> <span class="n">visibleSections</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">chunkUpdate</span> <span class="o">=</span> <span class="n">chunkupdate</span><span class="o">.</span><span class="n">ChunkUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunkInfo</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">chunkUpdate</span><span class="p">:</span>
+                <span class="n">work</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">work</span> <span class="o">%</span> <span class="n">SceneUpdateTask</span><span class="o">.</span><span class="n">workFactor</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">yield</span>
+
+            <span class="n">chunkInfo</span><span class="o">.</span><span class="n">invalidLayers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">meshesByRS</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="n">chunkUpdate</span><span class="o">.</span><span class="n">blockMeshes</span><span class="p">:</span>
+                <span class="n">meshesByRS</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">renderstate</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">renderstate</span> <span class="ow">in</span> <span class="n">renderstates</span><span class="o">.</span><span class="n">allRenderstates</span><span class="p">:</span>
+                <span class="n">groupNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">getRenderstateGroup</span><span class="p">(</span><span class="n">renderstate</span><span class="p">)</span>
+                <span class="n">meshes</span> <span class="o">=</span> <span class="n">meshesByRS</span><span class="p">[</span><span class="n">renderstate</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">meshes</span><span class="p">):</span>
+                    <span class="n">arrays</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexArrays</span> <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="n">meshes</span><span class="p">],</span> <span class="p">[])</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrays</span><span class="p">):</span>
+                        <span class="n">chunkNode</span> <span class="o">=</span> <span class="n">ChunkNode</span><span class="p">(</span><span class="n">cPos</span><span class="p">)</span>
+                        <span class="n">groupNode</span><span class="o">.</span><span class="n">addChunkNode</span><span class="p">(</span><span class="n">chunkNode</span><span class="p">)</span>
+                        <span class="n">node</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">VertexNode</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+                        <span class="n">chunkNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">groupNode</span><span class="o">.</span><span class="n">discardChunkNode</span><span class="p">(</span><span class="o">*</span><span class="n">cPos</span><span class="p">)</span>
+
+                        <span class="c"># Need a way to signal WorldScene that this chunk didn&#39;t need updating in this renderstate,</span>
+                        <span class="c"># but it should keep the old vertex arrays for the state.</span>
+                        <span class="c"># Alternately, signal WorldScene that the chunk did update for the renderstate and no</span>
+                        <span class="c"># vertex arrays resulted. Return a mesh with zero length vertexArrays</span>
+                        <span class="c">#else:</span>
+                        <span class="c">#    groupNode.discardChunkNode(*cPos)</span>
+
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">u&quot;Rendering chunk </span><span class="si">%s</span><span class="s"> failed: </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">cPos</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="WorldScene"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene">[docs]</a><span class="k">class</span> <span class="nc">WorldScene</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">textureAtlas</span><span class="p">,</span> <span class="n">geometryCache</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WorldScene</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span> <span class="o">=</span> <span class="n">textureAtlas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depthOffsetNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">DepthOffsetNode</span><span class="p">(</span><span class="n">DepthOffset</span><span class="o">.</span><span class="n">Renderer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">depthOffsetNode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlasNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">TextureAtlasNode</span><span class="p">(</span><span class="n">textureAtlas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depthOffsetNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textureAtlasNode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderstateNodes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">rsClass</span> <span class="ow">in</span> <span class="n">renderstates</span><span class="o">.</span><span class="n">allRenderstates</span><span class="p">:</span>
+            <span class="n">rsNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">RenderstateNode</span><span class="p">(</span><span class="n">rsClass</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlasNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">rsNode</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">renderstateNodes</span><span class="p">[</span><span class="n">rsClass</span><span class="p">]</span> <span class="o">=</span> <span class="n">rsNode</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">groupNodes</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># by renderstate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkRenderInfo</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visibleLayers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">Layer</span><span class="o">.</span><span class="n">AllLayers</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateTask</span> <span class="o">=</span> <span class="n">SceneUpdateTask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">textureAtlas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">geometryCache</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">geometryCache</span> <span class="o">=</span> <span class="n">GeometryCache</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometryCache</span> <span class="o">=</span> <span class="n">geometryCache</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showRedraw</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">minlod</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+
+<div class="viewcode-block" id="WorldScene.chunkPositions"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldScene.getRenderstateGroup"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.getRenderstateGroup">[docs]</a>    <span class="k">def</span> <span class="nf">getRenderstateGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rsClass</span><span class="p">):</span>
+        <span class="n">groupNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupNodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">rsClass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">groupNode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">groupNode</span> <span class="o">=</span> <span class="n">ChunkGroupNode</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupNodes</span><span class="p">[</span><span class="n">rsClass</span><span class="p">]</span> <span class="o">=</span> <span class="n">groupNode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">renderstateNodes</span><span class="p">[</span><span class="n">rsClass</span><span class="p">]</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">groupNode</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">groupNode</span>
+    <span class="c">#</span>
+    <span class="c"># def toggleLayer(self, val, layer):</span>
+    <span class="c">#     self.chunkGroupNode.toggleLayer(val, layer)</span>
+    <span class="c">#</span>
+    <span class="c"># drawEntities = layerProperty(Layer.Entities)</span>
+    <span class="c"># drawTileEntities = layerProperty(Layer.TileEntities)</span>
+    <span class="c"># drawTileTicks = layerProperty(Layer.TileTicks)</span>
+    <span class="c"># drawMonsters = layerProperty(Layer.Monsters)</span>
+    <span class="c"># drawItems = layerProperty(Layer.Items)</span>
+    <span class="c"># drawTerrainPopulated = layerProperty(Layer.TerrainPopulated)</span>
+</div>
+<div class="viewcode-block" id="WorldScene.discardChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.discardChunk">[docs]</a>    <span class="k">def</span> <span class="nf">discardChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discard the chunk at the given position from the scene</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">groupNode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupNodes</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">groupNode</span><span class="o">.</span><span class="n">discardChunkNode</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="o">.</span><span class="n">pop</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldScene.discardChunks"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.discardChunks">[docs]</a>    <span class="k">def</span> <span class="nf">discardChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discardChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldScene.discardAllChunks"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.discardAllChunks">[docs]</a>    <span class="k">def</span> <span class="nf">discardAllChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">groupNode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupNodes</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">groupNode</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldScene.invalidateChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.invalidateChunk">[docs]</a>    <span class="k">def</span> <span class="nf">invalidateChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">invalidLayers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mark the chunk for regenerating vertex data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">invalidLayers</span> <span class="o">=</span> <span class="n">invalidLayers</span> <span class="ow">or</span> <span class="n">Layer</span><span class="o">.</span><span class="n">AllLayers</span>
+</div>
+    <span class="n">_fastLeaves</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fastLeaves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fastLeaves</span>
+
+    <span class="nd">@fastLeaves.setter</span>
+<div class="viewcode-block" id="WorldScene.fastLeaves"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.fastLeaves">[docs]</a>    <span class="k">def</span> <span class="nf">fastLeaves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fastLeaves</span> <span class="o">!=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discardAllChunks</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fastLeaves</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</div>
+    <span class="n">_roughGraphics</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">roughGraphics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roughGraphics</span>
+
+    <span class="nd">@roughGraphics.setter</span>
+<div class="viewcode-block" id="WorldScene.roughGraphics"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.roughGraphics">[docs]</a>    <span class="k">def</span> <span class="nf">roughGraphics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roughGraphics</span> <span class="o">!=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discardAllChunks</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roughGraphics</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</div>
+    <span class="n">_showHiddenOres</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">showHiddenOres</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_showHiddenOres</span>
+
+    <span class="nd">@showHiddenOres.setter</span>
+<div class="viewcode-block" id="WorldScene.showHiddenOres"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.showHiddenOres">[docs]</a>    <span class="k">def</span> <span class="nf">showHiddenOres</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_showHiddenOres</span> <span class="o">!=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discardAllChunks</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_showHiddenOres</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldScene.wantsChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.wantsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">wantsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cPos</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateTask</span><span class="o">.</span><span class="n">wantsChunk</span><span class="p">(</span><span class="n">cPos</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldScene.workOnChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.workOnChunk">[docs]</a>    <span class="k">def</span> <span class="nf">workOnChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">visibleSections</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateTask</span><span class="o">.</span><span class="n">workOnChunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">visibleSections</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldScene.getChunkRenderInfo"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.worldscene.WorldScene.getChunkRenderInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getChunkRenderInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cPos</span><span class="p">):</span>
+        <span class="n">chunkInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cPos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chunkInfo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c">#log.info(&quot;Creating ChunkRenderInfo %s in %s&quot;, cPos, self.worldScene)</span>
+            <span class="n">chunkInfo</span> <span class="o">=</span> <span class="n">ChunkRenderInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cPos</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="p">[</span><span class="n">cPos</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunkInfo</span>
+
+        <span class="k">return</span> <span class="n">chunkInfo</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

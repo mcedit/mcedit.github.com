@@ -1,0 +1,719 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.selection package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mceditlib package" href="mceditlib.html" />
+    <link rel="next" title="mceditlib.test package" href="mceditlib.test.html" />
+    <link rel="prev" title="mceditlib.pc package" href="mceditlib.pc.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.test.html" title="mceditlib.test package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.pc.html" title="mceditlib.pc package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" accesskey="U">mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mceditlib-selection-package">
+<h1>mceditlib.selection package<a class="headerlink" href="#mceditlib-selection-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-mceditlib.selection">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mceditlib.selection" title="Permalink to this headline">¶</a></h2>
+<p>__init__.py</p>
+<dl class="class">
+<dt id="mceditlib.selection.ISelection">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">ISelection</tt><a class="reference internal" href="_modules/mceditlib/selection.html#ISelection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ISelection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Interface for block selections that can have any shape. Used by block_copy and block_fill.</p>
+<p>BoundingBox is the only provider for now.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>chunkPositions()</strong> &#8211; List or iterator of (cx, cz) coordinates for the chunks within this selection</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="mceditlib.selection.ISelection.chunkPositions">
+<tt class="descname">chunkPositions</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.ISelection.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.ISelection.contains_coords">
+<tt class="descname">contains_coords</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#ISelection.contains_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ISelection.contains_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array of boolean values indicating which of the x, y, z coordinate pairs are within this
+selection. x, y, and z must be numpy arrays of the same shape, and the return value will be a numpy
+array of the same shape.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray(shape=x.shape, dtype=bool)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.ISelection.containsChunk">
+<tt class="descname">containsChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#ISelection.containsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ISelection.containsChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the given chunk is in this selection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cx</strong> (<em>int</em>) &#8211; Chunk X position</li>
+<li><strong>cz</strong> (<em>int</em>) &#8211; Chunk Z position</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.ISelection.sectionPositions">
+<tt class="descname">sectionPositions</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#ISelection.sectionPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ISelection.sectionPositions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of cy values contained in the given chunk</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cx</strong> (<em>int</em>) &#8211; Chunk X position</li>
+<li><strong>cz</strong> (<em>int</em>) &#8211; Chunk Z position</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Chunk Y positions</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">iterator of ints</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.ISelection.box_mask">
+<tt class="descname">box_mask</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#ISelection.box_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ISelection.box_mask" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Construct and return a contiguous 3-d array of boolean values corresponding to the part</dt>
+<dd>of this selection within the given box. The returned array&#8217;s coordinates will be ordered YZX.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Mask array, ordered YZX</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray(shape=(box.height, box.length, box.width), dtype=bool)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.ISelection.section_mask">
+<tt class="descname">section_mask</tt><big>(</big><em>cx</em>, <em>cy</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#ISelection.section_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ISelection.section_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct and return a 16x16x16 array of boolean values indicating which of the 4096 blocks within the given
+section cube are within this selection. The returned array&#8217;s coordinates will be ordered YZX. The default implementation
+calls box_mask with a box constructed for the section&#8217;s bounds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Mask array, ordered YZX</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray(shape=(16, 16, 16), dtype=bool)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.SelectionBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">SelectionBox</tt><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mceditlib.selection.SelectionBox.section_mask">
+<tt class="descname">section_mask</tt><big>(</big><em>cx</em>, <em>cy</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox.section_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox.section_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.SelectionBox.box_mask">
+<tt class="descname">box_mask</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox.box_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox.box_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.SelectionBox.mincx">
+<tt class="descname">mincx</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.SelectionBox.mincx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.SelectionBox.mincy">
+<tt class="descname">mincy</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.SelectionBox.mincy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.SelectionBox.mincz">
+<tt class="descname">mincz</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.SelectionBox.mincz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.SelectionBox.maxcx">
+<tt class="descname">maxcx</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.SelectionBox.maxcx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.SelectionBox.maxcy">
+<tt class="descname">maxcy</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.SelectionBox.maxcy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.SelectionBox.maxcz">
+<tt class="descname">maxcz</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.SelectionBox.maxcz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.SelectionBox.chunkBox">
+<tt class="descname">chunkBox</tt><big>(</big><em>level</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox.chunkBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox.chunkBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns this box extended to the chunk boundaries of the given level</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.SelectionBox.containsChunk">
+<tt class="descname">containsChunk</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox.containsChunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox.containsChunk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.SelectionBox.chunkPositions">
+<tt class="descname">chunkPositions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox.chunkPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox.chunkPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.SelectionBox.sectionPositions">
+<tt class="descname">sectionPositions</tt><big>(</big><em>cx=0</em>, <em>cz=0</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox.sectionPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox.sectionPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.SelectionBox.chunkCount">
+<tt class="descname">chunkCount</tt><a class="reference internal" href="_modules/mceditlib/selection.html#SelectionBox.chunkCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SelectionBox.chunkCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.InvertedBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">InvertedBox</tt><big>(</big><em>base</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#InvertedBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.InvertedBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.SelectionBox" title="mceditlib.selection.SelectionBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.SelectionBox</span></tt></a></p>
+<dl class="method">
+<dt id="mceditlib.selection.InvertedBox.contains_coords">
+<tt class="descname">contains_coords</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#InvertedBox.contains_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.InvertedBox.contains_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.InvertedBox.box_mask">
+<tt class="descname">box_mask</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#InvertedBox.box_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.InvertedBox.box_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.CombinationBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">CombinationBox</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#CombinationBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.CombinationBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.SelectionBox" title="mceditlib.selection.SelectionBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.SelectionBox</span></tt></a></p>
+<dl class="attribute">
+<dt id="mceditlib.selection.CombinationBox.oper">
+<tt class="descname">oper</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.CombinationBox.oper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.CombinationBox.boundsminoper">
+<tt class="descname">boundsminoper</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.CombinationBox.boundsminoper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.CombinationBox.boundsmaxoper">
+<tt class="descname">boundsmaxoper</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mceditlib.selection.CombinationBox.boundsmaxoper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.CombinationBox.contains_coords">
+<tt class="descname">contains_coords</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#CombinationBox.contains_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.CombinationBox.contains_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.CombinationBox.box_mask">
+<tt class="descname">box_mask</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#CombinationBox.box_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.CombinationBox.box_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.CombinationBox.sectionPositions">
+<tt class="descname">sectionPositions</tt><big>(</big><em>cx</em>, <em>cz</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#CombinationBox.sectionPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.CombinationBox.sectionPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.UnionBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">UnionBox</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#UnionBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.UnionBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.CombinationBox" title="mceditlib.selection.CombinationBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.CombinationBox</span></tt></a></p>
+<dl class="method">
+<dt id="mceditlib.selection.UnionBox.oper">
+<tt class="descname">oper</tt><big>(</big><big>)</big><a class="headerlink" href="#mceditlib.selection.UnionBox.oper" title="Permalink to this definition">¶</a></dt>
+<dd><p>or_(a, b) &#8211; Same as a | b.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.UnionBox.boundsminoper">
+<tt class="descname">boundsminoper</tt><big>(</big><big>)</big><a class="headerlink" href="#mceditlib.selection.UnionBox.boundsminoper" title="Permalink to this definition">¶</a></dt>
+<dd><p>min(iterable[, key=func]) -&gt; value
+min(a, b, c, ...[, key=func]) -&gt; value</p>
+<p>With a single iterable argument, return its smallest item.
+With two or more arguments, return the smallest argument.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.UnionBox.boundsmaxoper">
+<tt class="descname">boundsmaxoper</tt><big>(</big><big>)</big><a class="headerlink" href="#mceditlib.selection.UnionBox.boundsmaxoper" title="Permalink to this definition">¶</a></dt>
+<dd><p>max(iterable[, key=func]) -&gt; value
+max(a, b, c, ...[, key=func]) -&gt; value</p>
+<p>With a single iterable argument, return its largest item.
+With two or more arguments, return the largest argument.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.IntersectionBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">IntersectionBox</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#IntersectionBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.IntersectionBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.CombinationBox" title="mceditlib.selection.CombinationBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.CombinationBox</span></tt></a></p>
+<dl class="method">
+<dt id="mceditlib.selection.IntersectionBox.oper">
+<tt class="descname">oper</tt><big>(</big><big>)</big><a class="headerlink" href="#mceditlib.selection.IntersectionBox.oper" title="Permalink to this definition">¶</a></dt>
+<dd><p>and_(a, b) &#8211; Same as a &amp; b.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.IntersectionBox.boundsminoper">
+<tt class="descname">boundsminoper</tt><big>(</big><big>)</big><a class="headerlink" href="#mceditlib.selection.IntersectionBox.boundsminoper" title="Permalink to this definition">¶</a></dt>
+<dd><p>max(iterable[, key=func]) -&gt; value
+max(a, b, c, ...[, key=func]) -&gt; value</p>
+<p>With a single iterable argument, return its largest item.
+With two or more arguments, return the largest argument.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.IntersectionBox.boundsmaxoper">
+<tt class="descname">boundsmaxoper</tt><big>(</big><big>)</big><a class="headerlink" href="#mceditlib.selection.IntersectionBox.boundsmaxoper" title="Permalink to this definition">¶</a></dt>
+<dd><p>min(iterable[, key=func]) -&gt; value
+min(a, b, c, ...[, key=func]) -&gt; value</p>
+<p>With a single iterable argument, return its smallest item.
+With two or more arguments, return the smallest argument.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.DifferenceBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">DifferenceBox</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#DifferenceBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.DifferenceBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.CombinationBox" title="mceditlib.selection.CombinationBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.CombinationBox</span></tt></a></p>
+<dl class="method">
+<dt id="mceditlib.selection.DifferenceBox.oper">
+<tt class="descname">oper</tt><big>(</big><em>a</em>, <em>b</em><big>)</big><a class="headerlink" href="#mceditlib.selection.DifferenceBox.oper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.DifferenceBox.boundsminoper">
+<tt class="descname">boundsminoper</tt><big>(</big><em>*a</em><big>)</big><a class="headerlink" href="#mceditlib.selection.DifferenceBox.boundsminoper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.DifferenceBox.boundsmaxoper">
+<tt class="descname">boundsmaxoper</tt><big>(</big><em>*a</em><big>)</big><a class="headerlink" href="#mceditlib.selection.DifferenceBox.boundsmaxoper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.selection.SectionBox">
+<tt class="descclassname">mceditlib.selection.</tt><tt class="descname">SectionBox</tt><big>(</big><em>cx</em>, <em>cy</em>, <em>cz</em>, <em>section=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SectionBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SectionBox" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.selection.rayIntersectsBox">
+<tt class="descclassname">mceditlib.selection.</tt><tt class="descname">rayIntersectsBox</tt><big>(</big><em>box</em>, <em>ray</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#rayIntersectsBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.rayIntersectsBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of (point, face) pairs for each side of the box intersected by ray. The list is sorted by distance
+from the ray&#8217;s origin, nearest to furthest.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>box</strong> &#8211; </li>
+<li><strong>ray</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.selection.createSelectionMask">
+<tt class="descclassname">mceditlib.selection.</tt><tt class="descname">createSelectionMask</tt><big>(</big><em>brushBox</em>, <em>shapeFunc</em>, <em>requestedBox</em>, <em>chance=100</em>, <em>hollow=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#createSelectionMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.createSelectionMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a boolean array for a selection with the given shape and style.
+If &#8216;offset&#8217; and &#8216;box&#8217; are given, then the selection is offset into the world
+and only the part of the world contained in box is returned as an array</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.BoundingBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">BoundingBox</tt><big>(</big><em>origin=(0</em>, <em>0</em>, <em>0)</em>, <em>size=(0</em>, <em>0</em>, <em>0)</em>, <em>maximum=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.SelectionBox" title="mceditlib.selection.SelectionBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.SelectionBox</span></tt></a></p>
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.type">
+<tt class="descname">type</tt><a class="headerlink" href="#mceditlib.selection.BoundingBox.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">int</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.origin">
+<tt class="descname">origin</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>The smallest position in the box
+:rtype: Vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.size">
+<tt class="descname">size</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The size of the box
+:rtype: Vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.center">
+<tt class="descname">center</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.width">
+<tt class="descname">width</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.width" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dimension along the X axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.height">
+<tt class="descname">height</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.height"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.height" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dimension along the Y axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.length">
+<tt class="descname">length</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dimension along the Z axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.minx">
+<tt class="descname">minx</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.minx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.minx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.miny">
+<tt class="descname">miny</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.miny"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.miny" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.minz">
+<tt class="descname">minz</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.minz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.minz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.maxx">
+<tt class="descname">maxx</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.maxx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.maxx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.maxy">
+<tt class="descname">maxy</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.maxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.maxy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.maxz">
+<tt class="descname">maxz</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.maxz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.maxz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.maximum">
+<tt class="descname">maximum</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.maximum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.maximum" title="Permalink to this definition">¶</a></dt>
+<dd><p>The largest point of the box; origin plus size.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.volume">
+<tt class="descname">volume</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>The volume of the box in blocks</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.positions">
+<tt class="descname">positions</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.positions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.positions" title="Permalink to this definition">¶</a></dt>
+<dd><p>iterate through all of the positions within this selection box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.BoundingBox.intersect">
+<tt class="descname">intersect</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.intersect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.intersect" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Return a box containing the area self and box have in common. Box will have zero volume</dt>
+<dd>if there is no common area.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.BoundingBox.union">
+<tt class="descname">union</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.union" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a box large enough to contain both self and box.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.BoundingBox.expand">
+<tt class="descname">expand</tt><big>(</big><em>dx</em>, <em>dy=None</em>, <em>dz=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.expand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.expand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new box with boundaries expanded by dx, dy, dz.
+If only dx is passed, expands by dx in all dimensions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.BoundingBox.contains_coords">
+<tt class="descname">contains_coords</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.contains_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.contains_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mceditlib.selection.BoundingBox.box_mask">
+<tt class="descname">box_mask</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.box_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.box_mask" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>box</strong> &#8211; BoundingBox</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">ndarray | None</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.mincx">
+<tt class="descname">mincx</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.mincx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.mincx" title="Permalink to this definition">¶</a></dt>
+<dd><p>The smallest chunk position contained in this box</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.mincy">
+<tt class="descname">mincy</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.mincy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.mincy" title="Permalink to this definition">¶</a></dt>
+<dd><p>The smallest section position contained in this box</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.mincz">
+<tt class="descname">mincz</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.mincz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.mincz" title="Permalink to this definition">¶</a></dt>
+<dd><p>The smallest chunk position contained in this box</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.maxcx">
+<tt class="descname">maxcx</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.maxcx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.maxcx" title="Permalink to this definition">¶</a></dt>
+<dd><p>The largest chunk position contained in this box</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.maxcy">
+<tt class="descname">maxcy</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.maxcy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.maxcy" title="Permalink to this definition">¶</a></dt>
+<dd><p>The largest section position contained in this box</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.maxcz">
+<tt class="descname">maxcz</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.maxcz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.maxcz" title="Permalink to this definition">¶</a></dt>
+<dd><p>The largest chunk position contained in this box</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mceditlib.selection.BoundingBox.isChunkAligned">
+<tt class="descname">isChunkAligned</tt><a class="reference internal" href="_modules/mceditlib/selection.html#BoundingBox.isChunkAligned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoundingBox.isChunkAligned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.FloatBox">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">FloatBox</tt><big>(</big><em>origin=(0</em>, <em>0</em>, <em>0)</em>, <em>size=(0</em>, <em>0</em>, <em>0)</em>, <em>maximum=None</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#FloatBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.FloatBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.BoundingBox" title="mceditlib.selection.BoundingBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.BoundingBox</span></tt></a></p>
+<dl class="attribute">
+<dt id="mceditlib.selection.FloatBox.type">
+<tt class="descname">type</tt><a class="headerlink" href="#mceditlib.selection.FloatBox.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">float</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mceditlib.selection.ShapedSelection">
+<em class="property">class </em><tt class="descclassname">mceditlib.selection.</tt><tt class="descname">ShapedSelection</tt><big>(</big><em>box</em>, <em>shapeFunc</em>, <em>chance=100</em>, <em>hollow=False</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#ShapedSelection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ShapedSelection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mceditlib.selection.BoundingBox" title="mceditlib.selection.BoundingBox"><tt class="xref py py-class docutils literal"><span class="pre">mceditlib.selection.BoundingBox</span></tt></a></p>
+<dl class="method">
+<dt id="mceditlib.selection.ShapedSelection.box_mask">
+<tt class="descname">box_mask</tt><big>(</big><em>box</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#ShapedSelection.box_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.ShapedSelection.box_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.selection.SphereShape">
+<tt class="descclassname">mceditlib.selection.</tt><tt class="descname">SphereShape</tt><big>(</big><em>blockCenters</em>, <em>shape</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#SphereShape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.SphereShape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.selection.BoxShape">
+<tt class="descclassname">mceditlib.selection.</tt><tt class="descname">BoxShape</tt><big>(</big><em>blockCenters</em>, <em>shape</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#BoxShape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.BoxShape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mceditlib.selection.DiamondShape">
+<tt class="descclassname">mceditlib.selection.</tt><tt class="descname">DiamondShape</tt><big>(</big><em>blockCenters</em>, <em>shape</em><big>)</big><a class="reference internal" href="_modules/mceditlib/selection.html#DiamondShape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mceditlib.selection.DiamondShape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mceditlib.selection package</a><ul>
+<li><a class="reference internal" href="#module-mceditlib.selection">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mceditlib.pc.html"
+                        title="previous chapter">mceditlib.pc package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mceditlib.test.html"
+                        title="next chapter">mceditlib.test package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mceditlib.selection.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.test.html" title="mceditlib.test package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mceditlib.pc.html" title="mceditlib.pc package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mceditlib.html" >mceditlib package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

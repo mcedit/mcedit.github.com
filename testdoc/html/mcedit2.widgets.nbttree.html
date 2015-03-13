@@ -1,0 +1,589 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.widgets.nbttree package &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="index.html" />
+    <link rel="up" title="mcedit2.widgets package" href="mcedit2.widgets.html" />
+    <link rel="next" title="mcedit2.worldview package" href="mcedit2.worldview.html" />
+    <link rel="prev" title="mcedit2.widgets package" href="mcedit2.widgets.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.worldview.html" title="mcedit2.worldview package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.widgets.html" title="mcedit2.widgets package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li>
+          <li><a href="mcedit2.widgets.html" accesskey="U">mcedit2.widgets package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mcedit2-widgets-nbttree-package">
+<h1>mcedit2.widgets.nbttree package<a class="headerlink" href="#mcedit2-widgets-nbttree-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mcedit2.widgets.nbttree.nbteditor">
+<span id="mcedit2-widgets-nbttree-nbteditor-module"></span><h2>mcedit2.widgets.nbttree.nbteditor module<a class="headerlink" href="#module-mcedit2.widgets.nbttree.nbteditor" title="Permalink to this headline">¶</a></h2>
+<p>nbttreewidget</p>
+<dl class="class">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTDataChangeCommand">
+<em class="property">class </em><tt class="descclassname">mcedit2.widgets.nbttree.nbteditor.</tt><tt class="descname">NBTDataChangeCommand</tt><big>(</big><em>editorSession</em>, <em>text</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTDataChangeCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTDataChangeCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mcedit2.html#mcedit2.command.SimpleRevisionCommand" title="mcedit2.command.SimpleRevisionCommand"><tt class="xref py py-class docutils literal"><span class="pre">mcedit2.command.SimpleRevisionCommand</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget">
+<em class="property">class </em><tt class="descclassname">mcedit2.widgets.nbttree.nbteditor.</tt><tt class="descname">NBTEditorWidget</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QWidget</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.undoCommandPrefixText">
+<tt class="descname">undoCommandPrefixText</tt><em class="property"> = u''</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.undoCommandPrefixText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.editorSession">
+<tt class="descname">editorSession</tt><em class="property"> = NotImplemented</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.editorSession" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.proxyModel">
+<tt class="descname">proxyModel</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.proxyModel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.rootTag">
+<tt class="descname">rootTag</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.rootTag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.editMade">
+<tt class="descname">editMade</tt><em class="property"> = &lt;PySide.QtCore.Signal object at 0x00000000083E08B8&gt;</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.editMade" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.setRootTag">
+<tt class="descname">setRootTag</tt><big>(</big><em>rootTag</em>, <em>keepExpanded=False</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.setRootTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.setRootTag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.itemExpanded">
+<tt class="descname">itemExpanded</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.itemExpanded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.itemExpanded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.indexAddingTo">
+<tt class="descname">indexAddingTo</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.indexAddingTo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.itemClicked">
+<tt class="descname">itemClicked</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.itemClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.itemClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addItemWithType">
+<tt class="descname">addItemWithType</tt><big>(</big><em>tagID</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addItemWithType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addItemWithType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addByte">
+<tt class="descname">addByte</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addByte"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addByte" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addShort">
+<tt class="descname">addShort</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addShort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addShort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addInt">
+<tt class="descname">addInt</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addInt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addInt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addLong">
+<tt class="descname">addLong</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addLong"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addLong" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addFloat">
+<tt class="descname">addFloat</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addFloat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addFloat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addDouble">
+<tt class="descname">addDouble</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addDouble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addDouble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addByteArray">
+<tt class="descname">addByteArray</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addByteArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addByteArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addString">
+<tt class="descname">addString</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addList">
+<tt class="descname">addList</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addCompound">
+<tt class="descname">addCompound</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addCompound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addCompound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addIntArray">
+<tt class="descname">addIntArray</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addIntArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addIntArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addShortArray">
+<tt class="descname">addShortArray</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.addShortArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.addShortArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.tagNameForUndo">
+<tt class="descname">tagNameForUndo</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.tagNameForUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.tagNameForUndo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.dataDidChange">
+<tt class="descname">dataDidChange</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.dataDidChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.dataDidChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.rowsDidInsert">
+<tt class="descname">rowsDidInsert</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.rowsDidInsert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.rowsDidInsert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.doomedTagName">
+<tt class="descname">doomedTagName</tt><em class="property"> = None</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.doomedTagName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.rowsDidRemove">
+<tt class="descname">rowsDidRemove</tt><big>(</big><em>index</em>, <em>start</em>, <em>end</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbteditor.html#NBTEditorWidget.rowsDidRemove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.rowsDidRemove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000083E5548&gt;</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbteditor.NBTEditorWidget.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.widgets.nbttree.nbttreemodel">
+<span id="mcedit2-widgets-nbttree-nbttreemodel-module"></span><h2>mcedit2.widgets.nbttree.nbttreemodel module<a class="headerlink" href="#module-mcedit2.widgets.nbttree.nbttreemodel" title="Permalink to this headline">¶</a></h2>
+<p>${NAME}</p>
+<dl class="function">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTIcon">
+<tt class="descclassname">mcedit2.widgets.nbttree.nbttreemodel.</tt><tt class="descname">NBTIcon</tt><big>(</big><em>type</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTIcon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTIcon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.MakeNBTTreeItem">
+<tt class="descclassname">mcedit2.widgets.nbttree.nbttreemodel.</tt><tt class="descname">MakeNBTTreeItem</tt><big>(</big><em>tag</em>, <em>parent</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#MakeNBTTreeItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.MakeNBTTreeItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound">
+<em class="property">class </em><tt class="descclassname">mcedit2.widgets.nbttree.nbttreemodel.</tt><tt class="descname">NBTTreeCompound</tt><big>(</big><em>tag</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.isCompound">
+<tt class="descname">isCompound</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.isCompound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.isList">
+<tt class="descname">isList</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.isList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.child">
+<tt class="descname">child</tt><big>(</big><em>row</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.child"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.child" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.childCount">
+<tt class="descname">childCount</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.childCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.childCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.childNumber">
+<tt class="descname">childNumber</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.childNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.childNumber" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.data">
+<tt class="descname">data</tt><big>(</big><em>column</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.tagCompoundName">
+<tt class="descname">tagCompoundName</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.tagCompoundName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.tagCompoundName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.tagCompoundSummary">
+<tt class="descname">tagCompoundSummary</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.tagCompoundSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.tagCompoundSummary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.insertChildren">
+<tt class="descname">insertChildren</tt><big>(</big><em>position</em>, <em>count</em>, <em>tagID</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.insertChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.insertChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.parent">
+<tt class="descname">parent</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.removeChildren">
+<tt class="descname">removeChildren</tt><big>(</big><em>position</em>, <em>count</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.removeChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.removeChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.setValue">
+<tt class="descname">setValue</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.nbtPath">
+<tt class="descname">nbtPath</tt><big>(</big><em>child=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeCompound.nbtPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeCompound.nbtPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList">
+<em class="property">class </em><tt class="descclassname">mcedit2.widgets.nbttree.nbttreemodel.</tt><tt class="descname">NBTTreeList</tt><big>(</big><em>tag</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.isCompound">
+<tt class="descname">isCompound</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.isCompound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.isList">
+<tt class="descname">isList</tt><em class="property"> = True</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.isList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.child">
+<tt class="descname">child</tt><big>(</big><em>row</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.child"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.child" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.childCount">
+<tt class="descname">childCount</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.childCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.childCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.childNumber">
+<tt class="descname">childNumber</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.childNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.childNumber" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.data">
+<tt class="descname">data</tt><big>(</big><em>column</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.insertChildren">
+<tt class="descname">insertChildren</tt><big>(</big><em>position</em>, <em>count</em>, <em>tagID</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.insertChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.insertChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.parent">
+<tt class="descname">parent</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.removeChildren">
+<tt class="descname">removeChildren</tt><big>(</big><em>position</em>, <em>count</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.removeChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.removeChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.setValue">
+<tt class="descname">setValue</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.nbtPath">
+<tt class="descname">nbtPath</tt><big>(</big><em>child=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeList.nbtPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeList.nbtPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem">
+<em class="property">class </em><tt class="descclassname">mcedit2.widgets.nbttree.nbttreemodel.</tt><tt class="descname">NBTTreeItem</tt><big>(</big><em>tag</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.isCompound">
+<tt class="descname">isCompound</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.isCompound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.isList">
+<tt class="descname">isList</tt><em class="property"> = False</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.isList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.childCount">
+<tt class="descname">childCount</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeItem.childCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.childCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.childNumber">
+<tt class="descname">childNumber</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeItem.childNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.childNumber" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.data">
+<tt class="descname">data</tt><big>(</big><em>column</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeItem.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.parent">
+<tt class="descname">parent</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeItem.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.setValue">
+<tt class="descname">setValue</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeItem.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.nbtPath">
+<tt class="descname">nbtPath</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeItem.nbtPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeItem.nbtPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel">
+<em class="property">class </em><tt class="descclassname">mcedit2.widgets.nbttree.nbttreemodel.</tt><tt class="descname">NBTTreeModel</tt><big>(</big><em>rootTag</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtCore.QAbstractItemModel</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.columnCount">
+<tt class="descname">columnCount</tt><big>(</big><em>parent=&lt;PySide.QtCore.QModelIndex(-1</em>, <em>-1</em>, <em>0x0</em>, <em>QObject(0x0) )  at 0x00000000083E5248&gt;</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.tagID">
+<tt class="descname">tagID</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.tagID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.tagID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.headerData">
+<tt class="descname">headerData</tt><big>(</big><em>section</em>, <em>orientation</em>, <em>role=PySide.QtCore.Qt.ItemDataRole.DisplayRole</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.flags">
+<tt class="descname">flags</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.data">
+<tt class="descname">data</tt><big>(</big><em>index</em>, <em>role=PySide.QtCore.Qt.ItemDataRole.DisplayRole</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.getItem">
+<tt class="descname">getItem</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.getItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.getItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.rowCount">
+<tt class="descname">rowCount</tt><big>(</big><em>parent=&lt;PySide.QtCore.QModelIndex(-1</em>, <em>-1</em>, <em>0x0</em>, <em>QObject(0x0) )  at 0x00000000083E5288&gt;</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.index">
+<tt class="descname">index</tt><big>(</big><em>row</em>, <em>column</em>, <em>parent=&lt;PySide.QtCore.QModelIndex(-1</em>, <em>-1</em>, <em>0x0</em>, <em>QObject(0x0) )  at 0x00000000083E52C8&gt;</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.parent">
+<tt class="descname">parent</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.insertRow">
+<tt class="descname">insertRow</tt><big>(</big><em>position</em>, <em>parent=&lt;PySide.QtCore.QModelIndex(-1</em>, <em>-1</em>, <em>0x0</em>, <em>QObject(0x0) )  at 0x00000000083E5308&gt;</em>, <em>tagID=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.insertRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.insertRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.insertRows">
+<tt class="descname">insertRows</tt><big>(</big><em>row</em>, <em>count</em>, <em>parent=&lt;PySide.QtCore.QModelIndex(-1</em>, <em>-1</em>, <em>0x0</em>, <em>QObject(0x0) )  at 0x00000000083E5388&gt;</em>, <em>tagID=None</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.insertRows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.insertRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.removeRow">
+<tt class="descname">removeRow</tt><big>(</big><em>position</em>, <em>parent=&lt;PySide.QtCore.QModelIndex(-1</em>, <em>-1</em>, <em>0x0</em>, <em>QObject(0x0) )  at 0x00000000083E5408&gt;</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.removeRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.removeRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.removeRows">
+<tt class="descname">removeRows</tt><big>(</big><em>position</em>, <em>rows</em>, <em>parent=&lt;PySide.QtCore.QModelIndex(-1</em>, <em>-1</em>, <em>0x0</em>, <em>QObject(0x0) )  at 0x00000000083E5448&gt;</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.removeRows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.removeRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.setData">
+<tt class="descname">setData</tt><big>(</big><em>index</em>, <em>value</em>, <em>role=PySide.QtCore.Qt.ItemDataRole.EditRole</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTTreeModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000083E5488&gt;</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTTreeModel.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel">
+<em class="property">class </em><tt class="descclassname">mcedit2.widgets.nbttree.nbttreemodel.</tt><tt class="descname">NBTFilterProxyModel</tt><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTFilterProxyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PySide.QtGui.QSortFilterProxyModel</span></tt></p>
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel.lessThan">
+<tt class="descname">lessThan</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTFilterProxyModel.lessThan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel.lessThan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel.sort">
+<tt class="descname">sort</tt><big>(</big><em>column</em>, <em>order</em><big>)</big><a class="reference internal" href="_modules/mcedit2/widgets/nbttree/nbttreemodel.html#NBTFilterProxyModel.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel.sort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel.staticMetaObject">
+<tt class="descname">staticMetaObject</tt><em class="property"> = &lt;PySide.QtCore.QMetaObject object at 0x00000000083E5508&gt;</em><a class="headerlink" href="#mcedit2.widgets.nbttree.nbttreemodel.NBTFilterProxyModel.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mcedit2.widgets.nbttree">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mcedit2.widgets.nbttree" title="Permalink to this headline">¶</a></h2>
+<p>__init__.py</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mcedit2.widgets.nbttree package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mcedit2.widgets.nbttree.nbteditor">mcedit2.widgets.nbttree.nbteditor module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.widgets.nbttree.nbttreemodel">mcedit2.widgets.nbttree.nbttreemodel module</a></li>
+<li><a class="reference internal" href="#module-mcedit2.widgets.nbttree">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mcedit2.widgets.html"
+                        title="previous chapter">mcedit2.widgets package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mcedit2.worldview.html"
+                        title="next chapter">mcedit2.worldview package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mcedit2.widgets.nbttree.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.worldview.html" title="mcedit2.worldview package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mcedit2.widgets.html" title="mcedit2.widgets package"
+             >previous</a> |</li>
+        <li><a href="index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="mcedit2.html" >mcedit2 package</a> &raquo;</li>
+          <li><a href="mcedit2.widgets.html" >mcedit2.widgets package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

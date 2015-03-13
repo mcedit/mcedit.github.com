@@ -1,0 +1,483 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.nbt_treemodel &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.nbt_treemodel</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ${NAME}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.resources</span> <span class="kn">import</span> <span class="n">resourcePath</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">nbt</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="n">_nbtIcons</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">_iconTypes</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;&quot;</span><span class="p">,</span>
+    <span class="s">&quot;byte.png&quot;</span><span class="p">,</span> <span class="c"># 1 - byte</span>
+    <span class="s">&quot;short.png&quot;</span><span class="p">,</span> <span class="c"># 2 - short</span>
+    <span class="s">&quot;int.png&quot;</span><span class="p">,</span> <span class="c"># 3 - int</span>
+    <span class="s">&quot;long.png&quot;</span><span class="p">,</span> <span class="c"># 4 - long</span>
+    <span class="s">&quot;float.png&quot;</span><span class="p">,</span> <span class="c"># 5 - float</span>
+    <span class="s">&quot;double.png&quot;</span><span class="p">,</span> <span class="c"># 6 - double</span>
+    <span class="s">&quot;array.png&quot;</span><span class="p">,</span> <span class="c"># 7 - bytearray</span>
+    <span class="s">&quot;text.png&quot;</span><span class="p">,</span> <span class="c"># 8 - string</span>
+    <span class="s">&quot;list.png&quot;</span><span class="p">,</span> <span class="c"># 9 - list</span>
+    <span class="s">&quot;compound.png&quot;</span><span class="p">,</span> <span class="c"># 10 - compound</span>
+    <span class="s">&quot;array.png&quot;</span><span class="p">,</span> <span class="c"># 11 - intarray</span>
+    <span class="s">&quot;array.png&quot;</span><span class="p">,</span> <span class="c"># 12 - shortarray</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="NBTIcon"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTIcon">[docs]</a><span class="k">def</span> <span class="nf">NBTIcon</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="n">_nbtIcons</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">icon</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">icon</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">_iconTypes</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">resourcePath</span><span class="p">(</span><span class="s">&quot;mcedit2/assets/mcedit2/nbticons/&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> does not exist&quot;</span> <span class="o">%</span> <span class="n">path</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">icon</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+    <span class="n">_nbtIcons</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="n">icon</span>
+    <span class="k">return</span> <span class="n">icon</span>
+
+</div>
+<div class="viewcode-block" id="MakeNBTTreeItem"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.MakeNBTTreeItem">[docs]</a><span class="k">def</span> <span class="nf">MakeNBTTreeItem</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">NBTTreeCompound</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">NBTTreeList</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">NBTTreeItem</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="NBTTreeCompound"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound">[docs]</a><span class="k">class</span> <span class="nc">NBTTreeCompound</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span> <span class="o">=</span> <span class="p">[</span><span class="n">MakeNBTTreeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span>
+
+<div class="viewcode-block" id="NBTTreeCompound.child"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.child">[docs]</a>    <span class="k">def</span> <span class="nf">child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.childCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.childCount">[docs]</a>    <span class="k">def</span> <span class="nf">childCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.childNumber"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.childNumber">[docs]</a>    <span class="k">def</span> <span class="nf">childNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span><span class="o">.</span><span class="n">childItems</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.columnCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.data"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tagCompoundName</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tagCompoundSummary</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.tagCompoundName"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.tagCompoundName">[docs]</a>    <span class="k">def</span> <span class="nf">tagCompoundName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span>
+        <span class="k">if</span> <span class="s">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s">&quot;Compound&quot;</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.tagCompoundSummary"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.tagCompoundSummary">[docs]</a>    <span class="k">def</span> <span class="nf">tagCompoundSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">:</span>
+            <span class="n">summary</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s">&quot;Pos&quot;</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="s">&quot;Pos&quot;</span><span class="p">]</span>
+                <span class="n">summary</span> <span class="o">+=</span> <span class="s">&quot; at </span><span class="si">%0.3f</span><span class="s">, </span><span class="si">%0.3f</span><span class="s">, </span><span class="si">%0.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">summary</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> items&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">summary</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.insertChildren"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.insertChildren">[docs]</a>    <span class="k">def</span> <span class="nf">insertChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+            <span class="n">item</span> <span class="o">=</span> <span class="n">NBTTreeItem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.parent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.removeChildren"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.removeChildren">[docs]</a>    <span class="k">def</span> <span class="nf">removeChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">+</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="NBTTreeCompound.setData"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeCompound.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div></div>
+<div class="viewcode-block" id="NBTTreeList"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList">[docs]</a><span class="k">class</span> <span class="nc">NBTTreeList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span> <span class="o">=</span> <span class="p">[</span><span class="n">MakeNBTTreeItem</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span>
+
+<div class="viewcode-block" id="NBTTreeList.child"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.child">[docs]</a>    <span class="k">def</span> <span class="nf">child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.childCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.childCount">[docs]</a>    <span class="k">def</span> <span class="nf">childCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.childNumber"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.childNumber">[docs]</a>    <span class="k">def</span> <span class="nf">childNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span><span class="o">.</span><span class="n">childItems</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.columnCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.data"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tagID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">list_type</span>
+
+            <span class="k">if</span> <span class="n">tagID</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nbt</span><span class="o">.</span><span class="n">ID_COMPOUND</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">ID_LIST</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s"> </span><span class="si">%s</span><span class="s">s&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">),</span> <span class="n">nbt</span><span class="o">.</span><span class="n">tag_classes</span><span class="p">[</span><span class="n">tagID</span><span class="p">]</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">tagID</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nbt</span><span class="o">.</span><span class="n">ID_FLOAT</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">ID_DOUBLE</span><span class="p">):</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%.03f</span><span class="s">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span>
+
+            <span class="k">return</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">fmt</span> <span class="o">%</span> <span class="n">i</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.insertChildren"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.insertChildren">[docs]</a>    <span class="k">def</span> <span class="nf">insertChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">list_type</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">NBTTreeItem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.parent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.removeChildren"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.removeChildren">[docs]</a>    <span class="k">def</span> <span class="nf">removeChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">+</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">childItems</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="NBTTreeList.setData"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeList.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div></div>
+<div class="viewcode-block" id="NBTTreeItem"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeItem">[docs]</a><span class="k">class</span> <span class="nc">NBTTreeItem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot; &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">childNumber</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot; #</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">childNumber</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot; of </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span>
+
+<div class="viewcode-block" id="NBTTreeItem.childCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeItem.childCount">[docs]</a>    <span class="k">def</span> <span class="nf">childCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="NBTTreeItem.childNumber"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeItem.childNumber">[docs]</a>    <span class="k">def</span> <span class="nf">childNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span><span class="o">.</span><span class="n">childItems</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="NBTTreeItem.columnCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeItem.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+</div>
+<div class="viewcode-block" id="NBTTreeItem.data"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeItem.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childNumber</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">value</span>
+</div>
+<div class="viewcode-block" id="NBTTreeItem.parent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeItem.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span>
+</div>
+<div class="viewcode-block" id="NBTTreeItem.setData"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeItem.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div></div>
+<div class="viewcode-block" id="NBTTreeModel"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel">[docs]</a><span class="k">class</span> <span class="nc">NBTTreeModel</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractItemModel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootTag</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NBTTreeModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootItem</span> <span class="o">=</span> <span class="n">MakeNBTTreeItem</span><span class="p">(</span><span class="n">rootTag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">rootTag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowNameChanges</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="NBTTreeModel.columnCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootItem</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.tagID"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.tagID">[docs]</a>    <span class="k">def</span> <span class="nf">tagID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">tagID</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.data"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c">#if role != QtCore.Qt.DisplayRole and role != QtCore.Qt.EditRole:</span>
+        <span class="c">#    return None</span>
+
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DecorationRole</span> <span class="ow">and</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">NBTIcon</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">tagID</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">role</span> <span class="ow">in</span> <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.flags"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.flags">[docs]</a>    <span class="k">def</span> <span class="nf">flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowNameChanges</span> <span class="ow">and</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">|=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span>
+        <span class="k">return</span> <span class="n">flags</span>
+
+</div>
+<div class="viewcode-block" id="NBTTreeModel.getItem"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.getItem">[docs]</a>    <span class="k">def</span> <span class="nf">getItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">item</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootItem</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.headerData"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.headerData">[docs]</a>    <span class="k">def</span> <span class="nf">headerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="s">&quot;Name&quot;</span><span class="p">,</span> <span class="s">&quot;Value&quot;</span><span class="p">)[</span><span class="n">section</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.index"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">isValid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+
+        <span class="n">parentItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">childItem</span> <span class="o">=</span> <span class="n">parentItem</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">childItem</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">childItem</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.insertRows"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.insertRows">[docs]</a>    <span class="k">def</span> <span class="nf">insertRows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span>
+        <span class="n">parentItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">position</span> <span class="o">+</span> <span class="n">rows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">parentItem</span><span class="o">.</span><span class="n">insertChildren</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">rootItem</span><span class="o">.</span><span class="n">columnCount</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">success</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.parent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+
+        <span class="n">childItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">parentItem</span> <span class="o">=</span> <span class="n">childItem</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">parentItem</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootItem</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">parentItem</span><span class="o">.</span><span class="n">childNumber</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">parentItem</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.removeRows"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.removeRows">[docs]</a>    <span class="k">def</span> <span class="nf">removeRows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span>
+        <span class="n">parentItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginRemoveRows</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">position</span> <span class="o">+</span> <span class="n">rows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">parentItem</span><span class="o">.</span><span class="n">removeChildren</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">success</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.rowCount"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.rowCount">[docs]</a>    <span class="k">def</span> <span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span>
+        <span class="n">parentItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parentItem</span><span class="o">.</span><span class="n">childCount</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="NBTTreeModel.setData"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTTreeModel.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="o">!=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">parentItem</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">tagID</span> <span class="o">==</span> <span class="n">nbt</span><span class="o">.</span><span class="n">ID_COMPOUND</span><span class="p">:</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">parentItem</span><span class="o">.</span><span class="n">tag</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">tag</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+</div></div>
+<span class="n">_NBTTagTypeSortOrder</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;TAG_Compound&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_List&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Int_Array&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Short_Array&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Byte_Array&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_String&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Double&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Float&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Long&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Int&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Short&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TAG_Byte&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<div class="viewcode-block" id="NBTFilterProxyModel"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTFilterProxyModel">[docs]</a><span class="k">class</span> <span class="nc">NBTFilterProxyModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSortFilterProxyModel</span><span class="p">):</span>
+<div class="viewcode-block" id="NBTFilterProxyModel.lessThan"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.nbt_treemodel.NBTFilterProxyModel.lessThan">[docs]</a>    <span class="k">def</span> <span class="nf">lessThan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="n">leftData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+        <span class="n">rightData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">leftTag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">tagID</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+            <span class="n">rightTag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">tagID</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+            <span class="n">leftTuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">leftTag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nbt</span><span class="o">.</span><span class="n">ID_COMPOUND</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">ID_LIST</span><span class="p">),</span> <span class="n">leftData</span> <span class="ow">and</span> <span class="n">leftData</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+            <span class="n">rightTuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">rightTag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nbt</span><span class="o">.</span><span class="n">ID_COMPOUND</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">ID_LIST</span><span class="p">),</span> <span class="n">rightData</span> <span class="ow">and</span> <span class="n">rightData</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+            <span class="k">return</span> <span class="n">leftTuple</span> <span class="o">&lt;</span> <span class="n">rightTuple</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">leftIndex</span> <span class="o">=</span> <span class="n">_NBTTagTypeSortOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">leftData</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">rightIndex</span> <span class="o">=</span> <span class="n">_NBTTagTypeSortOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">rightData</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">leftIndex</span> <span class="o">&lt;</span> <span class="n">rightIndex</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">NBTFilterProxyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">lessThan</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

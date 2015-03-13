@@ -1,0 +1,421 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.util.minecraftinstall &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.util.minecraftinstall</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    minecraftinstall</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">mcedit2.resourceloader</span> <span class="kn">import</span> <span class="n">ResourceLoader</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.load_ui</span> <span class="kn">import</span> <span class="n">load_ui</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">directories</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="n">installationsOption</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span><span class="o">.</span><span class="n">getOption</span><span class="p">(</span><span class="s">&quot;minecraft_installs/installations&quot;</span><span class="p">)</span>
+<span class="n">currentInstallOption</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span><span class="o">.</span><span class="n">getOption</span><span class="p">(</span><span class="s">&quot;minecraft_installs/current_install&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MCInstall"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall">[docs]</a><span class="k">class</span> <span class="nc">MCInstall</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;Unnamed&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+
+<div class="viewcode-block" id="MCInstall.checkUsable"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.checkUsable">[docs]</a>    <span class="k">def</span> <span class="nf">checkUsable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Raises MCInstallError explaining why this install is unusable, or else does nothing</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Checking install at </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MCInstallError</span><span class="p">(</span><span class="s">&quot;Minecraft folder does not exist.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versionsDir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MCInstallError</span><span class="p">(</span><span class="s">&quot;Minecraft versions folder does not exist.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MCInstallError</span><span class="p">(</span><span class="s">&quot;Minecraft folder has no minecraft versions&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Found versions:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="p">)</span>
+        <span class="n">requiredVersions</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">versions</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;1.8&quot;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">requiredVersions</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MCInstallError</span><span class="p">(</span><span class="s">&quot;Minecraft version 1.8 and up is required. Use the Minecraft Launcher to download it.&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="MCInstall.versionsDir"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.versionsDir">[docs]</a>    <span class="k">def</span> <span class="nf">versionsDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;versions&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="MCInstall.versions"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.versions">[docs]</a>    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">versions</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versionsDir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">versions</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getVersionJarPath</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+                <span class="ow">and</span> <span class="n">usableVersion</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
+</div>
+<div class="viewcode-block" id="MCInstall.getVersionJarPath"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.getVersionJarPath">[docs]</a>    <span class="k">def</span> <span class="nf">getVersionJarPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versionsDir</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.jar&quot;</span> <span class="o">%</span> <span class="n">version</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="MCInstall.resourcePacks"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.resourcePacks">[docs]</a>    <span class="k">def</span> <span class="nf">resourcePacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;resourcepacks&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="MCInstall.getSaveFileDir"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.getSaveFileDir">[docs]</a>    <span class="k">def</span> <span class="nf">getSaveFileDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;saves&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MCInstall.getResourcePackPath"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.getResourcePackPath">[docs]</a>    <span class="k">def</span> <span class="nf">getResourcePackPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;resourcepacks&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MCInstall.getJsonSettingValue"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.getJsonSettingValue">[docs]</a>    <span class="k">def</span> <span class="nf">getJsonSettingValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">}</span>
+</div>
+<div class="viewcode-block" id="MCInstall.getResourceLoader"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.getResourceLoader">[docs]</a>    <span class="k">def</span> <span class="nf">getResourceLoader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">resourcePack</span><span class="p">):</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">ResourceLoader</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">resourcePack</span><span class="p">:</span>
+            <span class="n">loader</span><span class="o">.</span><span class="n">addZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getResourcePackPath</span><span class="p">(</span><span class="n">resourcePack</span><span class="p">))</span>
+        <span class="n">loader</span><span class="o">.</span><span class="n">addZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getVersionJarPath</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+        <span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">rev</span> <span class="o">=</span> <span class="n">splitVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="c"># Need v1.8 for block models</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+            <span class="n">v1_8</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findVersion1_8</span><span class="p">()</span>
+            <span class="n">loader</span><span class="o">.</span><span class="n">addZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getVersionJarPath</span><span class="p">(</span><span class="n">v1_8</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">md5hash</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">md5</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">md5</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                <span class="k">return</span> <span class="n">md5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">md5hash</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">zipFiles</span><span class="p">]</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Created ResourceLoader with search path:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;,</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">loader</span>
+</div>
+<div class="viewcode-block" id="MCInstall.findVersion1_8"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstall.findVersion1_8">[docs]</a>    <span class="k">def</span> <span class="nf">findVersion1_8</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">versions</span><span class="p">:</span>
+            <span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">rev</span> <span class="o">=</span> <span class="n">splitVersion</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">rev</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">v</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rev</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rev</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>  <span class="c"># skip revs like &quot;.2-pre1&quot; and &quot;.1-OptiFine_HD_U_C7&quot;, only accept full releases</span>
+                    <span class="k">return</span> <span class="n">v</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+</div></div>
+<div class="viewcode-block" id="splitVersion"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.splitVersion">[docs]</a><span class="k">def</span> <span class="nf">splitVersion</span><span class="p">(</span><span class="n">version</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split a Minecraft version ID into major, minor, and revision. If the version could not be parsed, return (0, 0, &quot;&quot;)</span>
+<span class="sd">    The revision is returned with the leading period. For example, if &quot;1.8.1-pre3&quot; is passed, (1, 8, &quot;.1-pre3&quot;) will</span>
+<span class="sd">    be returned.</span>
+
+<span class="sd">    :param version:</span>
+<span class="sd">    :type version: unicode</span>
+<span class="sd">    :return: major, minor, revision</span>
+<span class="sd">    :rtype: int, int, unicode</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">r&quot;(\d+)\.(\d+)(.*)&quot;</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;&quot;</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="s">&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">groups</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="usableVersion"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.usableVersion">[docs]</a><span class="k">def</span> <span class="nf">usableVersion</span><span class="p">(</span><span class="n">version</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return True if the version has unstitched texture data in assets/minecraft/textures/blocks (v1.6+)</span>
+<span class="sd">    (earlier versions have unstitched textures elsewhere, so don&#39;t bother with them)</span>
+<span class="sd">    :param version:</span>
+<span class="sd">    :type version:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    :rtype:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">rev</span> <span class="o">=</span> <span class="n">splitVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">major</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">minor</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="MCInstallError"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MCInstallError">[docs]</a><span class="k">class</span> <span class="nc">MCInstallError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised for invalid or unusable Minecraft installs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="getDefaultInstall"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.getDefaultInstall">[docs]</a><span class="k">def</span> <span class="nf">getDefaultInstall</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    :rtype: MCInstall</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">minecraftDir</span> <span class="o">=</span> <span class="n">directories</span><span class="o">.</span><span class="n">minecraftDir</span>
+    <span class="n">defaultInstall</span> <span class="o">=</span> <span class="n">MCInstall</span><span class="p">(</span><span class="n">minecraftDir</span><span class="p">,</span> <span class="s">&quot;(Default)&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">defaultInstall</span><span class="o">.</span><span class="n">checkUsable</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">MCInstallError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Default install not usable: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">defaultInstall</span><span class="o">.</span><span class="n">getJsonSettingValue</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">installationsOption</span><span class="o">.</span><span class="n">jsonValue</span><span class="p">([]):</span>
+            <span class="n">_installations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">defaultInstall</span><span class="p">)</span>
+            <span class="n">_saveInstalls</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">defaultInstall</span>
+</div>
+<span class="n">_installations</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">def</span> <span class="nf">_saveInstalls</span><span class="p">():</span>
+    <span class="n">installationsOption</span><span class="o">.</span><span class="n">setJsonValue</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">getJsonSettingValue</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_installations</span><span class="p">])</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;MCInstall settings: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">installationsOption</span><span class="o">.</span><span class="n">jsonValue</span><span class="p">())</span>
+
+<span class="k">def</span> <span class="nf">_listInstalls</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">install</span> <span class="ow">in</span> <span class="n">installationsOption</span><span class="o">.</span><span class="n">jsonValue</span><span class="p">([]):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">install</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">install</span><span class="p">[</span><span class="s">&quot;path&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">install</span> <span class="o">=</span> <span class="n">MCInstall</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">install</span><span class="o">.</span><span class="n">checkUsable</span><span class="p">()</span>
+            <span class="k">yield</span> <span class="n">install</span>
+        <span class="k">except</span> <span class="n">MCInstallError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Not using install </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">install</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="listInstalls"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.listInstalls">[docs]</a><span class="k">def</span> <span class="nf">listInstalls</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">_installations</span>
+    <span class="k">if</span> <span class="n">_installations</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">_installations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_listInstalls</span><span class="p">())</span>
+    <span class="n">getDefaultInstall</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">_installations</span>
+</div>
+<div class="viewcode-block" id="selectedInstallIndex"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.selectedInstallIndex">[docs]</a><span class="k">def</span> <span class="nf">selectedInstallIndex</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">currentInstallOption</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getInstall"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.getInstall">[docs]</a><span class="k">def</span> <span class="nf">getInstall</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_installations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="ensureInstallation"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.ensureInstallation">[docs]</a><span class="k">def</span> <span class="nf">ensureInstallation</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called on app startup. Auto-detect install, display config dialog if no installs were found</span>
+<span class="sd">    :return:</span>
+<span class="sd">    :rtype:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">listInstalls</span><span class="p">()</span>
+
+    <span class="c">#raise MCInstallError(&quot;Displaying Minecraft Install dialog! xxx remove me&quot;)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">_installations</span><span class="p">):</span>
+        <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">()</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;No usable Minecraft installs were found. MCEdit requires an installed Minecraft version to &quot;</span>
+                       <span class="s">&quot;access block textures, models, and metadata. Minecraft 1.8 or greater is required.&quot;</span><span class="p">)</span>
+        <span class="c">#msgBox.setInformativeText(e.message)</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+        <span class="n">installsWidget</span> <span class="o">=</span> <span class="n">MinecraftInstallsDialog</span><span class="p">()</span>
+        <span class="n">installsWidget</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="NameItem"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.NameItem">[docs]</a><span class="k">class</span> <span class="nc">NameItem</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">):</span>
+<div class="viewcode-block" id="NameItem.setData"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.NameItem.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="o">!=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span> <span class="ow">or</span> <span class="n">data</span> <span class="o">!=</span> <span class="s">&quot;(Default)&quot;</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">NameItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="PathItem"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.PathItem">[docs]</a><span class="k">class</span> <span class="nc">PathItem</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">):</span>
+<div class="viewcode-block" id="PathItem.setData"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.PathItem.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="o">!=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">PathItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="MinecraftInstallsDialog"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MinecraftInstallsDialog">[docs]</a><span class="k">class</span> <span class="nc">MinecraftInstallsDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MinecraftInstallsDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">load_ui</span><span class="p">(</span><span class="s">&quot;minecraft_installs.ui&quot;</span><span class="p">,</span> <span class="n">baseinstance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># populate list view</span>
+        <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">install</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">listInstalls</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addInstall</span><span class="p">(</span><span class="n">install</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hiliteRow</span><span class="p">(</span><span class="n">currentInstallOption</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">cellChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemChanged</span><span class="p">)</span>
+        <span class="c">#self.tableWidget.doubleClicked.connect(self.select)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">)</span>
+        <span class="c">#self.editButton.clicked.connect(self.edit)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">okButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MinecraftInstallsDialog.itemChanged"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.itemChanged">[docs]</a>    <span class="k">def</span> <span class="nf">itemChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="n">install</span> <span class="o">=</span> <span class="n">_installations</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">install</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">install</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">text</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_addInstall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">install</span><span class="p">):</span>
+        <span class="n">tableWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+        <span class="n">tableWidget</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="n">row</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">nameItem</span> <span class="o">=</span> <span class="n">NameItem</span><span class="p">(</span><span class="n">install</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">install</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;(Default)&quot;</span><span class="p">:</span>
+            <span class="n">nameItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">nameItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span><span class="p">)</span>
+        <span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nameItem</span><span class="p">)</span>
+
+        <span class="n">versionsString</span> <span class="o">=</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">install</span><span class="o">.</span><span class="n">versions</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+        <span class="n">versionsItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">versionsString</span><span class="p">)</span>
+        <span class="n">versionsItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">versionsItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span><span class="p">)</span>
+        <span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">versionsItem</span><span class="p">)</span>
+
+        <span class="n">pathItem</span> <span class="o">=</span> <span class="n">PathItem</span><span class="p">(</span><span class="n">install</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">install</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;(Default)&quot;</span><span class="p">:</span>
+            <span class="n">pathItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">pathItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span><span class="p">)</span>
+        <span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pathItem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hiliteRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="n">currentInstallOption</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="n">_saveInstalls</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_hiliteRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hiliteRow</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()):</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+                <span class="n">font</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">font</span><span class="p">()</span>
+                <span class="n">font</span><span class="o">.</span><span class="n">setBold</span><span class="p">(</span><span class="n">row</span> <span class="o">==</span> <span class="n">hiliteRow</span><span class="p">)</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MinecraftInstallsDialog.add"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Choose a Minecraft installation folder (.minecraft)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">folder</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">install</span> <span class="o">=</span> <span class="n">MCInstall</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+            <span class="n">install</span><span class="o">.</span><span class="n">checkUsable</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">MCInstallError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&quot;This minecraft install is unusable.</span><span class="se">\n</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Minecraft Install Unusable&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_installations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">install</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addInstall</span><span class="p">(</span><span class="n">install</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MinecraftInstallsDialog.remove"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">currentRow</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">_installations</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="n">_saveInstalls</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MinecraftInstallsDialog.select"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">currentRow</span><span class="p">()</span>
+        <span class="n">currentInstallOption</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hiliteRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MinecraftInstallsDialog.ok"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.ok">[docs]</a>    <span class="k">def</span> <span class="nf">ok</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MinecraftInstallsDialog.close"><a class="viewcode-back" href="../../../mcedit2.util.html#mcedit2.util.minecraftinstall.MinecraftInstallsDialog.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">_installations</span><span class="p">):</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                <span class="s">&quot;Minecraft Install Needed&quot;</span><span class="p">,</span>
+                                                <span class="s">&quot;Cannot start MCEdit without at least one Minecraft installation version &quot;</span>
+                                                <span class="s">&quot;1.8 or greater.&quot;</span><span class="p">,</span>
+                                                <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Close</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">,</span>
+                                                <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">button</span> <span class="o">==</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Close</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">SystemExit</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">MinecraftInstallsDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
