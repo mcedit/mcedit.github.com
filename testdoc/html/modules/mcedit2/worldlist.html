@@ -1,0 +1,424 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.worldlist &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.worldlist</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">arrow</span> <span class="kn">import</span> <span class="n">arrow</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">blockmeshes</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.blockmodels</span> <span class="kn">import</span> <span class="n">BlockModels</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.chunkloader</span> <span class="kn">import</span> <span class="n">ChunkLoader</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.textureatlas</span> <span class="kn">import</span> <span class="n">TextureAtlas</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">profiler</span><span class="p">,</span> <span class="n">minecraftinstall</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.load_ui</span> <span class="kn">import</span> <span class="n">load_ui</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.minecraftinstall</span> <span class="kn">import</span> <span class="n">MinecraftInstallsDialog</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.screen</span> <span class="kn">import</span> <span class="n">centerWidgetInScreen</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.worldloader</span> <span class="kn">import</span> <span class="n">LoaderTimer</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.layout</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Row</span><span class="p">,</span> <span class="n">setWidgetError</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.minimap</span> <span class="kn">import</span> <span class="n">MinimapWorldView</span>
+<span class="kn">from</span> <span class="nn">mceditlib.anvil.adapter</span> <span class="kn">import</span> <span class="n">AnvilWorldAdapter</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">LevelFormatError</span><span class="p">,</span> <span class="n">PlayerNotFound</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">worldeditor</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">mceditlib.findadapter</span> <span class="kn">import</span> <span class="n">isLevel</span><span class="p">,</span> <span class="n">findAdapter</span>
+<span class="kn">from</span> <span class="nn">mceditlib.util</span> <span class="kn">import</span> <span class="n">displayName</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="lastPlayedTime"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.lastPlayedTime">[docs]</a><span class="k">def</span> <span class="nf">lastPlayedTime</span><span class="p">(</span><span class="n">adapter</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">LastPlayed</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">arrow</span><span class="o">.</span><span class="n">Arrow</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">time</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dt</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="usefulFilename"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.usefulFilename">[docs]</a><span class="k">def</span> <span class="nf">usefulFilename</span><span class="p">(</span><span class="n">adapter</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">adapter</span><span class="p">,</span> <span class="s">&#39;worldFolder&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldListItemWidget"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListItemWidget">[docs]</a><span class="k">class</span> <span class="nc">WorldListItemWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">):</span>
+    <span class="n">doubleClicked</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldAdapter</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">worldAdapter</span><span class="o">.</span><span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFlat</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># mapLabel = QtGui.QLabel()</span>
+            <span class="c"># mapLabel.setFixedSize(72, 72)</span>
+            <span class="n">displayNameLimit</span> <span class="o">=</span> <span class="mi">50</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">displayName</span><span class="p">(</span><span class="n">worldAdapter</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">displayNameLimit</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="n">displayNameLimit</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;...&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displayNameLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastPlayed</span> <span class="o">=</span> <span class="n">lastPlayedTime</span><span class="p">(</span><span class="n">worldAdapter</span><span class="p">)</span>
+            <span class="n">lastPlayedText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastPlayed</span><span class="o">.</span><span class="n">humanize</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastPlayed</span> <span class="k">else</span> <span class="s">&quot;Unknown&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastPlayedLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">lastPlayedText</span><span class="p">)</span>
+            <span class="c">#self.sizeLabel = QtGui.QLabel(self.tr(&quot;Calculating area...&quot;))</span>
+            <span class="c"># areaText = self.tr(&quot;%.02f million square meters&quot;) % (world.chunkCount * 0.25)</span>
+            <span class="c"># diskSize = 0</span>
+            <span class="c"># if hasattr(worldAdapter, &#39;worldFolder&#39;):</span>
+            <span class="c">#     folder = worldAdapter.worldFolder</span>
+            <span class="c">#     for rf in folder.findRegionFiles():</span>
+            <span class="c">#         diskSize += os.stat(rf).st_size</span>
+            <span class="c"># else:</span>
+            <span class="c">#     diskSize = os.stat(worldAdapter.filename).st_size</span>
+            <span class="c">#</span>
+            <span class="c"># self.diskSizeLabel = QtGui.QLabel(self.tr(&quot;%0.2f MB&quot;) % (diskSize / 1000000.0))</span>
+
+            <span class="n">infoColumn</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">displayNameLabel</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lastPlayedLabel</span><span class="p">,</span>
+                <span class="c">#self.diskSizeLabel,</span>
+                <span class="bp">None</span>
+            <span class="p">)</span>
+
+            <span class="c">#layout = Row(mapLabel, (infoColumn, 1), None)</span>
+            <span class="n">layout</span> <span class="o">=</span> <span class="n">infoColumn</span>
+            <span class="c">#if usefulFilename(world) == world.displayName:</span>
+            <span class="c">#    boxLabelText = world.displayName</span>
+            <span class="c">#else:</span>
+            <span class="c">#    boxLabelText = self.tr(&quot;%s (%s)&quot; % (world.displayName, usefulFilename(world)))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">setWidgetError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WorldListItemWidget.mouseDoubleClickEvent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListItemWidget.mouseDoubleClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldListItemWidget.setErrorMessage"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListItemWidget.setErrorMessage">[docs]</a>    <span class="k">def</span> <span class="nf">setErrorMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizeLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="WorldListWidget"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget">[docs]</a><span class="k">class</span> <span class="nc">WorldListWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WorldListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&quot;World List&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveFileDir</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkLoader</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+
+        <span class="n">load_ui</span><span class="p">(</span><span class="s">&#39;world_list.ui&#39;</span><span class="p">,</span> <span class="n">baseinstance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Row</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editClicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cancelButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showListAgainInput</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewClicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">openWorldButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openWorldClicked</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">repairButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repairClicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repairButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backupButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backupClicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backupButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configureButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configureClicked</span><span class="p">)</span>
+
+        <span class="n">centerWidgetInScreen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span> <span class="o">=</span> <span class="n">LoaderTimer</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loadTimerFired</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">install</span> <span class="ow">in</span> <span class="n">minecraftinstall</span><span class="o">.</span><span class="n">listInstalls</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">minecraftInstallBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">install</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minecraftInstallBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">minecraftinstall</span><span class="o">.</span><span class="n">selectedInstallIndex</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateVersionsAndResourcePacks</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloadList</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_updateVersionsAndResourcePacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">install</span> <span class="o">=</span> <span class="n">minecraftinstall</span><span class="o">.</span><span class="n">getInstall</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minecraftInstallBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">install</span><span class="o">.</span><span class="n">versions</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">minecraftVersionBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resourcePackBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;(No resource pack)&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">resourcePack</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">install</span><span class="o">.</span><span class="n">resourcePacks</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resourcePackBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">resourcePack</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveFileDir</span> <span class="o">=</span> <span class="n">install</span><span class="o">.</span><span class="n">getSaveFileDir</span><span class="p">()</span>
+
+<div class="viewcode-block" id="WorldListWidget.getSelectedIVP"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.getSelectedIVP">[docs]</a>    <span class="k">def</span> <span class="nf">getSelectedIVP</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minecraftInstallBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+        <span class="n">install</span> <span class="o">=</span> <span class="n">minecraftinstall</span><span class="o">.</span><span class="n">getInstall</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minecraftVersionBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resourcePackBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resourcePackBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">install</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">p</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.reloadList"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.reloadList">[docs]</a>    <span class="k">def</span> <span class="nf">reloadList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFileDir</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">u&quot;Could not find the Minecraft saves directory!</span><span class="se">\n\n</span><span class="s">({0} was not found or is not a directory)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFileDir</span><span class="p">))</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Scanning </span><span class="si">%s</span><span class="s"> for worlds...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveFileDir</span><span class="p">)</span>
+            <span class="n">potentialWorlds</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFileDir</span><span class="p">)</span>
+            <span class="n">potentialWorlds</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFileDir</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">potentialWorlds</span><span class="p">]</span>
+            <span class="n">worldFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">potentialWorlds</span> <span class="k">if</span> <span class="n">isLevel</span><span class="p">(</span><span class="n">AnvilWorldAdapter</span><span class="p">,</span> <span class="n">p</span><span class="p">)]</span>
+            <span class="n">worldAdapters</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">worldFiles</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">adapter</span> <span class="o">=</span> <span class="n">findAdapter</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Could not find adapter for </span><span class="si">%s</span><span class="s">: </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">worldAdapters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">adapter</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">worldAdapters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;No worlds found! You should probably play Minecraft to create your first world.&quot;</span><span class="p">)</span>
+
+            <span class="n">column</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+            <span class="n">column</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">column</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">worldGroup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QButtonGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="c">#worldGroup.setExclusive(True)</span>
+
+            <span class="k">for</span> <span class="n">adapter</span> <span class="ow">in</span> <span class="n">worldAdapters</span><span class="p">:</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">WorldListItemWidget</span><span class="p">(</span><span class="n">adapter</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">lastPlayed</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">):</span>
+                <span class="n">worldGroup</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">column</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldListItemDoubleClicked</span><span class="p">)</span>
+
+            <span class="n">worldGroup</span><span class="o">.</span><span class="n">buttonClicked</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldListItemClicked</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">setWidgetError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.openWorldClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.openWorldClicked">[docs]</a>    <span class="k">def</span> <span class="nf">openWorldClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">qApp</span><span class="o">.</span><span class="n">chooseOpenWorld</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.worldListItemClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.worldListItemClicked">[docs]</a>    <span class="k">def</span> <span class="nf">worldListItemClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="kn">import</span> <span class="nn">gc</span><span class="p">;</span> <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">worldEditor</span> <span class="o">=</span> <span class="n">worldeditor</span><span class="o">.</span><span class="n">WorldEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">EnvironmentError</span><span class="p">,</span> <span class="n">LevelFormatError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">setWidgetError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorWidget</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">stackedWidget</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stackedWidget</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stackedWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldViewBox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorWidget</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedIVP</span><span class="p">()</span>
+            <span class="n">blockModels</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">)</span>
+            <span class="n">resLoader</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">getResourceLoader</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">blockModels</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">models</span><span class="p">[</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">]</span> <span class="o">=</span> <span class="n">blockModels</span> <span class="o">=</span> <span class="n">BlockModels</span><span class="p">(</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">,</span> <span class="n">resLoader</span><span class="p">)</span>
+            <span class="n">textureAtlas</span> <span class="o">=</span> <span class="n">TextureAtlas</span><span class="p">(</span><span class="n">worldEditor</span><span class="p">,</span> <span class="n">resLoader</span><span class="p">,</span> <span class="n">blockModels</span><span class="p">)</span>
+
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">worldEditor</span><span class="o">.</span><span class="n">getDimension</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setWorldView</span><span class="p">(</span><span class="n">MinimapWorldView</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">textureAtlas</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkLoader</span> <span class="o">=</span> <span class="n">ChunkLoader</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkLoader</span><span class="o">.</span><span class="n">addClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkLoader</span><span class="o">.</span><span class="n">chunkCompleted</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">player</span> <span class="o">=</span> <span class="n">worldEditor</span><span class="o">.</span><span class="n">getPlayer</span><span class="p">()</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Centering on single-player player.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">PlayerNotFound</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">center</span> <span class="o">=</span> <span class="n">worldEditor</span><span class="o">.</span><span class="n">worldSpawnPosition</span><span class="p">()</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Centering on spawn position.&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Centering on world center&quot;</span><span class="p">)</span>
+                    <span class="n">center</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">dim</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">player</span><span class="o">.</span><span class="n">dimName</span> <span class="o">==</span> <span class="n">dim</span><span class="o">.</span><span class="n">dimName</span><span class="p">:</span>
+                    <span class="n">center</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="n">player</span><span class="o">.</span><span class="n">Position</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">center</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">dim</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Switched world view&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.setWorldView"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.setWorldView">[docs]</a>    <span class="k">def</span> <span class="nf">setWorldView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldView</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">removeWorldView</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span> <span class="o">=</span> <span class="n">worldView</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stackedWidget</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">worldView</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.removeWorldView"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.removeWorldView">[docs]</a>    <span class="k">def</span> <span class="nf">removeWorldView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">textureAtlas</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stackedWidget</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkLoader</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.closeEvent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeWorldView</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="c">#import gc; gc.collect()</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.showEvent"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.showEvent">[docs]</a>    <span class="k">def</span> <span class="nf">showEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.worldListItemDoubleClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.worldListItemDoubleClicked">[docs]</a>    <span class="k">def</span> <span class="nf">worldListItemDoubleClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editClicked</span><span class="p">()</span>
+</div>
+    <span class="nd">@profiler.function</span><span class="p">(</span><span class="s">&quot;worldListLoadTimer&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="WorldListWidget.loadTimerFired"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.loadTimerFired">[docs]</a>    <span class="k">def</span> <span class="nf">loadTimerFired</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkLoader</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chunkLoader</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+</div>
+    <span class="n">editWorldClicked</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">unicode</span><span class="p">)</span>
+    <span class="n">viewWorldClicked</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">unicode</span><span class="p">)</span>
+    <span class="n">repairWorldClicked</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">unicode</span><span class="p">)</span>
+    <span class="n">backupWorldClicked</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">unicode</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WorldListWidget.editClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.editClicked">[docs]</a>    <span class="k">def</span> <span class="nf">editClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editWorldClicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.viewClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.viewClicked">[docs]</a>    <span class="k">def</span> <span class="nf">viewClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewWorldClicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.repairClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.repairClicked">[docs]</a>    <span class="k">def</span> <span class="nf">repairClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repairWorldClicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.backupClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.backupClicked">[docs]</a>    <span class="k">def</span> <span class="nf">backupClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backupWorldClicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemWidgets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedWorldIndex</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldListWidget.configureClicked"><a class="viewcode-back" href="../../mcedit2.html#mcedit2.worldlist.WorldListWidget.configureClicked">[docs]</a>    <span class="k">def</span> <span class="nf">configureClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">installsWidget</span> <span class="o">=</span> <span class="n">MinecraftInstallsDialog</span><span class="p">()</span>
+        <span class="n">installsWidget</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateVersionsAndResourcePacks</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

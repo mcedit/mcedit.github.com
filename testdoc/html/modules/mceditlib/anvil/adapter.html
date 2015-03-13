@@ -1,0 +1,1096 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.anvil.adapter &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.anvil.adapter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    adapter</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">zlib</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">nbt</span>
+<span class="kn">from</span> <span class="nn">mceditlib.anvil.entities</span> <span class="kn">import</span> <span class="n">PCEntityRef</span><span class="p">,</span> <span class="n">PCTileEntityRef</span>
+<span class="kn">from</span> <span class="nn">mceditlib.anvil.worldfolder</span> <span class="kn">import</span> <span class="n">AnvilWorldFolder</span>
+<span class="kn">from</span> <span class="nn">mceditlib.blocktypes</span> <span class="kn">import</span> <span class="n">pc_blocktypes</span><span class="p">,</span> <span class="n">PCBlockTypeSet</span><span class="p">,</span> <span class="n">BlockType</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">nbtattr</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">PlayerNotFound</span><span class="p">,</span> <span class="n">ChunkNotPresent</span>
+<span class="kn">from</span> <span class="nn">mceditlib.revisionhistory</span> <span class="kn">import</span> <span class="n">RevisionHistory</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c"># --- Constants ---</span>
+
+<span class="n">GAMETYPE_SURVIVAL</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">GAMETYPE_CREATIVE</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">VERSION_MCR</span> <span class="o">=</span> <span class="mi">19132</span>
+<span class="n">VERSION_ANVIL</span> <span class="o">=</span> <span class="mi">19133</span>
+
+<span class="c"># --- Exceptions ---</span>
+
+
+<div class="viewcode-block" id="AnvilChunkFormatError"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkFormatError">[docs]</a><span class="k">class</span> <span class="nc">AnvilChunkFormatError</span><span class="p">(</span><span class="ne">IOError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when an Anvil chunk&#39;s data is not as expected</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+</div>
+<div class="viewcode-block" id="SessionLockLost"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.SessionLockLost">[docs]</a><span class="k">class</span> <span class="nc">SessionLockLost</span><span class="p">(</span><span class="ne">IOError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when the session lock is lost because another program (Minecraft) opened the level</span>
+<span class="sd">    while we were editing it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="c"># --- Helper functions ---</span>
+
+</div>
+<div class="viewcode-block" id="unpackNibbleArray"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.unpackNibbleArray">[docs]</a><span class="k">def</span> <span class="nf">unpackNibbleArray</span><span class="p">(</span><span class="n">dataArray</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">dataArray</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">unpackedData</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+
+    <span class="n">unpackedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataArray</span>
+    <span class="n">unpackedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;=</span> <span class="mh">0xf</span>
+    <span class="n">unpackedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataArray</span>
+    <span class="n">unpackedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;&gt;=</span> <span class="mi">4</span>
+    <span class="k">return</span> <span class="n">unpackedData</span>
+
+</div>
+<div class="viewcode-block" id="packNibbleArray"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.packNibbleArray">[docs]</a><span class="k">def</span> <span class="nf">packNibbleArray</span><span class="p">(</span><span class="n">unpackedData</span><span class="p">):</span>
+    <span class="n">packedData</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">unpackedData</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="n">unpackedData</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">packedData</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;=</span> <span class="mi">4</span>
+    <span class="n">packedData</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">|=</span> <span class="n">packedData</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">packedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="deflate"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.deflate">[docs]</a><span class="k">def</span> <span class="nf">deflate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="c"># zobj = zlib.compressobj(6,zlib.DEFLATED,-zlib.MAX_WBITS,zlib.DEF_MEM_LEVEL,0)</span>
+    <span class="c"># zdata = zobj.compress(data)</span>
+    <span class="c"># zdata += zobj.flush()</span>
+    <span class="c"># return zdata</span>
+    <span class="k">return</span> <span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="inflate"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.inflate">[docs]</a><span class="k">def</span> <span class="nf">inflate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="sanitizeBlocks"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.sanitizeBlocks">[docs]</a><span class="k">def</span> <span class="nf">sanitizeBlocks</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">blocktypes</span><span class="p">):</span>
+    <span class="k">return</span>
+    <span class="c"># # change grass to dirt where needed so Minecraft doesn&#39;t flip out and die</span>
+    <span class="c"># grass = section.Blocks == blocktypes.Grass.ID</span>
+    <span class="c"># grass |= section.Blocks == blocktypes.Dirt.ID</span>
+    <span class="c"># badgrass = grass[1:, :, :] &amp; grass[:-1, :, :]</span>
+    <span class="c">#</span>
+    <span class="c"># section.Blocks[:-1, :, :][badgrass] = blocktypes.Dirt.ID</span>
+    <span class="c">#</span>
+    <span class="c"># # remove any thin snow layers immediately above other thin snow layers.</span>
+    <span class="c"># # minecraft doesn&#39;t flip out, but it&#39;s almost never intended</span>
+    <span class="c"># if hasattr(blocktypes, &quot;SnowLayer&quot;):</span>
+    <span class="c">#     snowlayer = section.Blocks == blocktypes.SnowLayer.ID</span>
+    <span class="c">#     badsnow = snowlayer[:, :, 1:] &amp; snowlayer[:, :, :-1]</span>
+    <span class="c">#</span>
+    <span class="c">#     section.Blocks[:, :, 1:][badsnow] = 0</span>
+
+<span class="c"># --- Sections and chunks ---</span>
+
+</div>
+<div class="viewcode-block" id="AnvilSection"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilSection">[docs]</a><span class="k">class</span> <span class="nc">AnvilSection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Internal representation of a 16x16x16 chunk section. Arrays are indexed YZX.</span>
+
+<span class="sd">    4-bit arrays are unpacked to byte arrays to make them work with numpy&#39;s array routines.</span>
+
+<span class="sd">    To create the full 12-bit block ID, the Blocks array is extended to 16 bits and the Add array is merged into</span>
+<span class="sd">    the Blocks array.</span>
+
+<span class="sd">    :ivar Y: section&#39;s Y value [0..(world.Height+15) &gt;&gt; 4]</span>
+<span class="sd">    :ivar Blocks: Block IDs [0..4095]</span>
+<span class="sd">    :ivar Data: Block sub-data [0..15]</span>
+<span class="sd">    :ivar BlockLight: Light emitted by blocks [0..15]</span>
+<span class="sd">    :ivar SkyLight: Light emitted by the sun/moon [0..15]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section_tag</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">section_tag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">section_tag</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section_tag</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">section_tag</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;Y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span> <span class="o">=</span> <span class="n">section_tag</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;Blocks&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&quot;uint16&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="s">&quot;Data&quot;</span><span class="p">,</span> <span class="s">&quot;SkyLight&quot;</span><span class="p">,</span> <span class="s">&quot;BlockLight&quot;</span><span class="p">:</span>
+            <span class="n">section_array</span> <span class="o">=</span> <span class="n">section_tag</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">section_array</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">unpackNibbleArray</span><span class="p">(</span><span class="n">section_array</span><span class="p">))</span>
+
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">section_tag</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;Add&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tag</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span>
+            <span class="n">add</span> <span class="o">=</span> <span class="n">unpackNibbleArray</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span> <span class="o">|=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="s">&#39;uint16&#39;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_section_tag</span> <span class="o">=</span> <span class="n">section_tag</span>
+
+    <span class="k">def</span> <span class="nf">_create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint16&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SkyLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BlockLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_section_tag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AnvilSection.buildNBTTag"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilSection.buildNBTTag">[docs]</a>    <span class="k">def</span> <span class="nf">buildNBTTag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a TAG_Compound for saving this section to a chunk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">section_tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_section_tag</span>
+
+        <span class="n">Blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span>
+        <span class="n">Data</span> <span class="o">=</span> <span class="n">packNibbleArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">)</span>
+        <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">packNibbleArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BlockLight</span><span class="p">)</span>
+        <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">packNibbleArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">)</span>
+
+        <span class="n">add</span> <span class="o">=</span> <span class="n">Blocks</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">add</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">section_tag</span><span class="p">[</span><span class="s">&quot;Add&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">packNibbleArray</span><span class="p">(</span><span class="n">add</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;uint8&#39;</span><span class="p">))</span>
+
+        <span class="n">section_tag</span><span class="p">[</span><span class="s">&#39;Blocks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">))</span>
+        <span class="n">section_tag</span><span class="p">[</span><span class="s">&#39;Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">Data</span><span class="p">)</span>
+        <span class="n">section_tag</span><span class="p">[</span><span class="s">&#39;BlockLight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">BlockLight</span><span class="p">)</span>
+        <span class="n">section_tag</span><span class="p">[</span><span class="s">&#39;SkyLight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">SkyLight</span><span class="p">)</span>
+
+        <span class="n">section_tag</span><span class="p">[</span><span class="s">&quot;Y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">section_tag</span>
+
+</div></div>
+<div class="viewcode-block" id="AnvilChunkData"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData">[docs]</a><span class="k">class</span> <span class="nc">AnvilChunkData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; This is the chunk data backing a WorldEditorChunk. Chunk data is retained by the WorldEditor until its</span>
+<span class="sd">    WorldEditorChunk is no longer used, then it is either cached in memory, discarded, or written to disk according to</span>
+<span class="sd">    resource limits.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adapter</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">rootTag</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type adapter: mceditlib.anvil.adapter.AnvilWorldAdapter</span>
+<span class="sd">        :type cx: int</span>
+<span class="sd">        :type cz: int</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :type rootTag: mceditlib.nbt.TAG_Compound</span>
+<span class="sd">        :type create: bool</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: AnvilChunkData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cx</span> <span class="o">=</span> <span class="n">cx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cz</span> <span class="o">=</span> <span class="n">cz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span> <span class="o">=</span> <span class="n">dimName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">adapter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">rootTag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">rootTag</span><span class="p">)</span>
+
+        <span class="n">levelTag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&quot;Biomes&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">levelTag</span><span class="p">:</span>
+            <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;Biomes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte_Array</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="s">&#39;uint8&#39;</span><span class="p">))</span>
+            <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;Biomes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Entities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;Entities&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TileEntities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;TileEntities&quot;</span><span class="p">]</span>
+
+        <span class="c"># self.Entities = [PCEntityRef(tag) for tag in self.rootTag[&quot;Level&quot;][&quot;Entities&quot;]]</span>
+        <span class="c"># del self.rootTag[&quot;Level&quot;][&quot;Entities&quot;]</span>
+        <span class="c"># self.TileEntities = [PCTileEntityRef(tag) for tag in self.rootTag[&quot;Level&quot;][&quot;TileEntities&quot;]]</span>
+        <span class="c"># del self.rootTag[&quot;Level&quot;][&quot;TileEntities&quot;]</span>
+
+    <span class="k">def</span> <span class="nf">_create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">chunkTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+        <span class="n">chunkTag</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+        <span class="n">levelTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+        <span class="n">chunkTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">levelTag</span>
+
+        <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;HeightMap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int_Array</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="s">&#39;uint32&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">newbyteorder</span><span class="p">())</span>
+        <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;TerrainPopulated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;xPos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cx</span><span class="p">)</span>
+        <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;zPos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cz</span><span class="p">)</span>
+
+        <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;LastUpdate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Long</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;Entities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">()</span>
+        <span class="n">levelTag</span><span class="p">[</span><span class="s">&quot;TileEntities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">chunkTag</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootTag</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">rootTag</span>
+
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;Sections&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">sec</span><span class="p">[</span><span class="s">&quot;Y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">AnvilSection</span><span class="p">(</span><span class="n">sec</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AnvilChunkData.buildNBTTag"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.buildNBTTag">[docs]</a>    <span class="k">def</span> <span class="nf">buildNBTTag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; does not recalculate any data or light &quot;&quot;&quot;</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">u&quot;Saving chunk: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">sections</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_List</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">section</span><span class="o">.</span><span class="n">Blocks</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span>
+                    <span class="ow">not</span> <span class="n">section</span><span class="o">.</span><span class="n">BlockLight</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span>
+                    <span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">SkyLight</span> <span class="o">==</span> <span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
+                <span class="k">continue</span>
+
+            <span class="n">sanitizeBlocks</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">)</span>
+            <span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">buildNBTTag</span><span class="p">())</span>
+
+        <span class="n">tag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;Sections&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sections</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">u&quot;Saved chunk {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">tag</span>
+</div>
+<div class="viewcode-block" id="AnvilChunkData.sectionPositions"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.sectionPositions">[docs]</a>    <span class="k">def</span> <span class="nf">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AnvilChunkData.getSection"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.getSection">[docs]</a>    <span class="k">def</span> <span class="nf">getSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param cy: Section number (y coordinate &gt;&gt; 4)</span>
+<span class="sd">        :param create: If False, returns None if the section is not present, otherwise creates the section.</span>
+<span class="sd">        :returns: The requested section, or None if it wasn&#39;t created.</span>
+<span class="sd">        :rtype: AnvilSection</span>
+<span class="sd">        :raises: ValueError if create is True and the requested section can&#39;t be stored in this chunk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cy</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">maxHeight</span> <span class="ow">or</span> <span class="n">cy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Requested section </span><span class="si">%s</span><span class="s"> exceeds world height&quot;</span> <span class="o">%</span> <span class="n">cy</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="n">section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">create</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">AnvilSection</span><span class="p">()</span>
+                <span class="n">section</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">cy</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="n">cy</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span>
+
+        <span class="k">return</span> <span class="n">section</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="AnvilChunkData.bounds"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">cx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">minHeight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">),</span>
+                           <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">maxHeight</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">minHeight</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="AnvilChunkData.blocktypes"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.blocktypes">[docs]</a>    <span class="k">def</span> <span class="nf">blocktypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">blocktypes</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="AnvilChunkData.Biomes"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.Biomes">[docs]</a>    <span class="k">def</span> <span class="nf">Biomes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;Biomes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="AnvilChunkData.HeightMap"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.HeightMap">[docs]</a>    <span class="k">def</span> <span class="nf">HeightMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># z, x order in save file</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;HeightMap&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">TerrainPopulated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;TerrainPopulated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@TerrainPopulated.setter</span>
+<div class="viewcode-block" id="AnvilChunkData.TerrainPopulated"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilChunkData.TerrainPopulated">[docs]</a>    <span class="k">def</span> <span class="nf">TerrainPopulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;True or False. If False, the game will populate the chunk with</span>
+<span class="sd">        ores and vegetation on next load&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Level&quot;</span><span class="p">][</span><span class="s">&quot;TerrainPopulated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c"># --- World info ---</span>
+
+</div></div>
+<div class="viewcode-block" id="AnvilWorldMetadata"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldMetadata">[docs]</a><span class="k">class</span> <span class="nc">AnvilWorldMetadata</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadataTag</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadataTag</span> <span class="o">=</span> <span class="n">metadataTag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">metadataTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="c"># --- NBT Tag variables ---</span>
+
+    <span class="n">SizeOnDisk</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;SizeOnDisk&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Long</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">RandomSeed</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;RandomSeed&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Long</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">Time</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;Time&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Long</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c"># Age of the world in ticks. 20 ticks per second; 24000 ticks per day.</span>
+    <span class="n">LastPlayed</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;LastPlayed&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Long</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+
+    <span class="n">LevelName</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;LevelName&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">,</span> <span class="s">&quot;Untitled World&quot;</span><span class="p">)</span>
+
+    <span class="n">MapFeatures</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;MapFeatures&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">GameType</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;GameType&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c"># 0 for survival, 1 for creative</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;version&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">,</span> <span class="n">VERSION_ANVIL</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AnvilWorldMetadata.worldSpawnPosition"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldMetadata.worldSpawnPosition">[docs]</a>    <span class="k">def</span> <span class="nf">worldSpawnPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;SpawnX&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnY&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnZ&quot;</span><span class="p">)])</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldMetadata.setWorldSpawnPosition"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldMetadata.setWorldSpawnPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setWorldSpawnPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s">&quot;SpawnX&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnY&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnZ&quot;</span><span class="p">),</span> <span class="n">pos</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="AnvilWorldAdapter"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter">[docs]</a><span class="k">class</span> <span class="nc">AnvilWorldAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides an interface to AnvilWorldFolder/RevisionHistory that is usable by WorldEditor</span>
+
+<span class="sd">    This interface is the base used for all adapter classes. When writing a new adapter, make sure to</span>
+<span class="sd">    implement all required methods and attributes. Required methods and attrs are the ones with docstrings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">minHeight</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">maxHeight</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">blocktypes</span> <span class="o">=</span> <span class="n">pc_blocktypes</span>
+    <span class="n">hasLights</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">EntityRef</span> <span class="o">=</span> <span class="n">PCEntityRef</span>
+    <span class="n">TileEntityRef</span> <span class="o">=</span> <span class="n">PCTileEntityRef</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a Minecraft for PC level (Anvil format) from the given filename. It can point to either</span>
+<span class="sd">        a level.dat or a folder containing one. If create is True, it will</span>
+<span class="sd">        also create the world using a randomly selected seed.</span>
+
+<span class="sd">        If you try to create an existing world, IOError will be raised.</span>
+
+<span class="sd">        Uses a RevisionHistory to manage undo history. Upon creation, the world is read-only until createRevision() is</span>
+<span class="sd">        called. Call createRevision() to create a new revision, or selectRevision() to revert to an earlier</span>
+<span class="sd">        revision. Older revisions are read-only, so createRevision() must be called again to make further changes.</span>
+
+<span class="sd">        Call writeAllChanges() to write all changes into the original world.</span>
+
+<span class="sd">        :type filename: str or unicode</span>
+<span class="sd">        :type create: bool</span>
+<span class="sd">        :type readonly: bool</span>
+<span class="sd">        :rtype: AnvilWorldAdapter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lockTime</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">create</span> <span class="ow">and</span> <span class="n">readonly</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;level.dat&quot;</span><span class="p">,</span> <span class="s">&quot;level.dat_old&quot;</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">create</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&#39;File not found&#39;</span><span class="p">)</span>
+
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;level.dat&quot;</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&#39;File exists!&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&#39;File is not a Minecraft Anvil world&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">readonly</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span> <span class="o">=</span> <span class="n">AnvilWorldFolder</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span> <span class="o">=</span> <span class="n">RevisionHistory</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">resume</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">getHead</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="n">readonly</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">readonly</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acquireSessionLock</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_createMetadataTag</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="s">&quot;level.dat&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">metadataTag</span><span class="o">.</span><span class="n">save</span><span class="p">())</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadMetadata</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;AnvilWorldAdapter(</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span>
+
+    <span class="c"># --- Create, save, close ---</span>
+
+<div class="viewcode-block" id="AnvilWorldAdapter.loadMetadata"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.loadMetadata">[docs]</a>    <span class="k">def</span> <span class="nf">loadMetadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metadataTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="s">&quot;level.dat&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">AnvilWorldMetadata</span><span class="p">(</span><span class="n">metadataTag</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadFMLMapping</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">EnvironmentError</span><span class="p">,</span> <span class="n">zlib</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Error loading level.dat, trying level.dat_old ({0})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metadataTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="s">&quot;level.dat_old&quot;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">AnvilWorldMetadata</span><span class="p">(</span><span class="n">metadataTag</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;level.dat restored from backup.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveChanges</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%r</span><span class="s"> while loading level.dat_old. Initializing with defaults.&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_createMetadataTag</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="n">VERSION_ANVIL</span><span class="p">,</span> <span class="s">&quot;Pre-Anvil world formats are not supported (for now)&quot;</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.loadFMLMapping"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.loadFMLMapping">[docs]</a>    <span class="k">def</span> <span class="nf">loadFMLMapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">metadataTag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">metadataTag</span>
+        <span class="n">fml</span> <span class="o">=</span> <span class="n">metadataTag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;FML&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fml</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">fml</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ModItemData&#39;</span><span class="p">)</span>  <span class="c"># MC 1.6</span>
+        <span class="k">if</span> <span class="n">mid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding block IDs from FML for MC 1.6&quot;</span><span class="p">)</span>
+            <span class="n">blocktypes</span> <span class="o">=</span> <span class="n">PCBlockTypeSet</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">mid</span><span class="p">:</span>
+                <span class="n">ID</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;ItemId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;ordinal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;ItemType&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">blocktypes</span><span class="o">.</span><span class="n">statesByID</span><span class="p">:</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">IDsByState</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">statesByID</span><span class="p">[</span><span class="n">ID</span><span class="p">,</span> <span class="n">meta</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">blockJsons</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s">&#39;displayName&#39;</span><span class="p">:</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s">&#39;internalName&#39;</span><span class="p">:</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s">&#39;blockState&#39;</span><span class="p">:</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">allBlocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">BlockType</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">blocktypes</span><span class="p">))</span>
+
+            <span class="n">blocktypes</span><span class="o">.</span><span class="n">allBlocks</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span> <span class="o">=</span> <span class="n">blocktypes</span>
+
+        <span class="n">itemdata</span> <span class="o">=</span> <span class="n">fml</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ItemData&#39;</span><span class="p">)</span>  <span class="c"># MC 1.7</span>
+        <span class="k">if</span> <span class="n">itemdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding block IDs from FML for MC 1.7&quot;</span><span class="p">)</span>
+            <span class="n">blocktypes</span> <span class="o">=</span> <span class="n">PCBlockTypeSet</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">itemdata</span><span class="p">:</span>
+                <span class="n">ID</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;K&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">blocktypes</span><span class="o">.</span><span class="n">statesByID</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">IDsByState</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ID</span><span class="p">,</span> <span class="mi">0</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">statesByID</span><span class="p">[</span><span class="n">ID</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">blockJsons</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s">&#39;displayName&#39;</span><span class="p">:</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s">&#39;internalName&#39;</span><span class="p">:</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s">&#39;blockState&#39;</span><span class="p">:</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="n">blocktypes</span><span class="o">.</span><span class="n">allBlocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">BlockType</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">blocktypes</span><span class="p">))</span>
+
+            <span class="n">blocktypes</span><span class="o">.</span><span class="n">allBlocks</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Added </span><span class="si">%d</span><span class="s"> blocks.&quot;</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span> <span class="o">=</span> <span class="n">blocktypes</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_createMetadataTag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a level.dat for a newly created world or a world found with damaged level.dat/.dat_old (xxx repair in</span>
+<span class="sd">        WorldEditor?)</span>
+<span class="sd">        :param random_seed:</span>
+<span class="sd">        :type random_seed:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metadataTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+        <span class="n">metadataTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+        <span class="n">metadataTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">][</span><span class="s">&quot;SpawnX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">metadataTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">][</span><span class="s">&quot;SpawnY&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">metadataTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">][</span><span class="s">&quot;SpawnZ&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">last_played</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">random_seed</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">random_seed</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="mh">0xffffffffffffffff</span><span class="n">L</span><span class="p">)</span> <span class="o">-</span> <span class="mh">0x8000000000000000</span><span class="n">L</span>
+
+        <span class="n">metadataTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="n">VERSION_ANVIL</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">AnvilWorldMetadata</span><span class="p">(</span><span class="n">metadataTag</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">LastPlayed</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="n">last_played</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">RandomSeed</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">SizeOnDisk</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">Time</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">LevelName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AnvilWorldAdapter.syncToDisk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.syncToDisk">[docs]</a>    <span class="k">def</span> <span class="nf">syncToDisk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write cached items (metadata from level.dat and players in players/ folder) to the current revision.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">dirty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="s">&quot;level.dat&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">metadataTag</span><span class="o">.</span><span class="n">save</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.saveChanges"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.saveChanges">[docs]</a>    <span class="k">def</span> <span class="nf">saveChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write all changes from all revisions into the world folder.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;World is opened read only.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkSessionLock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">writeAllChanges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">getHead</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.close"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close the world, deleting temporary files and freeing resources. Operations on a closed world are undefined.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">pass</span>  <span class="c"># do what here???</span>
+
+    <span class="c"># --- Undo revisions ---</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.requireRevisions"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.requireRevisions">[docs]</a>    <span class="k">def</span> <span class="nf">requireRevisions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enforce the creation of new revisions by making the world folder&#39;s revision read-only.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">rootNode</span><span class="o">.</span><span class="n">readOnly</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.createRevision"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.createRevision">[docs]</a>    <span class="k">def</span> <span class="nf">createRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new undo revision. Subsequent changes should be stored in the new revision.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">createRevision</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.closeRevision"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.closeRevision">[docs]</a>    <span class="k">def</span> <span class="nf">closeRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close the current revision and mark it read-only. Subsequent edits will not be possible until createRevision</span>
+<span class="sd">        is called.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">closeRevision</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.setRevisionInfo"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.setRevisionInfo">[docs]</a>    <span class="k">def</span> <span class="nf">setRevisionInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attach some arbitrary JSON-serializable data to the current revision</span>
+
+<span class="sd">        :param info: JSON-serializable data</span>
+<span class="sd">        :type info: list | dict | str | unicode | int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">setRevisionInfo</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.getRevisionInfo"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.getRevisionInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getRevisionInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return JSON-serializable data attached previously to the current revision via setRevisionInfo, or None if</span>
+<span class="sd">        no data is attached.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: list | dict | str | unicode | int | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">getRevisionInfo</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.selectRevision"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.selectRevision">[docs]</a>    <span class="k">def</span> <span class="nf">selectRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Select the current revision by index. Return changes between the previous revision and this one. If</span>
+<span class="sd">         the index is invalid, returns None and does nothing.</span>
+
+<span class="sd">         (XXX use an ID instead of index?)</span>
+
+<span class="sd">        :param index:</span>
+<span class="sd">        :type index:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: RevisionChanges</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">newRevision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">getRevision</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">changes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">getRevisionChanges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="p">,</span> <span class="n">newRevision</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span> <span class="o">=</span> <span class="n">newRevision</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadMetadata</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">changes</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.listRevisions"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.listRevisions">[docs]</a>    <span class="k">def</span> <span class="nf">listRevisions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List the revision indexes and infos as (index, info) tuples. Info is JSON-serializable data previously attached</span>
+<span class="sd">        with setRevisionInfo, or None.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: iterator[(int, list | dict | str | unicode | int)]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">ID</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">ID</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">getRevisionInfo</span><span class="p">()</span>
+
+    <span class="c"># --- Session lock ---</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.acquireSessionLock"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.acquireSessionLock">[docs]</a>    <span class="k">def</span> <span class="nf">acquireSessionLock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Acquire the world&#39;s session.lock. Formats without this file may do nothing.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lockfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">rootFolder</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="s">&quot;session.lock&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lockTime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="n">lockfile</span><span class="p">,</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&quot;&gt;q&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lockTime</span><span class="p">))</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">fsync</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.checkSessionLock"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.checkSessionLock">[docs]</a>    <span class="k">def</span> <span class="nf">checkSessionLock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make sure the lock previously acquired by acquireSessionLock is still valid. Raise SessionLockLost if it is</span>
+<span class="sd">        not. Raising the exception will abort any writes done to the main world folder.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SessionLockLost</span><span class="p">(</span><span class="s">&quot;World is opened read only.&quot;</span><span class="p">)</span>
+
+        <span class="n">lockfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revisionHistory</span><span class="o">.</span><span class="n">rootFolder</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="s">&quot;session.lock&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;&gt;q&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="p">(</span><span class="n">lockfile</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+            <span class="n">lock</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">lock</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lockTime</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SessionLockLost</span><span class="p">(</span><span class="s">&quot;Session lock lost. This world is being accessed from another location.&quot;</span><span class="p">)</span>
+
+    <span class="c"># --- Format detection ---</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="AnvilWorldAdapter.canOpenFile"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.canOpenFile">[docs]</a>    <span class="k">def</span> <span class="nf">canOpenFile</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ask this adapter if it can open the given file.</span>
+
+<span class="sd">        :param filename: File to identify</span>
+<span class="sd">        :type filename: str | unicode</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;chunks.dat&quot;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">False</span>  <span class="c"># exclude Pocket Edition folders</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;level.dat&quot;</span><span class="p">,</span> <span class="s">&quot;level.dat_old&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;level.dat&quot;</span> <span class="ow">in</span> <span class="n">files</span> <span class="ow">or</span> <span class="s">&quot;level.dat_old&quot;</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c"># --- Dimensions ---</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.listDimensions"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.listDimensions">[docs]</a>    <span class="k">def</span> <span class="nf">listDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List the names of all dimensions in this world.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: iterator of str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">listDimensions</span><span class="p">()</span>
+
+    <span class="c"># --- Chunks ---</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.chunkCount"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.chunkCount">[docs]</a>    <span class="k">def</span> <span class="nf">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Count the chunks in the given dimension</span>
+
+<span class="sd">        :param dimName:</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">chunkCount</span><span class="p">(</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.chunkPositions"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List the chunk positions (cx, cz) in the given dimension.</span>
+
+<span class="sd">        :type dimName: unicode or str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: Iterator of (int, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">(</span><span class="n">dimName</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.containsChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return whether the given chunk is present in the given dimension</span>
+
+<span class="sd">        :type cx: int or dtype</span>
+<span class="sd">        :type cz: int or dtype</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.readChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.readChunk">[docs]</a>    <span class="k">def</span> <span class="nf">readChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return chunk (cx, cz) in the given dimension as an AnvilChunkData. Raise ChunkNotPresent if not found.</span>
+
+<span class="sd">        :type cx: int or dtype</span>
+<span class="sd">        :type cz: int or dtype</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: AnvilChunkData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">readChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+            <span class="n">chunkTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">buf</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;_getChunkData: Chunk </span><span class="si">%s</span><span class="s"> loaded (</span><span class="si">%s</span><span class="s"> bytes)&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="n">chunkData</span> <span class="o">=</span> <span class="n">AnvilChunkData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">chunkTag</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ChunkNotPresent</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">,</span> <span class="n">zlib</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c"># Missing nbt keys, lists too short, decompression failure</span>
+            <span class="k">raise</span> <span class="n">AnvilChunkFormatError</span><span class="p">(</span><span class="s">&quot;Error loading chunk: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">chunkData</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.writeChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.writeChunk">[docs]</a>    <span class="k">def</span> <span class="nf">writeChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the given AnvilChunkData to the current revision.</span>
+
+<span class="sd">        :type chunk: mceditlib.anvil.adapter.AnvilChunkData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">buildNBTTag</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">writeChunkBytes</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cz</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">dimName</span><span class="p">,</span> <span class="n">tag</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">compressed</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.createChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.createChunk">[docs]</a>    <span class="k">def</span> <span class="nf">createChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new empty chunk at the given position in the given dimension.</span>
+
+<span class="sd">        :type cx: int</span>
+<span class="sd">        :type cz: int</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: AnvilChunkData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Chunk </span><span class="si">%s</span><span class="s"> already exists in dim </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">),</span> <span class="n">dimName</span><span class="p">)</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">AnvilChunkData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">writeChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">buildNBTTag</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">compressed</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">chunk</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.deleteChunk"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.deleteChunk">[docs]</a>    <span class="k">def</span> <span class="nf">deleteChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete the chunk at the given position in the given dimension.</span>
+
+<span class="sd">        :type cx: int</span>
+<span class="sd">        :type cz: int</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">deleteChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+
+    <span class="c"># --- Players ---</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.listPlayers"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.listPlayers">[docs]</a>    <span class="k">def</span> <span class="nf">listPlayers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List the names of all players in this world (XXX players folder in dimension folders??)</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: Iterator of [str]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">listFolder</span><span class="p">(</span><span class="s">&quot;playerdata&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.dat&quot;</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">f</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&quot;Player&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">rootTag</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="s">&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.getPlayer"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.getPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">getPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">playerUUID</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AnvilPlayerRef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">playerUUID</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.getPlayerTag"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.getPlayerTag">[docs]</a>    <span class="k">def</span> <span class="nf">getPlayerTag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">playerUUID</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the root NBT tag for the named player. Raise PlayerNotFound if not present.</span>
+
+<span class="sd">        :param playerUUID:</span>
+<span class="sd">        :type playerUUID: unicode</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: PCPlayer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">playerUUID</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;Player&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">rootTag</span><span class="p">:</span>
+                <span class="c"># single-player world</span>
+                <span class="n">playerTag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Player&quot;</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">playerTag</span>
+            <span class="k">raise</span> <span class="n">PlayerNotFound</span><span class="p">(</span><span class="n">playerUUID</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">playerFilePath</span> <span class="o">=</span> <span class="s">&quot;playerdata/</span><span class="si">%s</span><span class="s">.dat&quot;</span> <span class="o">%</span> <span class="n">playerUUID</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">playerFilePath</span><span class="p">):</span>
+                <span class="c"># multiplayer world, found this player</span>
+                <span class="n">playerTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">playerFilePath</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">playerTag</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PlayerNotFound</span><span class="p">(</span><span class="n">playerUUID</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.savePlayerTag"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.savePlayerTag">[docs]</a>    <span class="k">def</span> <span class="nf">savePlayerTag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">playerUUID</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">playerUUID</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="c"># sync metadata?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="s">&quot;playerdata/</span><span class="si">%s</span><span class="s">.dat&quot;</span> <span class="o">%</span> <span class="n">playerUUID</span><span class="p">,</span> <span class="n">tag</span><span class="o">.</span><span class="n">save</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="AnvilWorldAdapter.createPlayer"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilWorldAdapter.createPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">createPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">playerUUID</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new player with the given name and return the PlayerRef. Raises some kind of IOError if the player</span>
+<span class="sd">         could not be created.</span>
+
+<span class="sd">        :param playerUUID:</span>
+<span class="sd">        :type playerUUID: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: PCPlayer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;World is opened read only.&quot;</span><span class="p">)</span>
+
+        <span class="n">playerFilePath</span> <span class="o">=</span> <span class="s">&quot;playerdata/</span><span class="si">%s</span><span class="s">.dat&quot;</span> <span class="o">%</span> <span class="n">playerUUID</span>
+
+        <span class="k">if</span> <span class="n">playerUUID</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;Player&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;Single-player player already exists.&quot;</span><span class="p">)</span>
+            <span class="n">playerTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="s">&quot;Data&quot;</span><span class="p">][</span><span class="s">&quot;Player&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">playerTag</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">playerFilePath</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot create player </span><span class="si">%s</span><span class="s">: already exists.&quot;</span><span class="p">)</span>
+
+            <span class="n">playerTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+
+        <span class="n">player</span> <span class="o">=</span> <span class="n">AnvilPlayerRef</span><span class="p">(</span><span class="n">playerTag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">nbtattr</span><span class="o">.</span><span class="n">SetNBTDefaults</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">playerUUID</span> <span class="o">!=</span> <span class="s">&quot;Player&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkSessionLock</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectedRevision</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="n">playerFilePath</span><span class="p">,</span> <span class="n">playerTag</span><span class="o">.</span><span class="n">save</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPlayer</span><span class="p">(</span><span class="n">playerUUID</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PlayerAbilitiesAttrs"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.PlayerAbilitiesAttrs">[docs]</a><span class="k">class</span> <span class="nc">PlayerAbilitiesAttrs</span><span class="p">(</span><span class="n">nbtattr</span><span class="o">.</span><span class="n">CompoundAttrs</span><span class="p">):</span>
+    <span class="n">mayBuild</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;mayBuild&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">instabuild</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;instabuild&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">flying</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;flying&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">mayfly</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;mayfly&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">invulnerable</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;invulnerable&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="AnvilPlayerRef"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilPlayerRef">[docs]</a><span class="k">class</span> <span class="nc">AnvilPlayerRef</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adapter</span><span class="p">,</span> <span class="n">playerUUID</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">playerUUID</span> <span class="o">=</span> <span class="n">playerUUID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">adapter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">getPlayerTag</span><span class="p">(</span><span class="n">playerUUID</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="c">#</span>
+    <span class="c"># @property</span>
+    <span class="c"># def rootTag(self):</span>
+    <span class="c">#     if self.playerTag is None or self.playerTag() is None:</span>
+    <span class="c">#         tag = self.adapter.getPlayerTag(self.playerName)</span>
+    <span class="c">#         self.playerTag = weakref.ref(tag)</span>
+    <span class="c">#</span>
+    <span class="c">#         return tag</span>
+    <span class="c">#     return self.playerTag()</span>
+
+    <span class="n">UUID</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTUUIDAttr</span><span class="p">()</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">)</span>
+    <span class="n">Position</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTVectorAttr</span><span class="p">(</span><span class="s">&quot;Pos&quot;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Double</span><span class="p">)</span>
+    <span class="n">Motion</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTVectorAttr</span><span class="p">(</span><span class="s">&quot;Motion&quot;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Double</span><span class="p">)</span>
+    <span class="n">Rotation</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTListAttr</span><span class="p">(</span><span class="s">&quot;Rotation&quot;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Float</span><span class="p">)</span>
+
+    <span class="n">Air</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;Air&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+    <span class="n">AttackTime</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;AttackTime&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">DeathTime</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;DeathTime&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">Fire</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;Fire&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">Health</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;Health&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">HurtTime</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;HurtTime&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Short</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">Score</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;Score&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">FallDistance</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;FallDistance&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Float</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">OnGround</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;OnGround&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">Dimension</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;OnGround&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">Inventory</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTListAttr</span><span class="p">(</span><span class="s">&#39;Inventory&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">)</span>
+
+    <span class="n">GAMETYPE_SURVIVAL</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">GAMETYPE_CREATIVE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">GAMETYPE_ADVENTURE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">GameType</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTAttr</span><span class="p">(</span><span class="s">&#39;playerGameType&#39;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">,</span> <span class="n">GAMETYPE_SURVIVAL</span><span class="p">)</span>
+
+    <span class="n">abilities</span> <span class="o">=</span> <span class="n">nbtattr</span><span class="o">.</span><span class="n">NBTCompoundAttr</span><span class="p">(</span><span class="s">&quot;abilities&quot;</span><span class="p">,</span> <span class="n">PlayerAbilitiesAttrs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AnvilPlayerRef.setAbilities"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilPlayerRef.setAbilities">[docs]</a>    <span class="k">def</span> <span class="nf">setAbilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gametype</span><span class="p">):</span>
+        <span class="c"># Assumes GAMETYPE_CREATIVE is the only mode with these abilities set,</span>
+        <span class="c"># which is true for now.  Future game modes may not hold this to be</span>
+        <span class="c"># true, however.</span>
+        <span class="k">if</span> <span class="n">gametype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">GAMETYPE_CREATIVE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abilities</span><span class="o">.</span><span class="n">instabuild</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abilities</span><span class="o">.</span><span class="n">mayfly</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abilities</span><span class="o">.</span><span class="n">invulnerable</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abilities</span><span class="o">.</span><span class="n">flying</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abilities</span><span class="o">.</span><span class="n">instabuild</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abilities</span><span class="o">.</span><span class="n">mayfly</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abilities</span><span class="o">.</span><span class="n">invulnerable</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="AnvilPlayerRef.setGameType"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilPlayerRef.setGameType">[docs]</a>    <span class="k">def</span> <span class="nf">setGameType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gametype</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GameType</span> <span class="o">=</span> <span class="n">gametype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAbilities</span><span class="p">(</span><span class="n">gametype</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Spawn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;SpawnX&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnY&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnZ&quot;</span><span class="p">)]</span>
+
+    <span class="nd">@Spawn.setter</span>
+<div class="viewcode-block" id="AnvilPlayerRef.Spawn"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilPlayerRef.Spawn">[docs]</a>    <span class="k">def</span> <span class="nf">Spawn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s">&quot;SpawnX&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnY&quot;</span><span class="p">,</span> <span class="s">&quot;SpawnZ&quot;</span><span class="p">),</span> <span class="n">pos</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AnvilPlayerRef.save"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilPlayerRef.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">savePlayerTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">playerUUID</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+    <span class="n">_dimNames</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="s">&quot;DIM-1&quot;</span><span class="p">,</span>
+        <span class="mi">0</span><span class="p">:</span><span class="s">&quot;&quot;</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">:</span><span class="s">&quot;DIM1&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="n">_dimNumbers</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_dimNames</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dimName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimNames</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Dimension</span><span class="p">]</span>
+
+    <span class="nd">@dimName.setter</span>
+<div class="viewcode-block" id="AnvilPlayerRef.dimName"><a class="viewcode-back" href="../../../mceditlib.anvil.html#mceditlib.anvil.adapter.AnvilPlayerRef.dimName">[docs]</a>    <span class="k">def</span> <span class="nf">dimName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimNumbers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

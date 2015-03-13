@@ -1,0 +1,506 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.multi_block &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.multi_block</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">relight</span>
+<span class="kn">from</span> <span class="nn">mceditlib.blocktypes</span> <span class="kn">import</span> <span class="n">BlockType</span>
+<span class="kn">from</span> <span class="nn">mceditlib.levelbase</span> <span class="kn">import</span> <span class="n">GetBlocksResult</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="chunkPosArray"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.chunkPosArray">[docs]</a><span class="k">def</span> <span class="nf">chunkPosArray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct an array of 8-byte integers made by packing the 4-byte chunk coordinate arrays x and z together.</span>
+
+<span class="sd">    :type x: ndarray</span>
+<span class="sd">    :type z: ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+    <span class="n">cz</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+
+    <span class="n">cPos</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">cx</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;i8&#39;</span><span class="p">)</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">cPos</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s">&#39;i4&#39;</span><span class="p">)</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">shape</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+    <span class="n">view</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">cx</span>
+    <span class="n">view</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cz</span>
+
+    <span class="k">return</span> <span class="n">cPos</span>
+</div>
+<div class="viewcode-block" id="decodeChunkPos"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.decodeChunkPos">[docs]</a><span class="k">def</span> <span class="nf">decodeChunkPos</span><span class="p">(</span><span class="n">cPos</span><span class="p">):</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">cPos</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s">&#39;i4&#39;</span><span class="p">)</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">view</span>
+
+
+</div>
+<div class="viewcode-block" id="coords_by_chunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.coords_by_chunk">[docs]</a><span class="k">def</span> <span class="nf">coords_by_chunk</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split the x, y, and z coordinate arrays according to chunk location. Return an iterator over tuples of the chunk&#39;s</span>
+<span class="sd">    cx and cz coordinates and arrays of the x y z coordinates located in that chunk.</span>
+
+<span class="sd">    Performance note: Implicitly sorts the elements of an intermediate array. May perform better when input arrays are</span>
+<span class="sd">    short.</span>
+
+<span class="sd">    :param x: Array of x coordinates</span>
+<span class="sd">    :param y: Array of y coordinates</span>
+<span class="sd">    :param z: Array of z coordinates</span>
+<span class="sd">    :return: iterator over (cx, cz, x, y, z) tuples, where x, y, and z are arrays and cx and cz are integers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cPos</span> <span class="o">=</span> <span class="n">chunkPosArray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+
+    <span class="n">elements</span><span class="p">,</span> <span class="n">inverse</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">cPos</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">decodeChunkPos</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+    <span class="n">cxs</span><span class="p">,</span> <span class="n">czs</span> <span class="o">=</span> <span class="n">view</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">view</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">cx</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndenumerate</span><span class="p">(</span><span class="n">cxs</span><span class="p">):</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="n">czs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="n">localMask</span> <span class="o">=</span> <span class="n">inverse</span> <span class="o">==</span> <span class="n">index</span>
+        <span class="n">localMask</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">localX</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">localMask</span><span class="p">]</span>
+        <span class="n">localY</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">localMask</span><span class="p">]</span>
+        <span class="n">localZ</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">localMask</span><span class="p">]</span>
+
+        <span class="k">yield</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">localX</span><span class="p">,</span> <span class="n">localY</span><span class="p">,</span> <span class="n">localZ</span><span class="p">,</span> <span class="n">localMask</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="getBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.getBlocks">[docs]</a><span class="k">def</span> <span class="nf">getBlocks</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+              <span class="n">return_Blocks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">return_Data</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="n">return_BlockLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="n">return_SkyLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="n">return_Biomes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    High performance method for accessing multiple blocks and their lighting info.</span>
+
+<span class="sd">    Requires `world` have a `getChunk(cx, cz)` method</span>
+<span class="sd">    Requires that method return an object that has a `getBlocks` method that takes the same</span>
+<span class="sd">    parameters as this one.</span>
+
+<span class="sd">    Return the blocks at the requested locations as one or more ndarrays. Returns a</span>
+<span class="sd">    tuple of ndarrays, one for each `return_` parameter with a True value, in the order</span>
+<span class="sd">    that the parameters appear. Returns the blocks as raw Block IDs, which you can convert</span>
+<span class="sd">    to BlockType instances using world.blocktype</span>
+
+<span class="sd">    The `x`, `y`, and `z` parameters must have the same shape.</span>
+
+<span class="sd">    :param x: Array of x coordinates</span>
+<span class="sd">    :param y: Array of y coordinates</span>
+<span class="sd">    :param z: Array of z coordinates</span>
+<span class="sd">    :param return_Blocks:</span>
+<span class="sd">    :param return_Data:</span>
+<span class="sd">    :param return_BlockLight:</span>
+<span class="sd">    :param return_SkyLight:</span>
+<span class="sd">    :param return_Biomes:</span>
+<span class="sd">    :return: GetBlocksResult</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="n">Blocks</span> <span class="o">=</span> <span class="n">Data</span> <span class="o">=</span> <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">Biomes</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">return_Blocks</span><span class="p">:</span>
+        <span class="n">Blocks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint16&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_Data</span><span class="p">:</span>
+        <span class="n">Data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_BlockLight</span><span class="p">:</span>
+        <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_SkyLight</span><span class="p">:</span>
+        <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_Biomes</span><span class="p">:</span>
+        <span class="n">Biomes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">GetBlocksResult</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">BlockLight</span><span class="p">,</span> <span class="n">SkyLight</span><span class="p">,</span> <span class="n">Biomes</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="n">coords_by_chunk</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">world</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+
+        <span class="n">arrays</span> <span class="o">=</span> <span class="n">getChunkBlocks</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                                <span class="n">return_Blocks</span><span class="p">,</span>
+                                <span class="n">return_Data</span><span class="p">,</span>
+                                <span class="n">return_BlockLight</span><span class="p">,</span>
+                                <span class="n">return_SkyLight</span><span class="p">,</span>
+                                <span class="n">return_Biomes</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">dest</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">arrays</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">dest</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<div class="viewcode-block" id="getChunkBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.getChunkBlocks">[docs]</a><span class="k">def</span> <span class="nf">getChunkBlocks</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                   <span class="n">return_Blocks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                   <span class="n">return_Data</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">return_BlockLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">return_SkyLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">return_Biomes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    High performance method for accessing multiple blocks and their lighting info.</span>
+
+<span class="sd">    Parameters are identical to getBlocks</span>
+<span class="sd">    :type x: numpy.ndarray</span>
+<span class="sd">    :type y: numpy.ndarray</span>
+<span class="sd">    :type z: numpy.ndarray</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Blocks</span> <span class="o">=</span> <span class="n">Data</span> <span class="o">=</span> <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">Biomes</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="n">return_Blocks</span><span class="p">:</span>
+        <span class="n">Blocks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint16&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_Data</span><span class="p">:</span>
+        <span class="n">Data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_BlockLight</span><span class="p">:</span>
+        <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_SkyLight</span><span class="p">:</span>
+        <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_Biomes</span><span class="p">:</span>
+        <span class="n">Biomes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="s">&#39;Biomes&#39;</span><span class="p">):</span>
+            <span class="n">Biomes</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">GetBlocksResult</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">BlockLight</span><span class="p">,</span> <span class="n">SkyLight</span><span class="p">,</span> <span class="n">Biomes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="s">&#39;Biomes&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">return_Biomes</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">cy</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">():</span>
+        <span class="n">section</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">section</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">sectionMask</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">==</span> <span class="n">cy</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sectionMask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">continue</span>
+
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">sectionMask</span><span class="p">]</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">sectionMask</span><span class="p">]</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">sectionMask</span><span class="p">]</span>
+
+        <span class="n">sx</span> <span class="o">&amp;=</span> <span class="mh">0xf</span>
+        <span class="n">sy</span> <span class="o">&amp;=</span> <span class="mh">0xf</span>
+        <span class="n">sz</span> <span class="o">&amp;=</span> <span class="mh">0xf</span>
+
+        <span class="n">arrays</span> <span class="o">=</span> <span class="n">getSectionBlocks</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span>
+                                  <span class="n">return_Blocks</span><span class="p">,</span>
+                                  <span class="n">return_Data</span><span class="p">,</span>
+                                  <span class="n">return_BlockLight</span><span class="p">,</span>
+                                  <span class="n">return_SkyLight</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">dest</span><span class="p">,</span> <span class="n">src</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">arrays</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">dest</span><span class="p">[</span><span class="n">sectionMask</span><span class="p">]</span> <span class="o">=</span> <span class="n">src</span>
+
+
+
+    <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<div class="viewcode-block" id="getSectionBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.getSectionBlocks">[docs]</a><span class="k">def</span> <span class="nf">getSectionBlocks</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                     <span class="n">return_Blocks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                     <span class="n">return_Data</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                     <span class="n">return_BlockLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                     <span class="n">return_SkyLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the blocks at the given positions. Returns a list of one or more arrays depending on which `return_*`</span>
+<span class="sd">    parameters were passed.</span>
+
+<span class="sd">    x, y, z must be in the range 0..15</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">return_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">return_Blocks</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s">&#39;Blocks&#39;</span><span class="p">):</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_Data</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s">&#39;Data&#39;</span><span class="p">):</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_BlockLight</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s">&#39;BlockLight&#39;</span><span class="p">):</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">BlockLight</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_SkyLight</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s">&#39;SkyLight&#39;</span><span class="p">):</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">return_arrays</span>
+</div>
+<div class="viewcode-block" id="maskArray"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.maskArray">[docs]</a><span class="k">def</span> <span class="nf">maskArray</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,):</span>
+        <span class="k">return</span> <span class="n">array</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">array</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="atleast_3d"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.atleast_3d">[docs]</a><span class="k">def</span> <span class="nf">atleast_3d</span><span class="p">(</span><span class="n">ary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    numpy.atleast_3d adds axes on either side of a 1d array&#39;s axis, but I want the new axes to come afterward.</span>
+<span class="sd">    :param ary:</span>
+<span class="sd">    :type ary:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    :rtype:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ary</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">ary</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ary</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ary</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ary</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ary</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ary</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ary</span><span class="p">[:,:,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ary</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="setBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.setBlocks">[docs]</a><span class="k">def</span> <span class="nf">setBlocks</span><span class="p">(</span><span class="n">dimension</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+              <span class="n">Blocks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">Data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="c"># Deprecate soon</span>
+              <span class="n">BlockLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">SkyLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">Biomes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">updateLights</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Change the blocks at the given positions. All parameters must be arrays of the same shape, or single values.</span>
+
+<span class="sd">    :type dimension: mceditlib.worldeditor.WorldEditorDimension</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">atleast_3d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">atleast_3d</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">atleast_3d</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)):</span>
+            <span class="n">Blocks</span> <span class="o">=</span> <span class="p">[</span><span class="n">Blocks</span><span class="p">]</span>
+        <span class="n">_Blocks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_Data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">Blocks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="n">block</span> <span class="o">=</span> <span class="n">dimension</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">[</span><span class="n">block</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">BlockType</span><span class="p">):</span>
+                <span class="n">_Blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+                <span class="n">_Data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">meta</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_Blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_Blocks</span><span class="p">):</span>
+            <span class="n">Blocks</span> <span class="o">=</span> <span class="n">_Blocks</span>
+            <span class="n">Data</span> <span class="o">=</span> <span class="n">_Data</span>
+
+
+    <span class="n">Blocks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_3d</span><span class="p">(</span><span class="n">Blocks</span><span class="p">)</span> <span class="k">if</span> <span class="n">Blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+    <span class="n">Data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_3d</span><span class="p">(</span><span class="n">Data</span><span class="p">)</span> <span class="k">if</span> <span class="n">Data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+    <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_3d</span><span class="p">(</span><span class="n">BlockLight</span><span class="p">)</span> <span class="k">if</span> <span class="n">BlockLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+    <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_3d</span><span class="p">(</span><span class="n">SkyLight</span><span class="p">)</span> <span class="k">if</span> <span class="n">SkyLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+    <span class="n">Biomes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_3d</span><span class="p">(</span><span class="n">Biomes</span><span class="p">)</span> <span class="k">if</span> <span class="n">Biomes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+
+    <span class="n">arrays_to_broadcast</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">Blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">arrays_to_broadcast</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Blocks</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">arrays_to_broadcast</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">BlockLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">arrays_to_broadcast</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">BlockLight</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">SkyLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">arrays_to_broadcast</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SkyLight</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Biomes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">arrays_to_broadcast</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Biomes</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)):</span>
+        <span class="k">return</span>
+
+    <span class="n">broadcasted_arrays</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="o">*</span><span class="n">arrays_to_broadcast</span><span class="p">)</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">broadcasted_arrays</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">broadcasted_arrays</span> <span class="o">=</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+
+    <span class="k">if</span> <span class="n">Blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">Blocks</span><span class="p">,</span> <span class="n">broadcasted_arrays</span> <span class="o">=</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">Data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">Data</span><span class="p">,</span> <span class="n">broadcasted_arrays</span> <span class="o">=</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">BlockLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">BlockLight</span><span class="p">,</span> <span class="n">broadcasted_arrays</span> <span class="o">=</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">SkyLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">SkyLight</span><span class="p">,</span> <span class="n">broadcasted_arrays</span> <span class="o">=</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">Biomes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">Biomes</span><span class="p">,</span> <span class="n">broadcasted_arrays</span> <span class="o">=</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">broadcasted_arrays</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+
+
+    <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="n">coords_by_chunk</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">dimension</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">setChunkBlocks</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span>
+                       <span class="n">maskArray</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="n">mask</span><span class="p">),</span>
+                       <span class="n">maskArray</span><span class="p">(</span><span class="n">Data</span><span class="p">,</span> <span class="n">mask</span><span class="p">),</span>
+                       <span class="n">maskArray</span><span class="p">(</span><span class="n">BlockLight</span><span class="p">,</span> <span class="n">mask</span><span class="p">),</span>
+                       <span class="n">maskArray</span><span class="p">(</span><span class="n">SkyLight</span><span class="p">,</span> <span class="n">mask</span><span class="p">),</span>
+                       <span class="n">maskArray</span><span class="p">(</span><span class="n">Biomes</span><span class="p">,</span> <span class="n">mask</span><span class="p">))</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="n">updateLights</span><span class="p">:</span>
+        <span class="n">relight</span><span class="o">.</span><span class="n">updateLights</span><span class="p">(</span><span class="n">dimension</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setChunkBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.setChunkBlocks">[docs]</a><span class="k">def</span> <span class="nf">setChunkBlocks</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                   <span class="n">Blocks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">Data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">BlockLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">SkyLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">Biomes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Change the blocks at the given positions. All parameters must be arrays of the same shape, or single values.</span>
+<span class="sd">    Chunk must have a `world` attribute and `getSection` function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">cy</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">():</span>
+        <span class="n">section</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">section</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">sectionMask</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span> <span class="o">==</span> <span class="n">cy</span><span class="p">)</span>
+
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">sectionMask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">sx</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">sectionMask</span><span class="p">]</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">sectionMask</span><span class="p">]</span>
+        <span class="n">sx</span> <span class="o">&amp;=</span> <span class="mh">0xf</span>
+        <span class="n">sy</span> <span class="o">&amp;=</span> <span class="mh">0xf</span>
+        <span class="n">sz</span> <span class="o">&amp;=</span> <span class="mh">0xf</span>
+
+        <span class="n">setSectionBlocks</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span>
+                         <span class="n">maskArray</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="n">sectionMask</span><span class="p">),</span>
+                         <span class="n">maskArray</span><span class="p">(</span><span class="n">Data</span><span class="p">,</span> <span class="n">sectionMask</span><span class="p">),</span>
+                         <span class="n">maskArray</span><span class="p">(</span><span class="n">BlockLight</span><span class="p">,</span> <span class="n">sectionMask</span><span class="p">),</span>
+                         <span class="n">maskArray</span><span class="p">(</span><span class="n">SkyLight</span><span class="p">,</span> <span class="n">sectionMask</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">Biomes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="s">&#39;Biomes&#39;</span><span class="p">):</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[</span><span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">]</span> <span class="o">=</span> <span class="n">Biomes</span>
+
+
+</div>
+<div class="viewcode-block" id="setSectionBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.multi_block.setSectionBlocks">[docs]</a><span class="k">def</span> <span class="nf">setSectionBlocks</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                     <span class="n">Blocks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">Data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">BlockLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">SkyLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Change the blocks at the given positions. All parameters must be arrays of the same shape, or single values.</span>
+
+<span class="sd">    x, y, z must be in the range 0..15</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">section</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">Blocks</span>
+    <span class="k">if</span> <span class="n">Data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">section</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">Data</span>
+    <span class="k">if</span> <span class="n">BlockLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">section</span><span class="o">.</span><span class="n">BlockLight</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">BlockLight</span>
+    <span class="k">if</span> <span class="n">SkyLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">section</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">SkyLight</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

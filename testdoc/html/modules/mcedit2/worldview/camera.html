@@ -1,0 +1,493 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.worldview.camera &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.worldview.camera</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    camera.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">profiler</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.layout</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Row</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.lazyprop</span> <span class="kn">import</span> <span class="n">lazyprop</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.viewcontrols</span> <span class="kn">import</span> <span class="n">ViewControls</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.worldview</span> <span class="kn">import</span> <span class="n">WorldView</span><span class="p">,</span> <span class="n">iterateChunks</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.viewaction</span> <span class="kn">import</span> <span class="n">ViewAction</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CameraWorldViewFrame"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldViewFrame">[docs]</a><span class="k">class</span> <span class="nc">CameraWorldViewFrame</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">geometryCache</span><span class="p">,</span> <span class="n">resourceLoader</span><span class="p">,</span> <span class="n">shareGLWidget</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CameraWorldViewFrame</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span> <span class="o">=</span> <span class="n">view</span> <span class="o">=</span> <span class="n">CameraWorldView</span><span class="p">(</span><span class="n">dimension</span><span class="p">,</span> <span class="n">geometryCache</span><span class="p">,</span> <span class="n">resourceLoader</span><span class="p">,</span> <span class="n">shareGLWidget</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewControls</span> <span class="o">=</span> <span class="n">ViewControls</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+
+        <span class="n">viewDistanceInput</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span><span class="p">(</span><span class="n">minimum</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">singleStep</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">viewDistanceInput</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">viewDistance</span><span class="p">)</span>
+        <span class="n">viewDistanceInput</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">setViewDistance</span><span class="p">)</span>
+
+        <span class="n">perspectiveInput</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s">&quot;Perspective&quot;</span><span class="p">)</span>
+        <span class="n">perspectiveInput</span><span class="o">.</span><span class="n">toggle</span><span class="p">()</span>
+        <span class="n">perspectiveInput</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">setPerspective</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="n">Row</span><span class="p">((</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">(),</span> <span class="mi">1</span><span class="p">),</span>
+                                  <span class="n">perspectiveInput</span><span class="p">,</span>
+                                  <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;View Distance:&quot;</span><span class="p">),</span>
+                                  <span class="n">viewDistanceInput</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">viewControls</span><span class="o">.</span><span class="n">getShowHideButton</span><span class="p">(),</span> <span class="n">margin</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                              <span class="n">view</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+
+
+</div>
+<div class="viewcode-block" id="CameraKeyControls"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls">[docs]</a><span class="k">class</span> <span class="nc">CameraKeyControls</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldView</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param worldView:</span>
+<span class="sd">        :type worldView: CameraWorldView</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span> <span class="o">=</span> <span class="n">worldView</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forwardAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Forward</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backwardAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Backward</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leftAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rightAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Right</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Up</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">downAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Down</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">forwardAction</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">backwardAction</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">leftAction</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rightAction</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upAction</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">downAction</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">up</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">down</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tickTimer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tickCamera</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tickTimer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CameraKeyControls.tickCamera"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.tickCamera">[docs]</a>    <span class="k">def</span> <span class="nf">tickCamera</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">cameraVector</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">centerPoint</span>
+        <span class="n">up</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">up</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">+</span> <span class="n">vector</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backward</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">-</span> <span class="n">vector</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">-</span> <span class="n">left</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">+</span> <span class="n">left</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">up</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">+</span> <span class="n">up</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">down</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">-</span> <span class="n">up</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldView</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">=</span> <span class="n">point</span>
+
+</div>
+<div class="viewcode-block" id="CameraKeyControls.CameraAction"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.CameraAction">[docs]</a>    <span class="k">class</span> <span class="nc">CameraAction</span><span class="p">(</span><span class="n">ViewAction</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">CameraKeyControls</span><span class="o">.</span><span class="n">CameraAction</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span> <span class="o">=</span> <span class="n">controls</span>
+</div>
+<div class="viewcode-block" id="CameraKeyControls.Forward"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Forward">[docs]</a>    <span class="k">class</span> <span class="nc">Forward</span><span class="p">(</span><span class="n">CameraAction</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_W</span>
+        <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Move Forward&quot;</span>
+        <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/move/forward&quot;</span>
+
+<div class="viewcode-block" id="CameraKeyControls.Forward.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Forward.keyPressEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">forward</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">backward</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="CameraKeyControls.Forward.keyReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Forward.keyReleaseEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">forward</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="CameraKeyControls.Backward"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Backward">[docs]</a>    <span class="k">class</span> <span class="nc">Backward</span><span class="p">(</span><span class="n">CameraAction</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_S</span>
+        <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Move Backward&quot;</span>
+        <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/move/backward&quot;</span>
+
+<div class="viewcode-block" id="CameraKeyControls.Backward.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Backward.keyPressEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">backward</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">forward</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="CameraKeyControls.Backward.keyReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Backward.keyReleaseEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">backward</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="CameraKeyControls.Left"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Left">[docs]</a>    <span class="k">class</span> <span class="nc">Left</span><span class="p">(</span><span class="n">CameraAction</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_A</span>
+        <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Move Left&quot;</span>
+        <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/move/left&quot;</span>
+
+<div class="viewcode-block" id="CameraKeyControls.Left.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Left.keyPressEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="CameraKeyControls.Left.keyReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Left.keyReleaseEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="CameraKeyControls.Right"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Right">[docs]</a>    <span class="k">class</span> <span class="nc">Right</span><span class="p">(</span><span class="n">CameraAction</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_D</span>
+        <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Move Right&quot;</span>
+        <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/move/right&quot;</span>
+
+<div class="viewcode-block" id="CameraKeyControls.Right.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Right.keyPressEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="CameraKeyControls.Right.keyReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Right.keyReleaseEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="CameraKeyControls.Up"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Up">[docs]</a>    <span class="k">class</span> <span class="nc">Up</span><span class="p">(</span><span class="n">CameraAction</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Space</span>
+        <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Move Up&quot;</span>
+        <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/move/up&quot;</span>
+
+<div class="viewcode-block" id="CameraKeyControls.Up.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Up.keyPressEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">up</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">down</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="CameraKeyControls.Up.keyReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Up.keyReleaseEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">up</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="CameraKeyControls.Down"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Down">[docs]</a>    <span class="k">class</span> <span class="nc">Down</span><span class="p">(</span><span class="n">CameraAction</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_C</span>
+        <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Move Down&quot;</span>
+        <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/move/down&quot;</span>
+
+<div class="viewcode-block" id="CameraKeyControls.Down.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Down.keyPressEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">down</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">up</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="CameraKeyControls.Down.keyReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraKeyControls.Down.keyReleaseEvent">[docs]</a>        <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">down</span> <span class="o">=</span> <span class="mi">0</span>
+
+</div></div></div>
+<div class="viewcode-block" id="CameraWorldView"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView">[docs]</a><span class="k">class</span> <span class="nc">CameraWorldView</span><span class="p">(</span><span class="n">WorldView</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fov</span> <span class="o">=</span> <span class="mf">70.0</span>  <span class="c"># needed by updateMatrices called from WorldView.__init__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_yawPitch</span> <span class="o">=</span> <span class="o">-</span><span class="mf">45.</span><span class="p">,</span> <span class="mf">25.</span>
+        <span class="n">WorldView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compassNode</span><span class="o">.</span><span class="n">yawPitch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yawPitch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewDistance</span> <span class="o">=</span> <span class="mi">32</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span> <span class="o">=</span> <span class="p">[</span><span class="n">CameraMoveMouseAction</span><span class="p">(),</span>
+                             <span class="n">CameraPanMouseAction</span><span class="p">()]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cameraControls</span> <span class="o">=</span> <span class="n">CameraKeyControls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cameraControls</span><span class="o">.</span><span class="n">viewActions</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discardTimer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discardTimer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discardChunksOutsideViewDistance</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discardTimer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discardTimer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CameraWorldView.setViewDistance"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.setViewDistance">[docs]</a>    <span class="k">def</span> <span class="nf">setViewDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewDistance</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chunkIter</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discardChunksOutsideViewDistance</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CameraWorldView.centerOnPoint"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.centerOnPoint">[docs]</a>    <span class="k">def</span> <span class="nf">centerOnPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="n">awayVector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cameraVector</span> <span class="o">*</span> <span class="o">-</span><span class="n">distance</span>
+        <span class="n">newPos</span> <span class="o">=</span> <span class="n">awayVector</span> <span class="o">+</span> <span class="n">pos</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Camera: centering on </span><span class="si">%s</span><span class="s"> (moving to </span><span class="si">%s</span><span class="s">)&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">newPos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">=</span> <span class="n">newPos</span>
+</div>
+    <span class="n">perspective</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="CameraWorldView.setPerspective"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.setPerspective">[docs]</a>    <span class="k">def</span> <span class="nf">setPerspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perspective</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">perspective</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updateMatrices</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CameraWorldView.updateMatrices"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.updateMatrices">[docs]</a>    <span class="k">def</span> <span class="nf">updateMatrices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">perspective</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updatePerspectiveMatrices</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateOrthoMatrices</span><span class="p">()</span>
+
+        <span class="n">modelview</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMatrix4x4</span><span class="p">()</span>
+        <span class="n">modelview</span><span class="o">.</span><span class="n">lookAt</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVector3D</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span><span class="p">),</span>
+                         <span class="n">QtGui</span><span class="o">.</span><span class="n">QVector3D</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cameraVector</span><span class="p">)),</span>
+                         <span class="n">QtGui</span><span class="o">.</span><span class="n">QVector3D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">modelview</span> <span class="o">=</span> <span class="n">modelview</span>
+</div>
+<div class="viewcode-block" id="CameraWorldView.updateOrthoMatrices"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.updateOrthoMatrices">[docs]</a>    <span class="k">def</span> <span class="nf">updateOrthoMatrices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">w</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">projection</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMatrix4x4</span><span class="p">()</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">ortho</span><span class="p">(</span><span class="o">-</span><span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span>
+</div>
+<div class="viewcode-block" id="CameraWorldView.updatePerspectiveMatrices"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.updatePerspectiveMatrices">[docs]</a>    <span class="k">def</span> <span class="nf">updatePerspectiveMatrices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">h</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">fovy</span> <span class="o">=</span> <span class="n">degrees</span><span class="p">(</span><span class="n">atan</span><span class="p">(</span><span class="n">w</span> <span class="o">/</span> <span class="n">h</span> <span class="o">*</span> <span class="n">tan</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)))</span>
+
+        <span class="n">projection</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMatrix4x4</span><span class="p">()</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">perspective</span><span class="p">(</span><span class="n">fovy</span><span class="p">,</span> <span class="n">w</span> <span class="o">/</span> <span class="n">h</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span>
+</div>
+    <span class="nd">@lazyprop</span>
+<div class="viewcode-block" id="CameraWorldView.cameraVector"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.cameraVector">[docs]</a>    <span class="k">def</span> <span class="nf">cameraVector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_anglesToVector</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">yawPitch</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="CameraWorldView.makeChunkIter"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.makeChunkIter">[docs]</a>    <span class="k">def</span> <span class="nf">makeChunkIter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewDistance</span>
+
+        <span class="c"># If the focal point of the camera is less than twice the view distance away, load</span>
+        <span class="c"># chunks around that point. Otherwise, load chunks around the camera&#39;s position.</span>
+        <span class="n">vc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">(</span><span class="n">vc</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">radius</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">vc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span>
+
+        <span class="k">return</span> <span class="n">iterateChunks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">yawPitch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yawPitch</span>
+
+    <span class="nd">@yawPitch.setter</span>
+<div class="viewcode-block" id="CameraWorldView.yawPitch"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.yawPitch">[docs]</a>    <span class="k">def</span> <span class="nf">yawPitch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yawPitch</span><span class="p">):</span>
+        <span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span> <span class="o">=</span> <span class="n">yawPitch</span>
+        <span class="n">yaw</span> <span class="o">%=</span> <span class="mi">360</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mi">89</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">89</span><span class="p">,</span> <span class="n">pitch</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_yawPitch</span> <span class="o">=</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">cameraVector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetLoadOrder</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateMatrices</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">compassNode</span><span class="o">.</span><span class="n">yawPitch</span> <span class="o">=</span> <span class="n">yaw</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">90</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">45</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="nd">@profiler.function</span><span class="p">(</span><span class="s">&quot;discardChunks&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="CameraWorldView.discardChunksOutsideViewDistance"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.discardChunksOutsideViewDistance">[docs]</a>    <span class="k">def</span> <span class="nf">discardChunksOutsideViewDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldScene</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">worldScene</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">worldScene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span>
+
+        <span class="n">positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">worldScene</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">())</span>  <span class="c"># xxxx</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">viewDistance</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewDistance</span> <span class="o">*</span> <span class="mf">1.4</span><span class="p">)</span> <span class="c"># fudge it a little. Discard chunks in a wider area than they are loaded.</span>
+
+        <span class="k">def</span> <span class="nf">chunkPosition</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;i,i&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">))</span>
+        <span class="n">chunks</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="s">&#39;int32&#39;</span>
+        <span class="n">chunks</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">),</span> <span class="mi">2</span>
+
+        <span class="k">def</span> <span class="nf">outsideBox</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+            <span class="n">ox</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">-</span> <span class="n">distance</span>
+            <span class="n">oz</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">-</span> <span class="n">distance</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="n">outsideChunks</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ox</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">outsideChunks</span> <span class="o">|=</span> <span class="n">chunks</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ox</span> <span class="o">+</span> <span class="n">size</span>
+            <span class="n">outsideChunks</span> <span class="o">|=</span> <span class="n">chunks</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">oz</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">outsideChunks</span> <span class="o">|=</span> <span class="n">chunks</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">oz</span> <span class="o">+</span> <span class="n">size</span>
+            <span class="k">return</span> <span class="n">outsideChunks</span>
+
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunkPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span><span class="p">)</span>
+        <span class="n">outsideCenter</span> <span class="o">=</span> <span class="n">outsideBox</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">viewDistance</span><span class="p">)</span>
+
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunkPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">())</span>
+        <span class="n">outsideFocus</span> <span class="o">=</span> <span class="n">outsideBox</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">viewDistance</span><span class="p">)</span>
+
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">outsideCenter</span> <span class="o">&amp;</span> <span class="n">outsideFocus</span><span class="p">]</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Discarding </span><span class="si">%d</span><span class="s"> chunks...&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">))</span>
+        <span class="n">worldScene</span><span class="o">.</span><span class="n">discardChunks</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CameraWorldView.recieveChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraWorldView.recieveChunk">[docs]</a>    <span class="k">def</span> <span class="nf">recieveChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">chunkPosition</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">()</span><span class="o">.</span><span class="n">chunkPos</span><span class="p">()</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cx</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cz</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dx</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewDistance</span> <span class="ow">or</span> <span class="n">dz</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewDistance</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">iter</span><span class="p">([])</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">CameraWorldView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">recieveChunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CameraPanMouseAction"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraPanMouseAction">[docs]</a><span class="k">class</span> <span class="nc">CameraPanMouseAction</span><span class="p">(</span><span class="n">ViewAction</span><span class="p">):</span>
+    <span class="n">button</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span>
+    <span class="n">mouseDragStart</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">modifiers</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span>
+    <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Turn Camera&quot;</span>
+    <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/holdToTurn&quot;</span>
+
+<div class="viewcode-block" id="CameraPanMouseAction.buttonPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraPanMouseAction.buttonPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">buttonPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+</div>
+    <span class="n">sensitivity</span> <span class="o">=</span> <span class="o">.</span><span class="mi">15</span>
+
+<div class="viewcode-block" id="CameraPanMouseAction.mouseMoveEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraPanMouseAction.mouseMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span><span class="p">:</span>
+            <span class="n">oldx</span><span class="p">,</span> <span class="n">oldy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span>
+            <span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">yawPitch</span>
+
+            <span class="n">yaw</span> <span class="o">-=</span> <span class="p">(</span><span class="n">oldx</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span>
+            <span class="n">pitch</span> <span class="o">-=</span> <span class="p">(</span><span class="n">oldy</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span>
+
+            <span class="n">event</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">yawPitch</span> <span class="o">=</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="CameraPanMouseAction.buttonReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraPanMouseAction.buttonReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">buttonReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span> <span class="o">=</span> <span class="bp">None</span>
+
+</div></div>
+<div class="viewcode-block" id="CameraMoveMouseAction"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraMoveMouseAction">[docs]</a><span class="k">class</span> <span class="nc">CameraMoveMouseAction</span><span class="p">(</span><span class="n">ViewAction</span><span class="p">):</span>
+    <span class="n">button</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span>
+    <span class="n">mouseDragStart</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">labelText</span> <span class="o">=</span> <span class="s">&quot;Move Camera&quot;</span>
+    <span class="n">settingsKey</span> <span class="o">=</span> <span class="s">&quot;worldview/camera/holdToMove&quot;</span>
+
+<div class="viewcode-block" id="CameraMoveMouseAction.buttonPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraMoveMouseAction.buttonPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">buttonPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+</div>
+    <span class="n">sensitivity</span> <span class="o">=</span> <span class="o">.</span><span class="mi">15</span>
+
+<div class="viewcode-block" id="CameraMoveMouseAction.mouseMoveEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraMoveMouseAction.mouseMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span><span class="p">:</span>
+            <span class="n">oldx</span><span class="p">,</span> <span class="n">oldy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span>
+            <span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">yawPitch</span>
+
+            <span class="n">mx</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="n">oldx</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="n">oldy</span> <span class="o">-</span> <span class="n">y</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="o">-</span><span class="n">mx</span>
+
+            <span class="n">yaw</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">mx</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span> <span class="o">+</span> <span class="n">mz</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span>
+            <span class="n">dz</span> <span class="o">=</span> <span class="o">-</span><span class="n">mz</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span> <span class="o">+</span> <span class="n">mx</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span>
+
+            <span class="n">event</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">+=</span> <span class="p">(</span><span class="n">dx</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dz</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="CameraMoveMouseAction.buttonReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.camera.CameraMoveMouseAction.buttonReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">buttonReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseDragStart</span> <span class="o">=</span> <span class="bp">None</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

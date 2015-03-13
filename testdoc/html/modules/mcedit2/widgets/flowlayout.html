@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.widgets.flowlayout &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.widgets.flowlayout</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    flowlayout</span>
+
+<span class="sd">/****************************************************************************</span>
+<span class="sd"> **</span>
+<span class="sd"> ** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).</span>
+<span class="sd"> ** Contact: http://www.qt-project.org/legal</span>
+<span class="sd"> **</span>
+<span class="sd"> ** This file is part of the examples of the Qt Toolkit.</span>
+<span class="sd"> **</span>
+<span class="sd"> ** $QT_BEGIN_LICENSE:BSD$</span>
+<span class="sd"> ** You may use this file under the terms of the BSD license as follows:</span>
+<span class="sd"> **</span>
+<span class="sd"> ** &quot;Redistribution and use in source and binary forms, with or without</span>
+<span class="sd"> ** modification, are permitted provided that the following conditions are</span>
+<span class="sd"> ** met:</span>
+<span class="sd"> **   * Redistributions of source code must retain the above copyright</span>
+<span class="sd"> **     notice, this list of conditions and the following disclaimer.</span>
+<span class="sd"> **   * Redistributions in binary form must reproduce the above copyright</span>
+<span class="sd"> **     notice, this list of conditions and the following disclaimer in</span>
+<span class="sd"> **     the documentation and/or other materials provided with the</span>
+<span class="sd"> **     distribution.</span>
+<span class="sd"> **   * Neither the name of Digia Plc and its Subsidiary(-ies) nor the names</span>
+<span class="sd"> **     of its contributors may be used to endorse or promote products derived</span>
+<span class="sd"> **     from this software without specific prior written permission.</span>
+<span class="sd"> **</span>
+<span class="sd"> **</span>
+<span class="sd"> ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="sd"> ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="sd"> ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<span class="sd"> ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<span class="sd"> ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<span class="sd"> ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<span class="sd"> ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<span class="sd"> ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<span class="sd"> ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="sd"> ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<span class="sd"> ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;</span>
+<span class="sd"> **</span>
+<span class="sd"> ** $QT_END_LICENSE$</span>
+<span class="sd"> **</span>
+<span class="sd"> ****************************************************************************/</span>
+
+<span class="sd">Translated to Python/PySide by David Vierra</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+
+<div class="viewcode-block" id="FlowLayout"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout">[docs]</a><span class="k">class</span> <span class="nc">FlowLayout</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">margin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">hSpacing</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vSpacing</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vSpacing</span> <span class="o">=</span> <span class="n">vSpacing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hSpacing</span> <span class="o">=</span> <span class="n">hSpacing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">margin</span> <span class="o">=</span> <span class="n">margin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="n">margin</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="n">margin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itemList</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="FlowLayout.addItem"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.addItem">[docs]</a>    <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itemList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.horizontalSpacing"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.horizontalSpacing">[docs]</a>    <span class="k">def</span> <span class="nf">horizontalSpacing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hSpacing</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hSpacing</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">smartSpacing</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStyle</span><span class="o">.</span><span class="n">PM_LayoutHorizontalSpacing</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.verticalSpacing"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.verticalSpacing">[docs]</a>    <span class="k">def</span> <span class="nf">verticalSpacing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vSpacing</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vSpacing</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">smartSpacing</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStyle</span><span class="o">.</span><span class="n">PM_LayoutVerticalSpacing</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.count"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itemList</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.itemAt"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.itemAt">[docs]</a>    <span class="k">def</span> <span class="nf">itemAt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+            <span class="c">#raise IndexError(&quot;Asked for item %d in list of length %d&quot; % (index, self.count()))</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemList</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.expandingDirections"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.expandingDirections">[docs]</a>    <span class="k">def</span> <span class="nf">expandingDirections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.hasHeightForWidth"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.hasHeightForWidth">[docs]</a>    <span class="k">def</span> <span class="nf">hasHeightForWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.heightForWidth"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.heightForWidth">[docs]</a>    <span class="k">def</span> <span class="nf">heightForWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doLayout</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">height</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.setGeometry"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.setGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">setGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FlowLayout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doLayout</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.sizeHint"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimumSize</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.minimumSize"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.minimumSize">[docs]</a>    <span class="k">def</span> <span class="nf">minimumSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemList</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="o">.</span><span class="n">expandedTo</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">minimumSize</span><span class="p">())</span>
+        <span class="n">size</span> <span class="o">+=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">margin</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">margin</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">size</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.doLayout"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.doLayout">[docs]</a>    <span class="k">def</span> <span class="nf">doLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="p">,</span> <span class="n">testOnly</span><span class="p">):</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getContentsMargins</span><span class="p">()</span>
+        <span class="n">effectiveRect</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="o">+</span><span class="n">left</span><span class="p">,</span> <span class="o">+</span><span class="n">top</span><span class="p">,</span> <span class="o">-</span><span class="n">right</span><span class="p">,</span> <span class="o">-</span><span class="n">bottom</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">effectiveRect</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">effectiveRect</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+
+        <span class="n">lineHeight</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemList</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+            <span class="n">spaceX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizontalSpacing</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">spaceX</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">spaceX</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">style</span><span class="p">()</span><span class="o">.</span><span class="n">layoutSpacing</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">PushButton</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">PushButton</span><span class="p">,</span>
+                                                      <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">)</span>
+            <span class="n">spaceY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalSpacing</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">spaceY</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">spaceY</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">style</span><span class="p">()</span><span class="o">.</span><span class="n">layoutSpacing</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">PushButton</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">PushButton</span><span class="p">,</span>
+                                                      <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">)</span>
+
+            <span class="n">nextX</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">item</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="n">spaceX</span>
+            <span class="k">if</span> <span class="n">nextX</span> <span class="o">-</span> <span class="n">spaceX</span> <span class="o">&gt;</span> <span class="n">effectiveRect</span><span class="o">.</span><span class="n">right</span><span class="p">()</span> <span class="ow">and</span> <span class="n">lineHeight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">effectiveRect</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+                <span class="n">y</span> <span class="o">+=</span> <span class="n">lineHeight</span> <span class="o">+</span> <span class="n">spaceY</span>
+                <span class="n">nextX</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">item</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="n">spaceX</span>
+                <span class="n">lineHeight</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">testOnly</span><span class="p">:</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">item</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()))</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">nextX</span>
+            <span class="n">lineHeight</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">lineHeight</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">y</span> <span class="o">+</span> <span class="n">lineHeight</span> <span class="o">-</span> <span class="n">rect</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="n">bottom</span>
+</div>
+<div class="viewcode-block" id="FlowLayout.smartSpacing"><a class="viewcode-back" href="../../../mcedit2.widgets.html#mcedit2.widgets.flowlayout.FlowLayout.smartSpacing">[docs]</a>    <span class="k">def</span> <span class="nf">smartSpacing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">isWidgetType</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">style</span><span class="p">()</span><span class="o">.</span><span class="n">pixelMetric</span><span class="p">(</span><span class="n">pm</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">spacing</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

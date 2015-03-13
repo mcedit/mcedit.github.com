@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.worldview.fourup &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.worldview.fourup</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    fourup.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.layout</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Row</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Ray</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview</span> <span class="kn">import</span> <span class="n">worldruler</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.cutaway</span> <span class="kn">import</span> <span class="n">CutawayWorldView</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.iso</span> <span class="kn">import</span> <span class="n">IsoWorldView</span>
+<span class="kn">import</span> <span class="nn">mceditlib</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">Ray</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FourUpWorldViewFrame"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldViewFrame">[docs]</a><span class="k">def</span> <span class="nf">FourUpWorldViewFrame</span><span class="p">(</span><span class="n">dimension</span><span class="p">,</span> <span class="n">geometryCache</span><span class="p">,</span> <span class="n">resourceLoader</span><span class="p">,</span> <span class="n">sharedGLWidget</span><span class="p">):</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">FourUpWorldView</span><span class="p">(</span><span class="n">dimension</span><span class="p">,</span> <span class="n">geometryCache</span><span class="p">,</span> <span class="n">resourceLoader</span><span class="p">,</span> <span class="n">sharedGLWidget</span><span class="p">)</span>
+
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">worldView</span> <span class="o">=</span> <span class="n">view</span>
+
+    <span class="k">return</span> <span class="n">widget</span>
+
+</div>
+<div class="viewcode-block" id="FourUpWorldView"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView">[docs]</a><span class="k">class</span> <span class="nc">FourUpWorldView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xView</span> <span class="o">=</span> <span class="n">CutawayWorldView</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s">&quot;x&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yView</span> <span class="o">=</span> <span class="n">CutawayWorldView</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zView</span> <span class="o">=</span> <span class="n">CutawayWorldView</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s">&quot;z&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isoView</span> <span class="o">=</span> <span class="n">IsoWorldView</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">xView</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yView</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zView</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoView</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xView</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subViewMoved</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xView</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yView</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subViewMoved</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yView</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zView</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subViewMoved</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zView</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isoView</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subViewMoved</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isoView</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">:</span>
+            <span class="c">#view.viewportMoved.connect(lambda:self.centerOnView(view))</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">cursorMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursorMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+
+        <span class="n">xBox</span> <span class="o">=</span> <span class="n">worldruler</span><span class="o">.</span><span class="n">WorldViewRulerGrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xView</span><span class="p">)</span>
+        <span class="n">yBox</span> <span class="o">=</span> <span class="n">worldruler</span><span class="o">.</span><span class="n">WorldViewRulerGrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yView</span><span class="p">)</span>
+        <span class="n">zBox</span> <span class="o">=</span> <span class="n">worldruler</span><span class="o">.</span><span class="n">WorldViewRulerGrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zView</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">widgetize</span><span class="p">(</span><span class="n">box</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">widget</span>
+
+        <span class="n">left</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSplitter</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">)</span>
+        <span class="n">left</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isoView</span><span class="p">)</span>
+        <span class="n">left</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widgetize</span><span class="p">(</span><span class="n">xBox</span><span class="p">))</span>
+
+        <span class="n">right</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSplitter</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">)</span>
+        <span class="n">right</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widgetize</span><span class="p">(</span><span class="n">yBox</span><span class="p">))</span>
+        <span class="n">right</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widgetize</span><span class="p">(</span><span class="n">zBox</span><span class="p">))</span>
+
+        <span class="n">box</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSplitter</span><span class="p">()</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">Row</span><span class="p">(</span><span class="n">box</span><span class="p">))</span>
+
+<div class="viewcode-block" id="FourUpWorldView.requestChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.requestChunk">[docs]</a>    <span class="k">def</span> <span class="nf">requestChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">requestChunk</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="n">c</span>
+</div>
+<div class="viewcode-block" id="FourUpWorldView.wantsChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.wantsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">wantsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">wantsChunk</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FourUpWorldView.recieveChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.recieveChunk">[docs]</a>    <span class="k">def</span> <span class="nf">recieveChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">view</span><span class="o">.</span><span class="n">recieveChunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">):</span>
+                <span class="k">yield</span>
+</div>
+<div class="viewcode-block" id="FourUpWorldView.invalidateChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.invalidateChunk">[docs]</a>    <span class="k">def</span> <span class="nf">invalidateChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">:</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">invalidateChunk</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+</div>
+    <span class="n">mouseBlockPos</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">mouseRay</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">mouseBlockFace</span> <span class="o">=</span> <span class="n">mceditlib</span><span class="o">.</span><span class="n">faces</span><span class="o">.</span><span class="n">FaceYIncreasing</span>
+
+    <span class="n">viewportMoved</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centerPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xView</span><span class="o">.</span><span class="n">centerPoint</span>
+
+    <span class="nd">@centerPoint.setter</span>
+<div class="viewcode-block" id="FourUpWorldView.centerPoint"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.centerPoint">[docs]</a>    <span class="k">def</span> <span class="nf">centerPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FourUpWorldView.subViewMoved"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.subViewMoved">[docs]</a>    <span class="k">def</span> <span class="nf">subViewMoved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_moved</span><span class="p">():</span>
+            <span class="n">blocked</span> <span class="o">=</span> <span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">view</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">blocked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">):</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_moved</span>
+</div>
+<div class="viewcode-block" id="FourUpWorldView.viewCenter"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.viewCenter">[docs]</a>    <span class="k">def</span> <span class="nf">viewCenter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xView</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="FourUpWorldView.centerOnPoint"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.centerOnPoint">[docs]</a>    <span class="k">def</span> <span class="nf">centerOnPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">:</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FourUpWorldView.centerOnView"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.fourup.FourUpWorldView.centerOnView">[docs]</a>    <span class="k">def</span> <span class="nf">centerOnView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centerView</span><span class="p">):</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">centerView</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allViews</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">centerView</span><span class="p">:</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">centerOnPoint</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+</div>
+    <span class="n">cursorMoved</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

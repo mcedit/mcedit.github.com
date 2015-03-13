@@ -1,0 +1,734 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.selection &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.selection</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    __init__.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">faces</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ISelection"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ISelection">[docs]</a><span class="k">class</span> <span class="nc">ISelection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface for block selections that can have any shape. Used by block_copy and block_fill.</span>
+
+<span class="sd">    BoundingBox is the only provider for now.</span>
+
+<span class="sd">    :ivar chunkPositions(): List or iterator of (cx, cz) coordinates for the chunks within this selection</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chunkPositions</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the given set of coordinates is within this selection.</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ISelection.contains_coords"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ISelection.contains_coords">[docs]</a>    <span class="k">def</span> <span class="nf">contains_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an array of boolean values indicating which of the x, y, z coordinate pairs are within this</span>
+<span class="sd">        selection. x, y, and z must be numpy arrays of the same shape, and the return value will be a numpy</span>
+<span class="sd">        array of the same shape.</span>
+
+<span class="sd">        :rtype: ndarray(shape=x.shape, dtype=bool)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="ISelection.containsChunk"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ISelection.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the given chunk is in this selection</span>
+
+<span class="sd">        :param cx: Chunk X position</span>
+<span class="sd">        :type cx: int</span>
+<span class="sd">        :param cz: Chunk Z position</span>
+<span class="sd">        :type cz: int</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="ISelection.sectionPositions"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ISelection.sectionPositions">[docs]</a>    <span class="k">def</span> <span class="nf">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a list of cy values contained in the given chunk</span>
+
+<span class="sd">        :param cx: Chunk X position</span>
+<span class="sd">        :type cx: int</span>
+<span class="sd">        :param cz: Chunk Z position</span>
+<span class="sd">        :type cz: int</span>
+<span class="sd">        :return: Chunk Y positions</span>
+<span class="sd">        :rtype: iterator of ints</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="ISelection.box_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ISelection.box_mask">[docs]</a>    <span class="k">def</span> <span class="nf">box_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct and return a contiguous 3-d array of boolean values corresponding to the part</span>
+<span class="sd">         of this selection within the given box. The returned array&#39;s coordinates will be ordered YZX.</span>
+
+<span class="sd">        :returns: Mask array, ordered YZX</span>
+<span class="sd">        :rtype: ndarray(shape=(box.height, box.length, box.width), dtype=bool)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="ISelection.section_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ISelection.section_mask">[docs]</a>    <span class="k">def</span> <span class="nf">section_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct and return a 16x16x16 array of boolean values indicating which of the 4096 blocks within the given</span>
+<span class="sd">        section cube are within this selection. The returned array&#39;s coordinates will be ordered YZX. The default implementation</span>
+<span class="sd">        calls box_mask with a box constructed for the section&#39;s bounds.</span>
+
+<span class="sd">        :returns: Mask array, ordered YZX</span>
+<span class="sd">        :rtype: ndarray(shape=(16, 16, 16), dtype=bool)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+</div></div>
+<div class="viewcode-block" id="SelectionBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox">[docs]</a><span class="k">class</span> <span class="nc">SelectionBox</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IntersectionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">UnionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">UnionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">DifferenceBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">InvertedBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SelectionBox.section_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox.section_mask">[docs]</a>    <span class="k">def</span> <span class="nf">section_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_mask</span><span class="p">(</span><span class="n">SectionBox</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SelectionBox.box_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox.box_mask">[docs]</a>    <span class="k">def</span> <span class="nf">box_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="n">mincx</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">mincy</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">mincz</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">maxcx</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">maxcy</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">maxcz</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+
+<div class="viewcode-block" id="SelectionBox.chunkBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox.chunkBox">[docs]</a>    <span class="k">def</span> <span class="nf">chunkBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns this box extended to the chunk boundaries of the given level&quot;&quot;&quot;</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="n">box</span><span class="o">.</span><span class="n">mincx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="n">level</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">miny</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">mincz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">),</span>
+                           <span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">maxcx</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">mincx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="n">level</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxcz</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">mincz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SelectionBox.containsChunk"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mincx</span> <span class="o">&lt;=</span> <span class="n">cx</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxcx</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mincz</span> <span class="o">&lt;=</span> <span class="n">cz</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxcz</span>
+</div>
+<div class="viewcode-block" id="SelectionBox.chunkPositions"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#iterate through all of the chunk positions within this selection box</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mincx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxcx</span><span class="p">),</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mincz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxcz</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SelectionBox.sectionPositions"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox.sectionPositions">[docs]</a>    <span class="k">def</span> <span class="nf">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cz</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c">#iterate through all of the section positions within this chunk</span>
+        <span class="k">return</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mincy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxcy</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SelectionBox.chunkCount"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SelectionBox.chunkCount">[docs]</a>    <span class="k">def</span> <span class="nf">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxcx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mincx</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxcz</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mincz</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="InvertedBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.InvertedBox">[docs]</a><span class="k">class</span> <span class="nc">InvertedBox</span><span class="p">(</span><span class="n">SelectionBox</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InvertedBox</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">base</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincx</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">mincx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincy</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">mincy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincz</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">mincz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcx</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">maxcx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcy</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">maxcy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcz</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">maxcz</span>
+
+
+<div class="viewcode-block" id="InvertedBox.contains_coords"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.InvertedBox.contains_coords">[docs]</a>    <span class="k">def</span> <span class="nf">contains_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">contains_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="InvertedBox.box_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.InvertedBox.box_mask">[docs]</a>    <span class="k">def</span> <span class="nf">box_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">box_mask</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="CombinationBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.CombinationBox">[docs]</a><span class="k">class</span> <span class="nc">CombinationBox</span><span class="p">(</span><span class="n">SelectionBox</span><span class="p">):</span>
+    <span class="n">oper</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">boundsminoper</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">boundsmaxoper</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundsminoper</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">mincx</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">mincx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundsminoper</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">mincy</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">mincy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mincz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundsminoper</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">mincz</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">mincz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundsmaxoper</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">maxcx</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">maxcx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundsmaxoper</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">maxcy</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">maxcy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxcz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundsmaxoper</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">maxcz</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">maxcz</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CombinationBox.contains_coords"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.CombinationBox.contains_coords">[docs]</a>    <span class="k">def</span> <span class="nf">contains_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">contains_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">contains_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">left</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">right</span>
+        <span class="k">if</span> <span class="n">right</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">left</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">oper</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CombinationBox.box_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.CombinationBox.box_mask">[docs]</a>    <span class="k">def</span> <span class="nf">box_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">box_mask</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">box_mask</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">left</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">right</span>
+        <span class="k">if</span> <span class="n">right</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">left</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">oper</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CombinationBox.sectionPositions"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.CombinationBox.sectionPositions">[docs]</a>    <span class="k">def</span> <span class="nf">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="n">sections</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">sections</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+        <span class="n">sections</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sections</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="UnionBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.UnionBox">[docs]</a><span class="k">class</span> <span class="nc">UnionBox</span><span class="p">(</span><span class="n">CombinationBox</span><span class="p">):</span>
+    <span class="n">oper</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">or_</span>
+    <span class="n">boundsminoper</span> <span class="o">=</span> <span class="nb">min</span>
+    <span class="n">boundsmaxoper</span> <span class="o">=</span> <span class="nb">max</span>
+</div>
+<div class="viewcode-block" id="IntersectionBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.IntersectionBox">[docs]</a><span class="k">class</span> <span class="nc">IntersectionBox</span><span class="p">(</span><span class="n">CombinationBox</span><span class="p">):</span>
+    <span class="n">oper</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">and_</span>
+    <span class="n">boundsminoper</span> <span class="o">=</span> <span class="nb">max</span>
+    <span class="n">boundsmaxoper</span> <span class="o">=</span> <span class="nb">min</span>
+</div>
+<div class="viewcode-block" id="DifferenceBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.DifferenceBox">[docs]</a><span class="k">class</span> <span class="nc">DifferenceBox</span><span class="p">(</span><span class="n">CombinationBox</span><span class="p">):</span>
+    <span class="n">oper</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">boundsminoper</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">boundsmaxoper</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="SectionBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SectionBox">[docs]</a><span class="k">def</span> <span class="nf">SectionBox</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">section</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">Blocks</span><span class="o">.</span><span class="n">shape</span>  <span class="c"># XXX needed because FakeChunkedLevel returns odd sized sections - fix with storage adapter</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">Vector</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span> <span class="o">*</span> <span class="mi">16</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="rayIntersectsBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.rayIntersectsBox">[docs]</a><span class="k">def</span> <span class="nf">rayIntersectsBox</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">ray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of (point, face) pairs for each side of the box intersected by ray. The list is sorted by distance</span>
+<span class="sd">    from the ray&#39;s origin, nearest to furthest.</span>
+
+<span class="sd">    :param box:</span>
+<span class="sd">    :type box:</span>
+<span class="sd">    :param ray:</span>
+<span class="sd">    :type ray:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    :rtype:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nearPoint</span><span class="p">,</span> <span class="n">vector</span> <span class="o">=</span> <span class="n">ray</span>
+
+    <span class="n">intersections</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c">#        glPointSize(5.0)</span>
+    <span class="c">#        glColor(1.0, 1.0, 0.0, 1.0)</span>
+    <span class="c">#        glBegin(GL_POINTS)</span>
+
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">dim1</span> <span class="o">=</span> <span class="n">dim</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">dim2</span> <span class="o">=</span> <span class="n">dim</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="n">dim1</span> <span class="o">%=</span> <span class="mi">3</span>
+        <span class="n">dim2</span> <span class="o">%=</span> <span class="mi">3</span>
+
+        <span class="k">def</span> <span class="nf">pointInBounds</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">box</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">point</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">box</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+
+        <span class="n">neg</span> <span class="o">=</span> <span class="n">vector</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">maximum</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">origin</span><span class="p">)[</span><span class="n">side</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span> <span class="o">-</span> <span class="n">nearPoint</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">neg</span> <span class="ow">and</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">vector</span><span class="p">[</span><span class="n">dim</span><span class="p">]:</span>
+                    <span class="n">scale</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="n">vector</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+                    <span class="n">intersect</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">+</span> <span class="n">nearPoint</span>
+
+                    <span class="k">if</span> <span class="n">pointInBounds</span><span class="p">(</span><span class="n">intersect</span><span class="p">,</span> <span class="n">dim1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pointInBounds</span><span class="p">(</span><span class="n">intersect</span><span class="p">,</span> <span class="n">dim2</span><span class="p">):</span>
+                        <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">intersect</span><span class="p">,</span> <span class="n">faces</span><span class="o">.</span><span class="n">Face</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">side</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersections</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="c"># Get the distance from the viewing plane for each intersection point</span>
+
+    <span class="n">byDistance</span> <span class="o">=</span> <span class="p">[((</span><span class="n">point</span> <span class="o">-</span> <span class="n">nearPoint</span><span class="p">)</span><span class="o">.</span><span class="n">lengthSquared</span><span class="p">(),</span> <span class="n">point</span><span class="p">,</span> <span class="n">face</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">point</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">intersections</span><span class="p">]</span>
+
+    <span class="n">byDistance</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">byDistance</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="createSelectionMask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.createSelectionMask">[docs]</a><span class="k">def</span> <span class="nf">createSelectionMask</span><span class="p">(</span><span class="n">brushBox</span><span class="p">,</span> <span class="n">shapeFunc</span><span class="p">,</span> <span class="n">requestedBox</span><span class="p">,</span> <span class="n">chance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">hollow</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a boolean array for a selection with the given shape and style.</span>
+<span class="sd">    If &#39;offset&#39; and &#39;box&#39; are given, then the selection is offset into the world</span>
+<span class="sd">    and only the part of the world contained in box is returned as an array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">origin</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">brushBox</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="n">brushBox</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="k">if</span> <span class="n">chance</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="ow">or</span> <span class="n">hollow</span><span class="p">:</span>
+        <span class="n">requestedBox</span> <span class="o">=</span> <span class="n">requestedBox</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c"># we are returning indices for a Blocks array, so swap axes to YZX</span>
+    <span class="n">outputShape</span> <span class="o">=</span> <span class="n">requestedBox</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">outputShape</span> <span class="o">=</span> <span class="p">(</span><span class="n">outputShape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">outputShape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">outputShape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">requestedBox</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">origin</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">outputShape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">halfshape</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="p">((</span><span class="n">i</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="mf">0.5</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">])</span>
+
+    <span class="n">blockCenters</span> <span class="o">=</span> <span class="n">inds</span> <span class="o">-</span> <span class="n">halfshape</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">blockCenters</span> <span class="o">-=</span> <span class="n">origin</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+
+    <span class="c"># odd diameter means measure from the center of the block at 0,0,0 to each block center</span>
+    <span class="c"># even diameter means measure from the 0,0,0 grid point to each block center</span>
+
+    <span class="c"># if diameter &amp; 1 == 0: blockCenters += 0.5</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float32&#39;</span><span class="p">)</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">shapeFunc</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">chance</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="ow">or</span> <span class="n">hollow</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">max</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">chance</span> <span class="o">/</span> <span class="mf">100.0</span>
+        <span class="n">exposedBlockMask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">outputShape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;bool&#39;</span><span class="p">)</span>
+        <span class="n">exposedBlockMask</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="n">submask</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">exposedBlockSubMask</span> <span class="o">=</span> <span class="n">exposedBlockMask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">exposedBlockSubMask</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+            <span class="n">slices</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">exposedBlockSubMask</span> <span class="o">|=</span> <span class="p">(</span><span class="n">submask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span> <span class="o">!=</span> <span class="n">submask</span><span class="p">))</span>
+            <span class="n">slices</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">exposedBlockSubMask</span> <span class="o">|=</span> <span class="p">(</span><span class="n">submask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span> <span class="o">!=</span> <span class="n">submask</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">hollow</span><span class="p">:</span>
+            <span class="n">mask</span><span class="p">[</span><span class="o">~</span><span class="n">exposedBlockMask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">chance</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">rmask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">threshold</span>
+
+            <span class="n">mask</span><span class="p">[</span><span class="n">exposedBlockMask</span><span class="p">]</span> <span class="o">=</span> <span class="n">rmask</span><span class="p">[</span><span class="n">exposedBlockMask</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">chance</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="ow">or</span> <span class="n">hollow</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mask</span>
+
+</div>
+<div class="viewcode-block" id="BoundingBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox">[docs]</a><span class="k">class</span> <span class="nc">BoundingBox</span><span class="p">(</span><span class="n">SelectionBox</span><span class="p">):</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">maximum</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">_origin</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">origin</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">maximum</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="n">maximum</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="n">maximum</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">size</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(origin=</span><span class="si">%s</span><span class="s">, size=</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span>
+        <span class="k">elif</span> <span class="n">item</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.origin"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.origin">[docs]</a>    <span class="k">def</span> <span class="nf">origin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The smallest position in the box</span>
+<span class="sd">        :rtype: Vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.size"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The size of the box</span>
+<span class="sd">        :rtype: Vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.center"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.center">[docs]</a>    <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="mf">0.5</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.width"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.width">[docs]</a>    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The dimension along the X axis&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="o">.</span><span class="n">x</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.height"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.height">[docs]</a>    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The dimension along the Y axis&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="o">.</span><span class="n">y</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.length"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The dimension along the Z axis&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="o">.</span><span class="n">z</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.minx"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.minx">[docs]</a>    <span class="k">def</span> <span class="nf">minx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">x</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.miny"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.miny">[docs]</a>    <span class="k">def</span> <span class="nf">miny</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">y</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.minz"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.minz">[docs]</a>    <span class="k">def</span> <span class="nf">minz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">z</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.maxx"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.maxx">[docs]</a>    <span class="k">def</span> <span class="nf">maxx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">x</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.maxy"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.maxy">[docs]</a>    <span class="k">def</span> <span class="nf">maxy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">y</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.maxz"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.maxz">[docs]</a>    <span class="k">def</span> <span class="nf">maxz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">z</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">z</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.maximum"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.maximum">[docs]</a>    <span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;The largest point of the box; origin plus size.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.volume"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.volume">[docs]</a>    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;The volume of the box in blocks&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">z</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.positions"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.positions">[docs]</a>    <span class="k">def</span> <span class="nf">positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;iterate through all of the positions within this selection box&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span>
+            <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxx</span><span class="p">),</span>
+            <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">miny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="p">),</span>
+            <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxz</span><span class="p">)</span>
+        <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoundingBox.intersect"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.intersect">[docs]</a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a box containing the area self and box have in common. Box will have zero volume</span>
+<span class="sd">         if there is no common area.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#if (self.minx &gt; box.maxx or self.maxx &lt; box.minx or</span>
+        <span class="c">#            self.miny &gt; box.maxy or self.maxy &lt; box.miny or</span>
+        <span class="c">#            self.minz &gt; box.maxz or self.maxz &lt; box.minz):</span>
+        <span class="c">#    #Zero size intersection.</span>
+        <span class="c">#    return BoundingBox()</span>
+
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span>
+            <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minx</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">minx</span><span class="p">),</span>
+            <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">miny</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">miny</span><span class="p">),</span>
+            <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minz</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">minz</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span>
+            <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxx</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxx</span><span class="p">),</span>
+            <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxy</span><span class="p">),</span>
+            <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxz</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxz</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">maximum</span> <span class="o">-</span> <span class="n">origin</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">s</span><span class="o">&lt;=</span><span class="mi">0</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">size</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ZeroBox</span>
+        <span class="c">#print &quot;Intersect of {0} and {1}: {2}&quot;.format(self, box, newbox)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoundingBox.union"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.union">[docs]</a>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a box large enough to contain both self and box.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span>
+            <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minx</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">minx</span><span class="p">),</span>
+            <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">miny</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">miny</span><span class="p">),</span>
+            <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minz</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">minz</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span>
+            <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxx</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxx</span><span class="p">),</span>
+            <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxy</span><span class="p">),</span>
+            <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxz</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">maxz</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">maximum</span> <span class="o">-</span> <span class="n">origin</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoundingBox.expand"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.expand">[docs]</a>    <span class="k">def</span> <span class="nf">expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a new box with boundaries expanded by dx, dy, dz.</span>
+<span class="sd">        If only dx is passed, expands by dx in all dimensions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dz</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dz</span> <span class="o">=</span> <span class="n">dx</span>
+        <span class="k">if</span> <span class="n">dy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">dx</span>
+
+        <span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">-</span> <span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dy</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dz</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minx</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxx</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">miny</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minz</span> <span class="ow">or</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxz</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+    <span class="c">#</span>
+    <span class="c">#def containsSection(self, cx, cy, cz):</span>
+    <span class="c">#    return self.mincx &lt;= cx &lt; self.maxcx and self.mincy &lt;= cy &lt; self.maxcy and self.mincz &lt;= cz &lt; self.maxcz</span>
+
+<div class="viewcode-block" id="BoundingBox.contains_coords"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.contains_coords">[docs]</a>    <span class="k">def</span> <span class="nf">contains_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minx</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxx</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">miny</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxy</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minz</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxz</span>
+
+        <span class="k">return</span> <span class="n">mask</span>
+</div>
+<div class="viewcode-block" id="BoundingBox.box_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.box_mask">[docs]</a>    <span class="k">def</span> <span class="nf">box_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param box: BoundingBox</span>
+<span class="sd">        :return: :rtype: ndarray | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">selection_box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">selection_box</span><span class="o">.</span><span class="n">volume</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">box</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">width</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="n">mask</span><span class="p">[</span>
+            <span class="n">selection_box</span><span class="o">.</span><span class="n">miny</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">miny</span><span class="p">:</span><span class="n">selection_box</span><span class="o">.</span><span class="n">maxy</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">miny</span><span class="p">,</span>
+            <span class="n">selection_box</span><span class="o">.</span><span class="n">minz</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minz</span><span class="p">:</span><span class="n">selection_box</span><span class="o">.</span><span class="n">maxz</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minz</span><span class="p">,</span>
+            <span class="n">selection_box</span><span class="o">.</span><span class="n">minx</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minx</span><span class="p">:</span><span class="n">selection_box</span><span class="o">.</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">box</span><span class="o">.</span><span class="n">minx</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">mask</span>
+
+    <span class="c"># --- Chunk/Section positions ---</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.mincx"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.mincx">[docs]</a>    <span class="k">def</span> <span class="nf">mincx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The smallest chunk position contained in this box&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.mincy"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.mincy">[docs]</a>    <span class="k">def</span> <span class="nf">mincy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The smallest section position contained in this box&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.mincz"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.mincz">[docs]</a>    <span class="k">def</span> <span class="nf">mincz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The smallest chunk position contained in this box&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.maxcx"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.maxcx">[docs]</a>    <span class="k">def</span> <span class="nf">maxcx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The largest chunk position contained in this box&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.maxcy"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.maxcy">[docs]</a>    <span class="k">def</span> <span class="nf">maxcy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The largest section position contained in this box&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.maxcz"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.maxcz">[docs]</a>    <span class="k">def</span> <span class="nf">maxcz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The largest chunk position contained in this box&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">z</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundingBox.isChunkAligned"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoundingBox.isChunkAligned">[docs]</a>    <span class="k">def</span> <span class="nf">isChunkAligned</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</div></div>
+<span class="n">ZeroBox</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+<div class="viewcode-block" id="FloatBox"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.FloatBox">[docs]</a><span class="k">class</span> <span class="nc">FloatBox</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">):</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">float</span>
+
+</div>
+<div class="viewcode-block" id="ShapedSelection"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ShapedSelection">[docs]</a><span class="k">class</span> <span class="nc">ShapedSelection</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">shapeFunc</span><span class="p">,</span> <span class="n">chance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">hollow</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type shapeFunc: Style</span>
+<span class="sd">        :type box: BoundingBox</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShapedSelection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shapeFunc</span> <span class="o">=</span> <span class="n">shapeFunc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chance</span> <span class="o">=</span> <span class="n">chance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hollow</span> <span class="o">=</span> <span class="n">hollow</span>
+
+<div class="viewcode-block" id="ShapedSelection.box_mask"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.ShapedSelection.box_mask">[docs]</a>    <span class="k">def</span> <span class="nf">box_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">createSelectionMask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapeFunc</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hollow</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapeFunc</span><span class="p">),</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">shapeFunc</span><span class="p">))</span>
+
+
+<span class="c"># --- Shape functions ---</span>
+
+</div>
+<div class="viewcode-block" id="SphereShape"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.SphereShape">[docs]</a><span class="k">def</span> <span class="nf">SphereShape</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="n">blockCenters</span> <span class="o">*=</span> <span class="n">blockCenters</span>
+    <span class="n">shape</span> <span class="o">/=</span> <span class="mi">2</span>
+    <span class="n">shape</span> <span class="o">*=</span> <span class="n">shape</span>
+
+    <span class="n">blockCenters</span> <span class="o">/=</span> <span class="n">shape</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distances</span> <span class="o">&lt;</span> <span class="mi">1</span>
+
+</div>
+<div class="viewcode-block" id="BoxShape"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.BoxShape">[docs]</a><span class="k">def</span> <span class="nf">BoxShape</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="n">blockCenters</span> <span class="o">/=</span> <span class="n">shape</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>  <span class="c"># XXXXXX USING DIVIDE FOR A RECTANGLE</span>
+
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distances</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">5</span>
+
+</div>
+<div class="viewcode-block" id="DiamondShape"><a class="viewcode-back" href="../../mceditlib.selection.html#mceditlib.selection.DiamondShape">[docs]</a><span class="k">def</span> <span class="nf">DiamondShape</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="n">blockCenters</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">)</span>
+    <span class="n">shape</span> <span class="o">/=</span> <span class="mi">2</span>
+    <span class="n">blockCenters</span> <span class="o">/=</span> <span class="n">shape</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">blockCenters</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distances</span> <span class="o">&lt;</span> <span class="mi">1</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

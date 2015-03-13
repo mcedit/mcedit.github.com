@@ -1,0 +1,595 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.levelbase &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.levelbase</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Base classes for all Minecraft levels.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">zeros_like</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">nbt</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">ChunkNotPresent</span>
+<span class="kn">from</span> <span class="nn">mceditlib.nbtattr</span> <span class="kn">import</span> <span class="n">NBTAttr</span><span class="p">,</span> <span class="n">NBTVectorAttr</span>
+<span class="kn">from</span> <span class="nn">mceditlib.util</span> <span class="kn">import</span> <span class="n">matchEntityTags</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="n">GetBlocksResult</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&quot;GetBlocksResult&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;Blocks&quot;</span><span class="p">,</span> <span class="s">&quot;Data&quot;</span><span class="p">,</span> <span class="s">&quot;BlockLight&quot;</span><span class="p">,</span> <span class="s">&quot;SkyLight&quot;</span><span class="p">,</span> <span class="s">&quot;Biomes&quot;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="FakeChunkedLevelAdapter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter">[docs]</a><span class="k">class</span> <span class="nc">FakeChunkedLevelAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; FakeChunkedLevelAdapter is an abstract class for implementing fixed size, non-chunked storage formats.</span>
+<span class="sd">    Classic, Indev, and Schematic formats inherit from this class.  FakeChunkedLevelAdapter has dummy functions for</span>
+<span class="sd">    pretending to have Players, Entities and TileEntities. If Entities and TileEntities already present, provides</span>
+<span class="sd">    a working `getEntities` and `getTileEntities`.</span>
+
+<span class="sd">    FakeChunkedLevelAdapter subclasses must have Width, Length, and Height attributes.</span>
+<span class="sd">    Subclasses must also have Blocks, and optionally Data and BlockLight.</span>
+
+<span class="sd">    FakeChunkedLevelAdapter implements IWorld and ISectionWorld.</span>
+
+<span class="sd">    Required attributes:</span>
+
+<span class="sd">    :ivar Height: int</span>
+<span class="sd">    :ivar Length: int</span>
+<span class="sd">    :ivar Width: int</span>
+<span class="sd">    :ivar Blocks: ndarray of any shape, indexed [x, z, y]</span>
+<span class="sd">    :ivar blocktypes: BlockTypeSet</span>
+
+<span class="sd">    Optional attributes:</span>
+
+<span class="sd">    :ivar Entities: list or TAG_List</span>
+<span class="sd">    :ivar TileEntities: list or TAG_List</span>
+<span class="sd">    :ivar Data: ndarray, same shape and indexes as Blocks</span>
+<span class="sd">    :ivar BlockLight: ndarray, same shape and indexes as Blocks</span>
+<span class="sd">    :ivar SkyLight: ndarray, same shape and indexes as Blocks</span>
+<span class="sd">    :ivar Biomes: ndarray, same x and z sizes as Blocks, indexed [x, z]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Blocks</span> <span class="o">=</span> <span class="n">blocktypes</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    <span class="n">Width</span> <span class="o">=</span> <span class="n">Length</span> <span class="o">=</span> <span class="n">Height</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+    <span class="n">hasLights</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.size"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.bounds"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.readChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.readChunk">[docs]</a>    <span class="k">def</span> <span class="nf">readChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a FakeChunk object representing the chunk at the given</span>
+<span class="sd">        position. Subclasses may choose to override</span>
+<span class="sd">        fakeBlocksForChunk and fakeDataForChunk to provide block and blockdata arrays.</span>
+<span class="sd">        They may instead override getChunk and return a ChunkBase subclass.</span>
+
+<span class="sd">        By default, returns a chunk whose ``Blocks`` is made from slices of self.Blocks (and</span>
+<span class="sd">        ``Data`` from self.Data if present)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ChunkNotPresent</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">FakeChunk</span><span class="p">()</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">cx</span> <span class="o">=</span> <span class="n">cx</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">cz</span> <span class="o">=</span> <span class="n">cz</span>
+
+        <span class="n">chunk</span><span class="o">.</span><span class="n">Blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakeBlocksForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+
+        <span class="n">chunk</span><span class="o">.</span><span class="n">Data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakeDataForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+
+        <span class="n">whiteLight</span> <span class="o">=</span> <span class="n">zeros_like</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">Blocks</span><span class="p">)</span>
+        <span class="n">whiteLight</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">15</span>
+
+        <span class="n">chunk</span><span class="o">.</span><span class="n">BlockLight</span> <span class="o">=</span> <span class="n">whiteLight</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">SkyLight</span> <span class="o">=</span> <span class="n">whiteLight</span>
+
+        <span class="n">chunk</span><span class="o">.</span><span class="n">Entities</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">TileEntities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakeEntitiesForChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+
+        <span class="n">chunk</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_Compound</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">chunk</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.writeChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.writeChunk">[docs]</a>    <span class="k">def</span> <span class="nf">writeChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Chunks are references to internal Block arrays (xxx someday transform schematic into internal chunked format</span>
+<span class="sd">        and transform it back before write)</span>
+<span class="sd">        :param chunk:</span>
+<span class="sd">        :type chunk:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.chunkCount"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.chunkCount">[docs]</a>    <span class="k">def</span> <span class="nf">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes an artificial chunk count using self.Width and self.Length.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Width</span> <span class="o">+</span> <span class="mi">15</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Length</span> <span class="o">+</span> <span class="mi">15</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.chunkPositions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns an artificial list of chunk positions using `self.Width` and `self.Length`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Width</span> <span class="o">+</span> <span class="mi">15</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">),</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span> <span class="o">+</span> <span class="mi">15</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.containsChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if the position is within `self.bounds`.&quot;&quot;&quot;</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">bounds</span><span class="o">.</span><span class="n">mincx</span> <span class="o">&lt;=</span> <span class="n">cx</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="o">.</span><span class="n">maxcx</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">mincz</span> <span class="o">&lt;=</span> <span class="n">cz</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="o">.</span><span class="n">maxcz</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.fakeBlocksForChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.fakeBlocksForChunk">[docs]</a>    <span class="k">def</span> <span class="nf">fakeBlocksForChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a Blocks array for a fake chunk at the given position.</span>
+
+<span class="sd">        By default, returns a slice of self.Blocks.</span>
+
+<span class="sd">        :rtype: ndarray(shape=(16, 16, Height))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cxOff</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+        <span class="n">czOff</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">cxOff</span><span class="p">:</span><span class="n">cxOff</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span> <span class="n">czOff</span><span class="p">:</span><span class="n">czOff</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span> <span class="p">:]</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.fakeDataForChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.fakeDataForChunk">[docs]</a>    <span class="k">def</span> <span class="nf">fakeDataForChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a Data array for a fake chunk at the given position.</span>
+
+<span class="sd">        By default, returns a slice of self.Data if it is present, otherwise returns an array of zeros.</span>
+
+<span class="sd">        :rtype: ndarray(shape=(16, 16, Height))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cxOff</span> <span class="o">=</span> <span class="n">cx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+        <span class="n">czOff</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Data&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">cxOff</span><span class="p">:</span><span class="n">cxOff</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span> <span class="n">czOff</span><span class="p">:</span><span class="n">czOff</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Height</span> <span class="o">|</span> <span class="mh">0xf</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.fakeEntitiesForChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.fakeEntitiesForChunk">[docs]</a>    <span class="k">def</span> <span class="nf">fakeEntitiesForChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the Entities and TileEntities for a fake chunk at the given position.</span>
+
+<span class="sd">        By default, returns empty lists.</span>
+
+<span class="sd">        :rtype: (list, list)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[],</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.addEntity"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.addEntity">[docs]</a>    <span class="k">def</span> <span class="nf">addEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Entities&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.addTileEntity"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.addTileEntity">[docs]</a>    <span class="k">def</span> <span class="nf">addTileEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;TileEntities&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TileEntities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+    <span class="c"># --- Block accessors ---</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.getBlockID"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.getBlockID">[docs]</a>    <span class="k">def</span> <span class="nf">getBlockID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.setBlockID"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.setBlockID">[docs]</a>    <span class="k">def</span> <span class="nf">setBlockID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">blockID</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">blockID</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.getBlockData"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.getBlockData">[docs]</a>    <span class="k">def</span> <span class="nf">getBlockData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Data&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.setBlockData"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.setBlockData">[docs]</a>    <span class="k">def</span> <span class="nf">setBlockData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Data&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.setBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.setBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">setBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                  <span class="n">Blocks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">Data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">BlockLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">SkyLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">Biomes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">updateLights</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="c"># Note: Single-file blocks are ordered x, z, y and biomes ordered x, z for compatibility? purposes?</span>
+
+        <span class="c"># Eliminate coordinates outside this level&#39;s bounds.</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Width</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">Blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+                <span class="n">Blocks</span> <span class="o">=</span> <span class="n">Blocks</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">Blocks</span>
+
+        <span class="k">if</span> <span class="n">Data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Data&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Data</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+                <span class="n">Data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">Data</span>
+
+        <span class="k">if</span> <span class="n">BlockLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;BlockLight&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">BlockLight</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+                <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">BlockLight</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">BlockLight</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">BlockLight</span>
+
+        <span class="k">if</span> <span class="n">SkyLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;SkyLight&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">SkyLight</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+                <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">SkyLight</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">SkyLight</span>
+
+        <span class="k">if</span> <span class="n">Biomes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Biomes&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Biomes</span><span class="p">,</span> <span class="s">&#39;__getitem__&#39;</span><span class="p">):</span>
+                <span class="n">Biomes</span> <span class="o">=</span> <span class="n">Biomes</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">Biomes</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.getBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.getBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">getBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                  <span class="n">return_Blocks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                  <span class="n">return_Data</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">return_BlockLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">return_SkyLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">return_Biomes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">Blocks</span> <span class="o">=</span> <span class="n">Data</span> <span class="o">=</span> <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">Biomes</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Eliminate coordinates outside this level&#39;s bounds.</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">shapes</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+        <span class="n">max_shape</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span> <span class="ow">in</span> <span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="n">max_shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;All inputs to getBlocks must be the same shape or be a 1-sized array&quot;</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">max_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;bool&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">max_shape</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Width</span>
+        <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">max_shape</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span>
+        <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">max_shape</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span>
+
+        <span class="n">broadcast_shape</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">max_shape</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">max_shape</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">max_shape</span><span class="p">:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">return_Blocks</span><span class="p">:</span>
+            <span class="n">Blocks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">broadcast_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">Blocks</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">return_Data</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Data&#39;</span><span class="p">):</span>
+            <span class="n">Data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">broadcast_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">Data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">return_BlockLight</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;BlockLight&#39;</span><span class="p">):</span>
+            <span class="n">BlockLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">broadcast_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BlockLight</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">BlockLight</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BlockLight</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">return_SkyLight</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;SkyLight&#39;</span><span class="p">):</span>
+            <span class="n">SkyLight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">broadcast_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkyLight</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">SkyLight</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">return_Biomes</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Biomes&#39;</span><span class="p">):</span>
+            <span class="n">Biomes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">broadcast_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Biomes</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">Biomes</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Biomes</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">GetBlocksResult</span><span class="p">(</span><span class="n">Blocks</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">BlockLight</span><span class="p">,</span> <span class="n">SkyLight</span><span class="p">,</span> <span class="n">Biomes</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.getEntities"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.getEntities">[docs]</a>    <span class="k">def</span> <span class="nf">getEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Entities&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Entities</span><span class="p">:</span>
+                <span class="n">refType</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;EntityRefType&quot;</span><span class="p">,</span> <span class="n">GenericEntityRef</span><span class="p">)</span>
+                <span class="n">ref</span> <span class="o">=</span> <span class="n">refType</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Position</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">matchEntityTags</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">kw</span><span class="p">):</span>
+                        <span class="k">yield</span> <span class="n">ref</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.listDimensions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.listDimensions">[docs]</a>    <span class="k">def</span> <span class="nf">listDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s">&quot;&quot;</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="FakeChunkedLevelAdapter.close"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunkedLevelAdapter.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="GenericEntityRef"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.GenericEntityRef">[docs]</a><span class="k">class</span> <span class="nc">GenericEntityRef</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootTag</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="n">rootTag</span>
+
+<div class="viewcode-block" id="GenericEntityRef.raw_tag"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.GenericEntityRef.raw_tag">[docs]</a>    <span class="k">def</span> <span class="nf">raw_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootTag</span>
+</div>
+<div class="viewcode-block" id="GenericEntityRef.dirty"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.GenericEntityRef.dirty">[docs]</a>    <span class="k">def</span> <span class="nf">dirty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</div>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">NBTAttr</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="n">nbt</span><span class="o">.</span><span class="n">TAG_String</span><span class="p">)</span>
+    <span class="n">Position</span> <span class="o">=</span> <span class="n">NBTVectorAttr</span><span class="p">(</span><span class="s">&quot;Pos&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+
+
+
+
+<span class="c">#</span>
+<span class="c"># class ChunkBase(object):</span>
+<span class="c"># &quot;&quot;&quot;</span>
+<span class="c">#     Abstract base class for the chunks returned by LevelBase.getChunk</span>
+<span class="c">#</span>
+<span class="c">#     The internal storage of chunks varies between level formats. Chunks in the</span>
+<span class="c">#     newest level format will have an array of 16x16x16 sections, each with a Y attribute</span>
+<span class="c">#     and a set of Blocks, Data, SkyLight, and BlockLight arrays. Older formats have those</span>
+<span class="c">#     arrays on the chunk directly. It is preferred to use the new world.getBlocks() function</span>
+<span class="c">#     instead of directly accessing a chunk&#39;s arrays, but the arrays can still be accessed</span>
+<span class="c">#     for maximum performance.</span>
+<span class="c">#</span>
+<span class="c">#     A chunk also has a HeightMap to speed skylight computations.</span>
+<span class="c">#</span>
+<span class="c">#     The HeightMap is shaped (16, 16) and records the y-coordinate of the lowest</span>
+<span class="c">#     block in the column where sunlight is at full strength. See heightmaps.py for this computation.</span>
+<span class="c">#     The HeightMap is also used for displaying low detail terrain in MCEdit, so</span>
+<span class="c">#     ChunkBase will compute and cache a HeightMap for subclasses that don&#39;t override it. (xxx)</span>
+<span class="c">#</span>
+<span class="c">#     :ivar world: LevelBase</span>
+<span class="c">#     :ivar chunkPosition: (int, int)</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+
+</div>
+<div class="viewcode-block" id="FakeChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk">[docs]</a><span class="k">class</span> <span class="nc">FakeChunk</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">dimension</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c">#: The parent dimension that this chunk belongs to</span>
+    <span class="n">cx</span> <span class="o">=</span> <span class="n">cz</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c">#: This chunk&#39;s position as a tuple (cx, cz)</span>
+
+    <span class="n">Width</span> <span class="o">=</span> <span class="n">Length</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="n">dimName</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">_heightMap</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">HeightMap</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">#</span>
+    <span class="c"># @property</span>
+    <span class="c"># def HeightMap(self):</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     Compute, cache, and return an artificial HeightMap for levels that don&#39;t provide one.</span>
+    <span class="c">#     :return: Array of height info.</span>
+    <span class="c">#     :rtype: ndarray(shape=(16, 16))</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     if self._heightMap is not None:</span>
+    <span class="c">#         return self._heightMap</span>
+    <span class="c">#     from mceditlib.heightmaps import computeChunkHeightMap</span>
+    <span class="c">#</span>
+    <span class="c">#     self._heightMap = computeChunkHeightMap(self)</span>
+    <span class="c">#     return self._heightMap</span>
+    <span class="c">#</span>
+    <span class="c"># pass</span>
+
+    <span class="k">def</span> <span class="nf">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cz</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FakeChunk.Height"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk.Height">[docs]</a>    <span class="k">def</span> <span class="nf">Height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">Height</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FakeChunk.bounds"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">cx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FakeChunk.size"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span>
+</div>
+<div class="viewcode-block" id="FakeChunk.sectionPositions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk.sectionPositions">[docs]</a>    <span class="k">def</span> <span class="nf">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Height</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FakeChunk.chunkChanged"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk.chunkChanged">[docs]</a>    <span class="k">def</span> <span class="nf">chunkChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">needsLighting</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You are required to call this function after directly modifying any of a chunk&#39;s</span>
+<span class="sd">        arrays or its rootTag. Alternately, just set `chunk.dirty = True`</span>
+
+<span class="sd">        needsLighting is deprecated; Use the updateLights= argument</span>
+<span class="sd">        of setBlocks and other editing functions, or call updateLights(level, x, y, z) to</span>
+<span class="sd">        explicitly update lights yourself.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FakeChunk.blocktypes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk.blocktypes">[docs]</a>    <span class="k">def</span> <span class="nf">blocktypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">blocktypes</span>
+</div>
+<div class="viewcode-block" id="FakeChunk.getSection"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeChunk.getSection">[docs]</a>    <span class="k">def</span> <span class="nf">getSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">cy</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">miny</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">maxy</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="n">section</span> <span class="o">=</span> <span class="n">FakeSection</span><span class="p">()</span>
+        <span class="n">section</span><span class="o">.</span><span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">s_</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">cy</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">:(</span><span class="n">cy</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Blocks&#39;</span><span class="p">):</span>
+            <span class="n">section</span><span class="o">.</span><span class="n">Blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;ChunkBase.getSection is only implemented for chunks providing a Blocks array&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Data&#39;</span><span class="p">):</span>
+            <span class="n">section</span><span class="o">.</span><span class="n">Data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;BlockLight&#39;</span><span class="p">):</span>
+            <span class="n">section</span><span class="o">.</span><span class="n">BlockLight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BlockLight</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;SkyLight&#39;</span><span class="p">):</span>
+            <span class="n">section</span><span class="o">.</span><span class="n">SkyLight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">section</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">cy</span>
+
+        <span class="k">return</span> <span class="n">section</span>
+
+</div></div>
+<div class="viewcode-block" id="FakeSection"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.FakeSection">[docs]</a><span class="k">class</span> <span class="nc">FakeSection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="LightedChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.LightedChunk">[docs]</a><span class="k">class</span> <span class="nc">LightedChunk</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract subclass of ChunkBase that provides Anvil and Pocket chunks with</span>
+<span class="sd">    an implementation of chunkChanged. This method is called after</span>
+<span class="sd">    the Blocks array is accessed directly and takes an optional argument</span>
+<span class="sd">    which disables lighting calculation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># def generateHeightMap(self):</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     Recalculate this chunk&#39;s HeightMap.</span>
+    <span class="c">#     &quot;&quot;&quot;</span>
+    <span class="c">#     computeChunkHeightMap(self.blocktypes, self.Blocks, self.HeightMap)</span>
+
+<div class="viewcode-block" id="LightedChunk.chunkChanged"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.LightedChunk.chunkChanged">[docs]</a>    <span class="k">def</span> <span class="nf">chunkChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calcLighting</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c"># self.needsLighting = calcLighting or self.needsLighting</span>
+        <span class="c"># self.generateHeightMap()</span>
+        <span class="c"># if calcLighting:</span>
+        <span class="c">#     self.genFastLights()</span>
+
+</div></div>
+<div class="viewcode-block" id="genSkyLights"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.genSkyLights">[docs]</a><span class="k">def</span> <span class="nf">genSkyLights</span><span class="p">(</span><span class="n">section</span><span class="p">):</span> <span class="c">#xxxxxxxxx</span>
+    <span class="n">section</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">chunk</span><span class="o">.</span><span class="n">dimName</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;DIM1&quot;</span><span class="p">,</span> <span class="s">&quot;DIM-1&quot;</span><span class="p">):</span>
+        <span class="k">return</span>  <span class="c"># no light in nether or the end</span>
+
+    <span class="n">blocks</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">Blocks</span>
+    <span class="n">la</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">blocktypes</span><span class="o">.</span><span class="n">lightAbsorption</span>
+    <span class="n">skylight</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">SkyLight</span>
+    <span class="n">heightmap</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">HeightMap</span>
+
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">16</span><span class="p">)):</span>
+
+        <span class="n">skylight</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">heightmap</span><span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">]:]</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="n">lv</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">heightmap</span><span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">])):</span>
+            <span class="n">lv</span> <span class="o">-=</span> <span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="n">blocks</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]]</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">lv</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">skylight</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">lv</span>
+
+</div>
+<div class="viewcode-block" id="BoundsFromChunkPositionsMixin"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.levelbase.BoundsFromChunkPositionsMixin">[docs]</a><span class="k">class</span> <span class="nc">BoundsFromChunkPositionsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides &#39;bounds&#39; and &#39;size&#39; attributes to a level that provides &#39;chunkCount&#39; and &#39;chunkPositions&#39; attributes</span>
+
+<span class="sd">    Required attributes:</span>
+
+<span class="sd">    :ivar chunkCount: Number of chunks in this world</span>
+<span class="sd">    :ivar chunkPositions(): Iterator of (cx, cz) tuples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

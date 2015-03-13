@@ -1,0 +1,859 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.worldeditor &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.worldeditor</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">mceditlib.block_copy</span> <span class="kn">import</span> <span class="n">copyBlocksIter</span>
+<span class="kn">from</span> <span class="nn">mceditlib.operations.block_fill</span> <span class="kn">import</span> <span class="n">FillBlocksOperation</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">mceditlib.findadapter</span> <span class="kn">import</span> <span class="n">findAdapter</span>
+<span class="kn">from</span> <span class="nn">mceditlib.multi_block</span> <span class="kn">import</span> <span class="n">getBlocks</span><span class="p">,</span> <span class="n">setBlocks</span>
+<span class="kn">from</span> <span class="nn">mceditlib.schematic</span> <span class="kn">import</span> <span class="n">createSchematic</span>
+<span class="kn">from</span> <span class="nn">mceditlib.util</span> <span class="kn">import</span> <span class="n">displayName</span><span class="p">,</span> <span class="n">chunk_pos</span><span class="p">,</span> <span class="n">exhaust</span><span class="p">,</span> <span class="n">matchEntityTags</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="n">DIM_NETHER</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">DIM_END</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">_zeros</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="string_func"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.string_func">[docs]</a><span class="k">def</span> <span class="nf">string_func</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">set_string_function</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;, shape=</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">,)</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">set_string_function</span><span class="p">(</span><span class="n">string_func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">string</span>
+
+</div>
+<span class="n">numpy</span><span class="o">.</span><span class="n">set_string_function</span><span class="p">(</span><span class="n">string_func</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="WorldEditorChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk">[docs]</a><span class="k">class</span> <span class="nc">WorldEditorChunk</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a 16x16xH chunk in a format-independent world.</span>
+<span class="sd">    The Blocks, Data, SkyLight, and BlockLight arrays are divided into</span>
+<span class="sd">    vertical sections of 16x16x16, accessed using the `getSection` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunkData</span><span class="p">,</span> <span class="n">editor</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span> <span class="o">=</span> <span class="n">editor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span> <span class="o">=</span> <span class="n">chunkData</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cz</span> <span class="o">=</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">cz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span> <span class="o">=</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">dimName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">getDimension</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Entities</span> <span class="o">=</span> <span class="p">[</span><span class="n">editor</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">EntityRef</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">Entities</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TileEntities</span> <span class="o">=</span> <span class="p">[</span><span class="n">editor</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">TileEntityRef</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">TileEntities</span><span class="p">]</span>
+
+<div class="viewcode-block" id="WorldEditorChunk.buildNBTTag"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.buildNBTTag">[docs]</a>    <span class="k">def</span> <span class="nf">buildNBTTag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">buildNBTTag</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;WorldEditorChunk, coords:{0}, world: {1}, dim: {2} D:{3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cz</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span><span class="p">)</span>
+
+    <span class="c"># --- WorldEditorChunkData accessors ---</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorChunk.bounds"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">bounds</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorChunk.chunkPosition"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.chunkPosition">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cz</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorChunk.rootTag"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.rootTag">[docs]</a>    <span class="k">def</span> <span class="nf">rootTag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">rootTag</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dirty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">dirty</span>
+
+    <span class="nd">@dirty.setter</span>
+<div class="viewcode-block" id="WorldEditorChunk.dirty"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.dirty">[docs]</a>    <span class="k">def</span> <span class="nf">dirty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">chunkBecameDirty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c"># --- Chunk attributes ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditorChunk.sectionPositions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.sectionPositions">[docs]</a>    <span class="k">def</span> <span class="nf">sectionPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldEditorChunk.getSection"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.getSection">[docs]</a>    <span class="k">def</span> <span class="nf">getSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">,</span> <span class="n">create</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorChunk.blocktypes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.blocktypes">[docs]</a>    <span class="k">def</span> <span class="nf">blocktypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">blocktypes</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorChunk.Biomes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.Biomes">[docs]</a>    <span class="k">def</span> <span class="nf">Biomes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">Biomes</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorChunk.HeightMap"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.HeightMap">[docs]</a>    <span class="k">def</span> <span class="nf">HeightMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">HeightMap</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">TerrainPopulated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">TerrainPopulated</span>
+
+    <span class="nd">@TerrainPopulated.setter</span>
+<div class="viewcode-block" id="WorldEditorChunk.TerrainPopulated"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.TerrainPopulated">[docs]</a>    <span class="k">def</span> <span class="nf">TerrainPopulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">TerrainPopulated</span> <span class="o">=</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="WorldEditorChunk.addEntity"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.addEntity">[docs]</a>    <span class="k">def</span> <span class="nf">addEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">chunk</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">Entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">rootTag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+        <span class="n">ref</span><span class="o">.</span><span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="WorldEditorChunk.addTileEntity"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.addTileEntity">[docs]</a>    <span class="k">def</span> <span class="nf">addTileEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">chunk</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">TileEntities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">rootTag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TileEntities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+        <span class="n">ref</span><span class="o">.</span><span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="WorldEditorChunk.removeTileEntity"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorChunk.removeTileEntity">[docs]</a>    <span class="k">def</span> <span class="nf">removeTileEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkData</span><span class="o">.</span><span class="n">TileEntities</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">rootTag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TileEntities</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+        <span class="n">ref</span><span class="o">.</span><span class="n">chunk</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">ref</span><span class="o">.</span><span class="n">rootTag</span> <span class="o">=</span> <span class="bp">None</span>
+
+</div></div>
+<div class="viewcode-block" id="WorldEditor"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor">[docs]</a><span class="k">class</span> <span class="nc">WorldEditor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">adapterClass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adapter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a Minecraft level of any format from the given filename.</span>
+
+<span class="sd">        If you try to create an existing world, IOError will be raised.</span>
+
+<span class="sd">        :type filename: str or unknown or unicode</span>
+<span class="sd">        :type create: bool</span>
+<span class="sd">        :type readonly: bool</span>
+<span class="sd">        :type adapter: unknown or mceditlib.anvil.adapter.AnvilWorldAdapter or mceditlib.schematic.SchematicFileAdapter</span>
+<span class="sd">        :type adapterClass: class</span>
+<span class="sd">        :type resume: None or bool</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: WorldEditor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">playerCache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">create</span> <span class="ow">and</span> <span class="n">readonly</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">create</span> <span class="ow">or</span> <span class="n">adapterClass</span><span class="p">,</span> <span class="s">&quot;create=True requires an adapterClass&quot;</span>
+
+        <span class="k">if</span> <span class="n">adapter</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">adapter</span>
+        <span class="k">elif</span> <span class="n">adapterClass</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">adapterClass</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span> <span class="n">readonly</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">findAdapter</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">readonly</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="n">readonly</span>
+
+        <span class="c"># maps (cx, cz, dimName) tuples to WorldEditorChunk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunks</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakValueDictionary</span><span class="p">()</span>
+
+        <span class="c"># maps (cx, cz, dimName) tuples to WorldEditorChunkData</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentDirtyChunks</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentDirtyFiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentDirtySections</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;WorldEditor(adapter=</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span>
+
+    <span class="c"># --- Undo/redo ---</span>
+<div class="viewcode-block" id="WorldEditor.requireRevisions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.requireRevisions">[docs]</a>    <span class="k">def</span> <span class="nf">requireRevisions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">requireRevisions</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.undo"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gotoRevision</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.redo"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gotoRevision</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.beginUndo"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.beginUndo">[docs]</a>    <span class="k">def</span> <span class="nf">beginUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Begin a new undo revision, creating a new revision in the underlying storage chain if an editable</span>
+<span class="sd">        revision is not selected.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">createRevision</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Opened revision </span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.commitUndo"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.commitUndo">[docs]</a>    <span class="k">def</span> <span class="nf">commitUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">revisionInfo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record all changes since the last call to beginUndo into the adapter&#39;s current revision. The revision is closed</span>
+<span class="sd">        and beginUndo must be called to open the next revision.</span>
+
+<span class="sd">        :param revisionInfo: May be supplied to record metadata for this undo</span>
+<span class="sd">        :type revisionInfo: object | None</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">setRevisionInfo</span><span class="p">(</span><span class="n">revisionInfo</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">syncToDisk</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">closeRevision</span><span class="p">()</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Closed revision </span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.undoRevisions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.undoRevisions">[docs]</a>    <span class="k">def</span> <span class="nf">undoRevisions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate through all revisions and return (index, revisionInfo) tuples. revisionInfo is the info stored with</span>
+<span class="sd">        commitUndo for each revision. Call selectUndoRevision with the index of the desired revision to rewind time.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">revision</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">listRevisions</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">index</span><span class="p">,</span> <span class="n">revision</span><span class="o">.</span><span class="n">revisionInfo</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.gotoRevision"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.gotoRevision">[docs]</a>    <span class="k">def</span> <span class="nf">gotoRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param index:</span>
+<span class="sd">        :type index:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;None is not a revision index!&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">syncToDisk</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">playerCache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">changes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">selectRevision</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentRevision</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="k">if</span> <span class="n">changes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Going to revision </span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Changes: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">changes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">chunkPositions</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recentDirtyChunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunkPositions</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">chunkPositions</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="o">.</span><span class="n">pop</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunks</span><span class="o">.</span><span class="n">pop</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentDirtyFiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">changes</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
+
+    <span class="c"># --- Save ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.syncToDisk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.syncToDisk">[docs]</a>    <span class="k">def</span> <span class="nf">syncToDisk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write all loaded chunks, player files, etc to disk.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dirtyPlayers</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">playerCache</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">player</span><span class="o">.</span><span class="n">dirty</span><span class="p">:</span>
+                <span class="n">dirtyPlayers</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">player</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">dirtyChunkCount</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">dirty</span><span class="p">:</span>
+                <span class="n">dirtyChunkCount</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">writeChunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                <span class="n">chunk</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">syncToDisk</span><span class="p">()</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">u&quot;Saved </span><span class="si">%d</span><span class="s"> chunks and </span><span class="si">%d</span><span class="s"> players&quot;</span><span class="p">,</span> <span class="n">dirtyChunkCount</span><span class="p">,</span> <span class="n">dirtyPlayers</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.saveChanges"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.saveChanges">[docs]</a>    <span class="k">def</span> <span class="nf">saveChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;World is opened read only.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">syncToDisk</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">playerCache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">saveChanges</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.close"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unload all chunks and close all open filehandles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunks</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="c"># --- Resource limits ---</span>
+</div>
+    <span class="n">loadedChunkLimit</span> <span class="o">=</span> <span class="mi">400</span>
+
+    <span class="c"># --- World limits ---</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditor.maxHeight"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.maxHeight">[docs]</a>    <span class="k">def</span> <span class="nf">maxHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">maxHeight</span>
+
+    <span class="c"># --- World info ---</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditor.displayName"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.displayName">[docs]</a>    <span class="k">def</span> <span class="nf">displayName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">displayName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditor.blocktypes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.blocktypes">[docs]</a>    <span class="k">def</span> <span class="nf">blocktypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">blocktypes</span>
+
+    <span class="c"># --- Chunk I/O ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.preloadChunkPositions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.preloadChunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">preloadChunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">u&quot;Scanning for regions in </span><span class="si">%s</span><span class="s">...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dimName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">listDimensions</span><span class="p">():</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">chunkPositions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">(</span><span class="n">dimName</span><span class="p">))</span>
+            <span class="n">chunkPositions</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="n">dimName</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Dim </span><span class="si">%s</span><span class="s">: Found </span><span class="si">%d</span><span class="s"> chunks in </span><span class="si">%0.2f</span><span class="s"> seconds.&quot;</span><span class="p">,</span>
+                     <span class="n">dimName</span><span class="p">,</span>
+                     <span class="nb">len</span><span class="p">(</span><span class="n">chunkPositions</span><span class="p">),</span>
+                     <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span>
+                     <span class="n">start</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunkPositions</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.chunkCount"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.chunkCount">[docs]</a>    <span class="k">def</span> <span class="nf">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">chunkCount</span><span class="p">(</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.chunkPositions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterates over (xPos, zPos) tuples, one for each chunk in the given dimension.</span>
+<span class="sd">        May initiate a costly chunk scan.</span>
+
+<span class="sd">        :param dimName: Name of dimension</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preloadChunkPositions</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">__iter__</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_getChunkData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="n">chunkData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">chunkData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;_getChunkData: Chunk </span><span class="si">%s</span><span class="s"> is in _loadedChunkData&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">chunkData</span>
+
+        <span class="n">chunkData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">readChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storeLoadedChunkData</span><span class="p">(</span><span class="n">chunkData</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">chunkData</span>
+
+    <span class="k">def</span> <span class="nf">_storeLoadedChunkData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunkData</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadedChunkLimit</span><span class="p">:</span>
+            <span class="c"># Try to find a chunk to unload. The chunk must not be in _loadedChunks, which contains only chunks that</span>
+            <span class="c"># are in use by another object. If the chunk is dirty, save it to the temporary folder.</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">ocx</span><span class="p">,</span> <span class="n">ocz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">),</span> <span class="n">oldChunkData</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ocx</span><span class="p">,</span> <span class="n">ocz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunks</span><span class="p">:</span>  <span class="c"># and (ocx, ocz) not in self._recentLoadedChunks:</span>
+                    <span class="k">if</span> <span class="n">oldChunkData</span><span class="o">.</span><span class="n">dirty</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">writeChunk</span><span class="p">(</span><span class="n">oldChunkData</span><span class="p">)</span>
+
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="p">[</span><span class="n">ocx</span><span class="p">,</span> <span class="n">ocz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">]</span>
+                    <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="p">[</span><span class="n">chunkData</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">cz</span><span class="p">,</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">dimName</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunkData</span>
+
+<div class="viewcode-block" id="WorldEditor.getChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.getChunk">[docs]</a>    <span class="k">def</span> <span class="nf">getChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: Chunk at the given position.</span>
+<span class="sd">        :rtype: WorldEditorChunk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">create</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+
+        <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunks</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">chunk</span>
+
+        <span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">chunkData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getChunkData</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">WorldEditorChunk</span><span class="p">(</span><span class="n">chunkData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">startTime</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Chunk </span><span class="si">%s</span><span class="s"> took </span><span class="si">%0.2f</span><span class="s"> seconds to load! entities=</span><span class="si">%s</span><span class="s"> tileentities=</span><span class="si">%s</span><span class="s"> tileticks=</span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span>
+                     <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">),</span> <span class="n">duration</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">Entities</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">TileEntities</span><span class="p">),</span>
+                     <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">rootTag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;TileTicks&quot;</span><span class="p">,</span> <span class="p">())))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunks</span><span class="p">[</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunk</span>
+        <span class="k">return</span> <span class="n">chunk</span>
+
+    <span class="c"># --- Chunk dirty bit ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.listDirtyChunks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.listDirtyChunks">[docs]</a>    <span class="k">def</span> <span class="nf">listDirtyChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">cPos</span><span class="p">,</span> <span class="n">chunkData</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">chunkData</span><span class="o">.</span><span class="n">dirty</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">cPos</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.chunkBecameDirty"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.chunkBecameDirty">[docs]</a>    <span class="k">def</span> <span class="nf">chunkBecameDirty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentDirtyChunks</span><span class="p">[</span><span class="n">chunk</span><span class="o">.</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">chunk</span><span class="o">.</span><span class="n">cx</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cz</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.getRecentDirtyChunks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.getRecentDirtyChunks">[docs]</a>    <span class="k">def</span> <span class="nf">getRecentDirtyChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentDirtyChunks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">dimName</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+
+    <span class="c"># --- HeightMaps ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.heightMapAt"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.heightMapAt">[docs]</a>    <span class="k">def</span> <span class="nf">heightMapAt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="n">zc</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">xc</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">xInChunk</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span>
+        <span class="n">zInChunk</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span>
+
+        <span class="n">ch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">zc</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+
+        <span class="n">heightMap</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">HeightMap</span>
+
+        <span class="k">return</span> <span class="n">heightMap</span><span class="p">[</span><span class="n">zInChunk</span><span class="p">,</span> <span class="n">xInChunk</span><span class="p">]</span>  <span class="c"># HeightMap indices are backwards</span>
+
+    <span class="c"># --- Chunk manipulation ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.containsChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadedChunkData</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.containsPoint"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.containsPoint">[docs]</a>    <span class="k">def</span> <span class="nf">containsPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="mi">127</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">,</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.createChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.createChunk">[docs]</a>    <span class="k">def</span> <span class="nf">createChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%r</span><span class="s">:Chunk </span><span class="si">%s</span><span class="s"> already present in </span><span class="si">%s</span><span class="s">!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">),</span> <span class="n">dimName</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="p">,</span> <span class="s">&#39;createChunk&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+
+            <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">createChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_storeLoadedChunkData</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.deleteChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.deleteChunk">[docs]</a>    <span class="k">def</span> <span class="nf">deleteChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">deleteChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_allChunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">discard</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+
+    <span class="c"># --- Player and spawn manipulation ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.worldSpawnPosition"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.worldSpawnPosition">[docs]</a>    <span class="k">def</span> <span class="nf">worldSpawnPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the world&#39;s default spawn position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">worldSpawnPosition</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.setWorldSpawnPosition"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.setWorldSpawnPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setWorldSpawnPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the world&#39;s default spawn position.</span>
+
+<span class="sd">        :param pos: (x, y, z) coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">setWorldSpawnPosition</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.listPlayers"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.listPlayers">[docs]</a>    <span class="k">def</span> <span class="nf">listPlayers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">listPlayers</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.getPlayer"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.getPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">getPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">playerUUID</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="n">player</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">playerCache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">playerUUID</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">player</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">player</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">getPlayer</span><span class="p">(</span><span class="n">playerUUID</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">playerCache</span><span class="p">[</span><span class="n">playerUUID</span><span class="p">]</span> <span class="o">=</span> <span class="n">player</span>
+
+        <span class="k">return</span> <span class="n">player</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.createPlayer"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.createPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">createPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">playerName</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">createPlayer</span><span class="p">(</span><span class="n">playerName</span><span class="p">)</span>
+
+    <span class="c"># --- Dimensions ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.listDimensions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.listDimensions">[docs]</a>    <span class="k">def</span> <span class="nf">listDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">listDimensions</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldEditor.getDimension"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditor.getDimension">[docs]</a>    <span class="k">def</span> <span class="nf">getDimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: WorldEditorDimension</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dimName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dim</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">WorldEditorDimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="k">return</span> <span class="n">dim</span>
+</div></div>
+<div class="viewcode-block" id="WorldEditorDimension"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension">[docs]</a><span class="k">class</span> <span class="nc">WorldEditorDimension</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worldEditor</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span> <span class="o">=</span> <span class="n">worldEditor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">worldEditor</span><span class="o">.</span><span class="n">adapter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span> <span class="o">=</span> <span class="n">dimName</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;WorldEditorDimension(dimName=</span><span class="si">%r</span><span class="s">, adapter=</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="p">)</span>
+
+    <span class="c"># --- Bounds ---</span>
+
+    <span class="n">_bounds</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorDimension.bounds"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: BoundingBox</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="p">,</span> <span class="s">&quot;getDimensionBounds&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">getDimensionBounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getWorldBounds</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getWorldBounds"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getWorldBounds">[docs]</a>    <span class="k">def</span> <span class="nf">getWorldBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">chunkPositions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkPositions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">chunkPositions</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">chunkPositions</span><span class="p">)</span>
+        <span class="n">mincx</span> <span class="o">=</span> <span class="p">(</span><span class="n">chunkPositions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">maxcx</span> <span class="o">=</span> <span class="p">(</span><span class="n">chunkPositions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">mincz</span> <span class="o">=</span> <span class="p">(</span><span class="n">chunkPositions</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">maxcz</span> <span class="o">=</span> <span class="p">(</span><span class="n">chunkPositions</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">mincx</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mincz</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="p">((</span><span class="n">maxcx</span> <span class="o">-</span> <span class="n">mincx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">maxHeight</span><span class="p">,</span> <span class="p">(</span><span class="n">maxcz</span> <span class="o">-</span> <span class="n">mincz</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorDimension.size"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">size</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldEditorDimension.blocktypes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.blocktypes">[docs]</a>    <span class="k">def</span> <span class="nf">blocktypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">blocktypes</span>
+
+    <span class="c"># --- Chunks ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.chunkCount"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.chunkCount">[docs]</a>    <span class="k">def</span> <span class="nf">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.chunkPositions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.containsChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getChunk">[docs]</a>    <span class="k">def</span> <span class="nf">getChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type cx: int or dtype</span>
+<span class="sd">        :type cz: int or dtype</span>
+<span class="sd">        :type create: bool</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: WorldEditorChunk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">,</span> <span class="n">create</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getChunks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getChunks">[docs]</a>    <span class="k">def</span> <span class="nf">getChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunkPositions</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :type chunkPositions(): iterator</span>
+<span class="sd">        :rtype: iterator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">chunkPositions</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">chunkPositions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">chunkPositions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.createChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.createChunk">[docs]</a>    <span class="k">def</span> <span class="nf">createChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">createChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.deleteChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.deleteChunk">[docs]</a>    <span class="k">def</span> <span class="nf">deleteChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">deleteChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getRecentDirtyChunks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getRecentDirtyChunks">[docs]</a>    <span class="k">def</span> <span class="nf">getRecentDirtyChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">getRecentDirtyChunks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimName</span><span class="p">)</span>
+
+    <span class="c"># --- Entities and TileEntities ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getEntities"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getEntities">[docs]</a>    <span class="k">def</span> <span class="nf">getEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunks</span><span class="p">(</span><span class="n">selection</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">Entities</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Position</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">matchEntityTags</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">kw</span><span class="p">):</span>
+                        <span class="k">yield</span> <span class="n">ref</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getTileEntities"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getTileEntities">[docs]</a>    <span class="k">def</span> <span class="nf">getTileEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunks</span><span class="p">(</span><span class="n">selection</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">TileEntities</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">Position</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">matchEntityTags</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">kw</span><span class="p">):</span>
+                        <span class="k">yield</span> <span class="n">ref</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.addEntity"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.addEntity">[docs]</a>    <span class="k">def</span> <span class="nf">addEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">Position</span>
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunk_pos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">addEntity</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.addTileEntity"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.addTileEntity">[docs]</a>    <span class="k">def</span> <span class="nf">addTileEntity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">Position</span>
+        <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunk_pos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="p">[</span><span class="n">old</span> <span class="k">for</span> <span class="n">old</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">TileEntities</span>
+                    <span class="k">if</span> <span class="n">old</span><span class="o">.</span><span class="n">Position</span> <span class="o">==</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">:</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">removeTileEntity</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="n">chunk</span><span class="o">.</span><span class="n">addTileEntity</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+    <span class="c"># --- Import/Export ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.copyBlocksIter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.copyBlocksIter">[docs]</a>    <span class="k">def</span> <span class="nf">copyBlocksIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceLevel</span><span class="p">,</span> <span class="n">sourceSelection</span><span class="p">,</span> <span class="n">destinationPoint</span><span class="p">,</span> <span class="n">blocksToCopy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">entities</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">biomes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">copyBlocksIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceLevel</span><span class="p">,</span> <span class="n">sourceSelection</span><span class="p">,</span> <span class="n">destinationPoint</span><span class="p">,</span> <span class="n">blocksToCopy</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span>
+                           <span class="n">biomes</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.copyBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.copyBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">copyBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceLevel</span><span class="p">,</span> <span class="n">sourceSelection</span><span class="p">,</span> <span class="n">destinationPoint</span><span class="p">,</span> <span class="n">blocksToCopy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">entities</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">biomes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copyBlocksIter</span><span class="p">(</span><span class="n">sourceLevel</span><span class="p">,</span> <span class="n">sourceSelection</span><span class="p">,</span> <span class="n">destinationPoint</span><span class="p">,</span> <span class="n">blocksToCopy</span><span class="p">,</span>
+                                           <span class="n">entities</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span> <span class="n">biomes</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.exportSchematicIter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.exportSchematicIter">[docs]</a>    <span class="k">def</span> <span class="nf">exportSchematicIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">):</span>
+        <span class="n">schematic</span> <span class="o">=</span> <span class="n">createSchematic</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">selection</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">blocktypes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">copyBlocksIter</span><span class="p">(</span><span class="n">schematic</span><span class="o">.</span><span class="n">getDimension</span><span class="p">(),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">[</span><span class="n">schematic</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.exportSchematic"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.exportSchematic">[docs]</a>    <span class="k">def</span> <span class="nf">exportSchematic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type selection: mceditlib.box.BoundingBox</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: WorldEditor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exportSchematicIter</span><span class="p">(</span><span class="n">selection</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.importSchematicIter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.importSchematicIter">[docs]</a>    <span class="k">def</span> <span class="nf">importSchematicIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schematic</span><span class="p">,</span> <span class="n">destPoint</span><span class="p">):</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">getDimension</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">copyBlocksIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">dim</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">destPoint</span><span class="p">,</span> <span class="n">biomes</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.importSchematic"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.importSchematic">[docs]</a>    <span class="k">def</span> <span class="nf">importSchematic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schematic</span><span class="p">,</span> <span class="n">destPoint</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">importSchematicIter</span><span class="p">(</span><span class="n">schematic</span><span class="p">,</span> <span class="n">destPoint</span><span class="p">)</span>
+
+    <span class="c"># --- Fill/Replace ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.fillBlocksIter"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.fillBlocksIter">[docs]</a>    <span class="k">def</span> <span class="nf">fillBlocksIter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">blocksToReplace</span><span class="o">=</span><span class="p">(),</span> <span class="n">updateLights</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FillBlocksOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">blocksToReplace</span><span class="p">,</span> <span class="n">updateLights</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.fillBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.fillBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">fillBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">blocksToReplace</span><span class="o">=</span><span class="p">(),</span> <span class="n">updateLights</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fillBlocksIter</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">blocksToReplace</span><span class="p">,</span> <span class="n">updateLights</span><span class="p">))</span>
+
+    <span class="c"># --- Blocks by single coordinate ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getBlock"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getBlock">[docs]</a>    <span class="k">def</span> <span class="nf">getBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="n">ID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBlockID</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBlockData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">[</span><span class="n">ID</span><span class="p">,</span> <span class="n">meta</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getBlockID"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getBlockID">[docs]</a>    <span class="k">def</span> <span class="nf">getBlockID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+            <span class="n">sec</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sec</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">Blocks</span>
+                <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">array</span><span class="p">[</span><span class="n">y</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">default</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.setBlockID"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.setBlockID">[docs]</a>    <span class="k">def</span> <span class="nf">setBlockID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+            <span class="n">sec</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sec</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">Data</span>
+                <span class="k">assert</span> <span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+                <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">array</span><span class="p">[</span><span class="n">y</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getBlockData"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getBlockData">[docs]</a>    <span class="k">def</span> <span class="nf">getBlockData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+            <span class="n">sec</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sec</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">Data</span>
+                <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">array</span><span class="p">[</span><span class="n">y</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">default</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.setBlockData"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.setBlockData">[docs]</a>    <span class="k">def</span> <span class="nf">setBlockData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">cz</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+            <span class="n">sec</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">getSection</span><span class="p">(</span><span class="n">cy</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sec</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">Data</span>
+                <span class="k">assert</span> <span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+                <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">array</span><span class="p">[</span><span class="n">y</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">z</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">x</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># --- Blocks by coordinate arrays ---</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.getBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.getBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">getBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                  <span class="n">return_Blocks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                  <span class="n">return_Data</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">return_BlockLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">return_SkyLight</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">return_Biomes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">getBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                         <span class="n">return_Blocks</span><span class="p">,</span>
+                         <span class="n">return_Data</span><span class="p">,</span>
+                         <span class="n">return_BlockLight</span><span class="p">,</span>
+                         <span class="n">return_SkyLight</span><span class="p">,</span>
+                         <span class="n">return_Biomes</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldEditorDimension.setBlocks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.worldeditor.WorldEditorDimension.setBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">setBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                  <span class="n">Blocks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">Data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">BlockLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">SkyLight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">Biomes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">updateLights</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">setBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span>
+                         <span class="n">Blocks</span><span class="p">,</span>
+                         <span class="n">Data</span><span class="p">,</span>
+                         <span class="n">BlockLight</span><span class="p">,</span>
+                         <span class="n">SkyLight</span><span class="p">,</span>
+                         <span class="n">Biomes</span><span class="p">,</span>
+                         <span class="n">updateLights</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">hasLights</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

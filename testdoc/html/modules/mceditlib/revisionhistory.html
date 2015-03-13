@@ -1,0 +1,818 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.revisionhistory &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.revisionhistory</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    revisionhistory</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="kn">from</span> <span class="nn">mceditlib.anvil.worldfolder</span> <span class="kn">import</span> <span class="n">AnvilWorldFolder</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">ChunkNotPresent</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="c">#</span>
+<span class="c"># RevisionHistory stores the edit history of a WorldFolder using a series of revision objects, each one storing the</span>
+<span class="c"># chunks and files changed or added in that revision along with a list of deleted chunks and files. Only the newest</span>
+<span class="c"># revision in the history may have new changes applied to it. Operations on a RevisionHistory:</span>
+<span class="c">#</span>
+<span class="c">#  createRevision:</span>
+<span class="c"># Creates a new revision at the head of the history. The previous head revision is marked read-only. If an earlier</span>
+<span class="c"># revision is given, removes all revisions after that revision and adds a revision after it as the new head.</span>
+<span class="c">#</span>
+<span class="c">#  closeRevision:</span>
+<span class="c"># Marks the head revision read-only. Client can use this to enforce that a new revision must be created with</span>
+<span class="c"># createRevision before further edits are made.</span>
+<span class="c">#</span>
+<span class="c"># writeAllChanges: Writes all changes since the last call to writeAllChanges, or since the beginning of the history</span>
+<span class="c"># if it hasn&#39;t been called. Rearranges the history to have the base world folder at the head of the history,</span>
+<span class="c"># or at the specified place in the history if a revision index is given. A partial revision holding the chunks and</span>
+<span class="c"># files that were overwritten by writeAllChanges is placed at the base world folder&#39;s previous position in the</span>
+<span class="c"># history to preserve the world folder&#39;s state at that place in the history.</span>
+<span class="c">#</span>
+<span class="c">#  getHead:</span>
+<span class="c"># Gets the newest revision in the history as a RevisionHistoryNode.</span>
+<span class="c">#</span>
+<span class="c">#  getRevision:</span>
+<span class="c"># Gets the revision at the requested index in the history as a RevisionHistoryNode</span>
+<span class="c">#</span>
+<span class="c"># RevisionHistoryNode reflects the state of the base WorldFolder at one place in its history. The node has all of</span>
+<span class="c"># the operations of a WorldFolder, including the chunk operations: listDimensions, containsChunk, chunkPositions,</span>
+<span class="c"># chunkCount, deleteChunk, readChunkBytes, writeChunkBytes; and the file operations: listFolder, containsFile,</span>
+<span class="c"># deleteFile, readFile, writeFile.</span>
+<span class="c">#</span>
+<span class="c"># It also has operations specific to the revision history: getChanges, getRevisionInfo, setRevisionInfo</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c"># -- NOTES --</span>
+<span class="c">#</span>
+<span class="c"># How to preserve undo history after writing changes?</span>
+<span class="c">#</span>
+<span class="c"># Problem: the root folder now reflects all changes and cannot be the root folder any more, and must be</span>
+<span class="c"># moved to the head of the history. All chunks and files in the root folder that are overwritten will be lost</span>
+<span class="c"># from the history completely.</span>
+<span class="c">#</span>
+<span class="c"># Solution: While moving forward in the history, write each revision to the world folder, and save all files/chunks</span>
+<span class="c"># replaced by that revision into a new revision meant to reverse that revision&#39;s changes. The reverse revision</span>
+<span class="c"># will be placed before the written revision, replacing the world folder&#39;s previous place. The world folder will</span>
+<span class="c"># then replace the written revision. The reverse revision must also store delete commands for any files/chunks added</span>
+<span class="c">#  in the written revision. The reverse revision&#39;s previousNode should then point forward in the history,</span>
+<span class="c"># toward the world folder&#39;s new position. In fact, previousNode may not even be needed.</span>
+
+
+<div class="viewcode-block" id="RevisionChanges"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionChanges">[docs]</a><span class="k">class</span> <span class="nc">RevisionChanges</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>  <span class="c"># dimName -&gt; set[(cx, cz)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c"># paths</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;RevisionChanges(chunks=</span><span class="si">%r</span><span class="s">, files=</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UndoFolderExists"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.UndoFolderExists">[docs]</a><span class="k">class</span> <span class="nc">UndoFolderExists</span><span class="p">(</span><span class="ne">IOError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when initializing a RevisionHistory and an existing undo folder is found, but no resume mode is given.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="RevisionHistory"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory">[docs]</a><span class="k">class</span> <span class="nc">RevisionHistory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A history of partial world folders, used to implement disk-backed undo. Each partial folder represents a revision</span>
+<span class="sd">    of the initial folder. Reading a file or chunk from the history will first read from the most recent world</span>
+<span class="sd">    folder. If it is not found there, proceeds down the history until the requested data is found, and returns its</span>
+<span class="sd">    most recent version. Writing a file or chunk will always write to the most recent revision.</span>
+
+<span class="sd">    Chunks are read and written as NBT TAG_Compounds. Files are read and written as bytes.</span>
+
+<span class="sd">    To begin using the RevisionHistory, call getHead() to get the head (latest) revision of the history as a</span>
+<span class="sd">    RevisionHistoryNode. The RevisionHistory is created with the initial world folder as the head node. Call createRevision</span>
+<span class="sd">    to create the first revision.</span>
+
+<span class="sd">    To get a reference to an earlier revision, call getRevision with the index of the requested revision. For now,</span>
+<span class="sd">    calling createRevision on an earlier revision will erase all subsequent revisions. In the future, this may be</span>
+<span class="sd">    changed to implement a tree-shaped undo history.</span>
+
+<span class="sd">    To write all changes from partial folders into the initial world folder, call writeAllChanges.</span>
+
+<span class="sd">    When the RevisionHistory is deleted, all partial folders are removed from disk.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param resume: Whether to resume editing if an undo folder already exists. Pass True to resume editing,</span>
+<span class="sd">        False to delete the old world folder, or None to raise an exception if the folder exists.</span>
+<span class="sd">        :type resume: bool | None</span>
+<span class="sd">        :param filename: Path to the world folder to open</span>
+<span class="sd">        :type filename: str | unicode</span>
+<span class="sd">        :rtype: RevisionHistory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Create undo folder in the folder containing the root folder.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">&quot;##</span><span class="si">%s</span><span class="s">.UNDO##&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">resume</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Cannot resume from existing undo folder (yet)&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">resume</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span> <span class="o">+</span> <span class="s">&quot;__&quot;</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span> <span class="o">+</span> <span class="s">&quot;__&quot;</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">UndoFolderExists</span><span class="p">(</span><span class="s">&quot;Undo folder already exists for </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootFolder</span> <span class="o">=</span> <span class="n">AnvilWorldFolder</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span> <span class="o">=</span> <span class="n">RevisionHistoryNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootFolder</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="o">.</span><span class="n">differences</span> <span class="o">=</span> <span class="n">RevisionChanges</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orphanChainIndex</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IDcounter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;RevisionHistory(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootFolder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="RevisionHistory.close"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close the RevisionHistory and release all resources, including all revisions. Operations on a closed RevisionHistory</span>
+<span class="sd">        are undefined.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Removing undo folder </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="k">def</span> <span class="nf">_createRevisionFolder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ID</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%08d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">IDcounter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IDcounter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">,</span> <span class="n">ID</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AnvilWorldFolder</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RevisionHistory.createRevision"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory.createRevision">[docs]</a>    <span class="k">def</span> <span class="nf">createRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">previousRevision</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new partial folder and appends it to the history. If revisionIndex is given, inserts the revision after</span>
+<span class="sd">        that position and removes all later revisions. Inserting a revision before the position of any presave folders</span>
+<span class="sd">        in the history after calling writeAllChanges will collapse those presave folders into the last presave folder</span>
+<span class="sd">        in the new history.</span>
+
+<span class="sd">        Subsequent writes are directed to this folder. This function must be called once before performing any edits,</span>
+<span class="sd">        otherwise the world is read-only.</span>
+
+<span class="sd">        :type previousRevision: int | RevisionHistoryNode</span>
+<span class="sd">        :return: The newly created revision node.</span>
+<span class="sd">        :rtype: RevisionHistoryNode</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">previousRevision</span><span class="p">,</span> <span class="n">RevisionHistoryNode</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">previousRevision</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHead</span><span class="p">():</span>
+                <span class="n">revisionIndex</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">revisionIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">previousRevision</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">previousRevision</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">revisionIndex</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">revisionIndex</span> <span class="o">=</span> <span class="n">previousRevision</span>
+
+        <span class="k">if</span> <span class="n">revisionIndex</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">revisionIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span> <span class="o">=</span> <span class="n">revisionIndex</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orphanChainIndex</span> <span class="o">=</span> <span class="n">revisionIndex</span>
+
+            <span class="c"># Root folder is about to be orphaned. Revisions from revisionIndex on to the root folder won&#39;t show up</span>
+            <span class="c">#  in the history, but the world folder needs to stay as is. The node at revisionIndex will point</span>
+            <span class="c"># forward to the chain leading to the root folder, and the revision about to be created will point</span>
+            <span class="c"># backward to the node at revisionIndex. When the root folder is saved, it will need to move backwards</span>
+            <span class="c"># along its subchain until it reaches revisionIndex, deleting revisions as it goes instead of</span>
+            <span class="c"># reversing them, then move forward to the new revision.</span>
+            <span class="c"># Root folder won&#39;t be orphaned in more than one position in the history. When it needs to be moved</span>
+            <span class="c"># again because createRevision is called on a previous revision, the intervening revisions are made part</span>
+            <span class="c">#  of the new orphan chain and the newly created revision added as before. When it needs to be moved</span>
+            <span class="c"># because of a call to writeAllChanges, the orphan chain is collapsed onto the root folder before</span>
+            <span class="c"># writing changes as usual.</span>
+
+        <span class="n">newFolder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createRevisionFolder</span><span class="p">()</span>
+
+        <span class="n">previousNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">revisionIndex</span><span class="p">]</span>
+        <span class="n">previousNode</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">newNode</span> <span class="o">=</span> <span class="n">RevisionHistoryNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newFolder</span><span class="p">,</span> <span class="n">previousNode</span><span class="p">)</span>
+        <span class="n">deadNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">revisionIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:</span><span class="n">revisionIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newNode</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">deadNodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">isPresave</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">previousNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">invalid</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="n">newNode</span>
+</div>
+<div class="viewcode-block" id="RevisionHistory.closeRevision"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory.closeRevision">[docs]</a>    <span class="k">def</span> <span class="nf">closeRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getHead</span><span class="p">()</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="RevisionHistory.getHead"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory.getHead">[docs]</a>    <span class="k">def</span> <span class="nf">getHead</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="RevisionHistory.getRevision"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory.getRevision">[docs]</a>    <span class="k">def</span> <span class="nf">getRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="RevisionHistory.getRevisionChanges"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory.getRevisionChanges">[docs]</a>    <span class="k">def</span> <span class="nf">getRevisionChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldNode</span><span class="p">,</span> <span class="n">newNode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return all changes that happened after oldNode up to and including those in newNode.</span>
+
+<span class="sd">        Returns a RevisionChanges object that lists the chunks that changed by dimension name, and the files that</span>
+<span class="sd">        changed. It does not distinguish between files/chunks that are newly created, modified or deleted.</span>
+
+<span class="sd">        :param oldNode: Index of the node to find changes after, or the node itself.</span>
+<span class="sd">        :type oldNode: int | RevisionHistoryNode</span>
+<span class="sd">        :param newNode: Index of the node to find changes up to and including, or the node itself.</span>
+<span class="sd">        :type newNode: int | RevisionHistoryNode</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: RevisionChanges</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">changes</span> <span class="o">=</span> <span class="n">RevisionChanges</span><span class="p">()</span>
+
+        <span class="c"># The initial folder will provide the changes of the node it replaced in the history when writeAllChanges</span>
+        <span class="c"># was called.</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">newNode</span><span class="p">,</span> <span class="n">RevisionHistoryNode</span><span class="p">):</span>
+            <span class="n">newIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">newNode</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newIndex</span> <span class="o">=</span> <span class="n">newNode</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">oldNode</span><span class="p">,</span> <span class="n">RevisionHistoryNode</span><span class="p">):</span>
+            <span class="n">oldIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">oldNode</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">oldIndex</span> <span class="o">=</span> <span class="n">oldNode</span>
+
+        <span class="k">if</span> <span class="n">oldIndex</span> <span class="o">&gt;</span> <span class="n">newIndex</span><span class="p">:</span>
+            <span class="n">oldIndex</span><span class="p">,</span> <span class="n">newIndex</span> <span class="o">=</span> <span class="n">newIndex</span><span class="p">,</span> <span class="n">oldIndex</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">oldIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">newIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">nodeChanges</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">getChanges</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="n">nodeChanges</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">changes</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+            <span class="n">changes</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nodeChanges</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">changes</span>
+</div>
+<div class="viewcode-block" id="RevisionHistory.writeAllChanges"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistory.writeAllChanges">[docs]</a>    <span class="k">def</span> <span class="nf">writeAllChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requestedRevision</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write all changes to the root world folder, preserving undo history. The previous head node is no longer</span>
+<span class="sd">        valid after calling writeAllChanges. Specify a revision to only save changes up to and including that</span>
+<span class="sd">        revision.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># XXXXX wait for async writes to complete here</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">requestedRevision</span><span class="p">,</span> <span class="n">RevisionHistoryNode</span><span class="p">):</span>
+            <span class="n">requestedIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">requestedRevision</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">requestedRevision</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">requestedIndex</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">requestedIndex</span> <span class="o">=</span> <span class="n">requestedRevision</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orphanChainIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Root node is orphaned - collapse orphan chain into it in reverse order</span>
+            <span class="n">orphanNodes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">orphanChainNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">orphanChainIndex</span><span class="p">]</span>
+            <span class="k">while</span> <span class="n">orphanChainNode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+                <span class="n">orphanNodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">orphanChainNode</span><span class="p">)</span>
+                <span class="n">orphanChainNode</span> <span class="o">=</span> <span class="n">orphanChainNode</span><span class="o">.</span><span class="n">parentNode</span>
+
+            <span class="k">for</span> <span class="n">orphanChainNode</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">orphanNodes</span><span class="p">):</span>
+                <span class="n">copyToFolder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootFolder</span><span class="p">,</span> <span class="n">orphanChainNode</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">orphanChainIndex</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orphanChainIndex</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">requestedIndex</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="c"># nothing to do</span>
+        <span class="k">elif</span> <span class="n">requestedIndex</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">requestedIndex</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">requestedIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;writeAllChanges: moving </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;forwards&quot;</span> <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s">&quot;backwards&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">currentIndex</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
+            <span class="c"># Write all changes from each node into the initial folder. Save the previous</span>
+            <span class="c"># chunk and file data from the initial folder into a reverse revision.</span>
+
+            <span class="n">currentNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">currentIndex</span><span class="p">]</span>
+
+            <span class="n">reverseFolder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createRevisionFolder</span><span class="p">()</span>
+            <span class="n">reverseNode</span> <span class="o">=</span> <span class="n">RevisionHistoryNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reverseFolder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">currentIndex</span> <span class="o">-</span> <span class="n">direction</span><span class="p">])</span>
+
+            <span class="n">reverseNode</span><span class="o">.</span><span class="n">differences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="o">.</span><span class="n">differences</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="o">.</span><span class="n">differences</span> <span class="o">=</span> <span class="n">currentNode</span><span class="o">.</span><span class="n">getChanges</span><span class="p">()</span>
+
+            <span class="n">copyToFolder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootFolder</span><span class="p">,</span> <span class="n">currentNode</span><span class="p">,</span> <span class="n">reverseNode</span><span class="p">)</span>
+            <span class="c"># xxx look ahead one or more nodes to skip some copies</span>
+
+            <span class="n">reverseNode</span><span class="o">.</span><span class="n">setRevisionInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="o">.</span><span class="n">getRevisionInfo</span><span class="p">())</span>
+            <span class="n">reverseNode</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="o">.</span><span class="n">setRevisionInfo</span><span class="p">(</span><span class="n">currentNode</span><span class="o">.</span><span class="n">getRevisionInfo</span><span class="p">())</span>
+
+            <span class="c"># Replace the previousNode with the reverse node, and the currentNode with the rootNode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">currentIndex</span> <span class="o">-</span> <span class="n">direction</span><span class="p">]</span> <span class="o">=</span> <span class="n">reverseNode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">currentIndex</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rootNodeIndex</span> <span class="o">=</span> <span class="n">currentIndex</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Root node now at index </span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">currentIndex</span><span class="p">)</span>
+
+            <span class="k">assert</span> <span class="n">currentNode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="p">,</span> <span class="s">&quot;Root node appears twice in nodes!&quot;</span>
+            <span class="n">currentNode</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">currentNode</span><span class="o">.</span><span class="n">invalid</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">currentNode</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="copyToFolder"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.copyToFolder">[docs]</a><span class="k">def</span> <span class="nf">copyToFolder</span><span class="p">(</span><span class="n">destFolder</span><span class="p">,</span> <span class="n">sourceNode</span><span class="p">,</span> <span class="n">presaveNode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">presaveNode</span><span class="p">:</span>
+        <span class="n">presaveFolder</span> <span class="o">=</span> <span class="n">presaveNode</span><span class="o">.</span><span class="n">worldFolder</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">presaveNode</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">sourceFolder</span> <span class="o">=</span> <span class="n">sourceNode</span><span class="o">.</span><span class="n">worldFolder</span>
+
+    <span class="c"># Remove deleted chunks</span>
+    <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span> <span class="ow">in</span> <span class="n">sourceNode</span><span class="o">.</span><span class="n">deadChunks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">presaveFolder</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">presaveFolder</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+                <span class="n">presaveFolder</span><span class="o">.</span><span class="n">writeChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">readChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+            <span class="n">destFolder</span><span class="o">.</span><span class="n">deleteChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+
+    <span class="c"># Write new and modified chunks</span>
+    <span class="k">for</span> <span class="n">dimName</span> <span class="ow">in</span> <span class="n">sourceFolder</span><span class="o">.</span><span class="n">listDimensions</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">sourceFolder</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">(</span><span class="n">dimName</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">presaveFolder</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">presaveFolder</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+                    <span class="n">presaveFolder</span><span class="o">.</span><span class="n">writeChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">readChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c"># new chunk</span>
+                    <span class="n">presaveNode</span><span class="o">.</span><span class="n">deleteChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+            <span class="n">destFolder</span><span class="o">.</span><span class="n">writeChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">sourceFolder</span><span class="o">.</span><span class="n">readChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+
+    <span class="c"># Remove deleted files</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sourceNode</span><span class="o">.</span><span class="n">deadFiles</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">presaveFolder</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">presaveFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">presaveFolder</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="n">destFolder</span><span class="o">.</span><span class="n">deleteFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c"># Write new and modified files</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sourceFolder</span><span class="o">.</span><span class="n">listAllFiles</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">presaveFolder</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">presaveFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">presaveFolder</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">destFolder</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c"># new file</span>
+                <span class="n">presaveNode</span><span class="o">.</span><span class="n">deleteFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">destFolder</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sourceFolder</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode">[docs]</a><span class="k">class</span> <span class="nc">RevisionHistoryNode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">worldFolder</span><span class="p">,</span> <span class="n">parentNode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param history:</span>
+<span class="sd">        :type history: RevisionHistory</span>
+<span class="sd">        :param worldFolder:</span>
+<span class="sd">        :type worldFolder: AnvilWorldFolder</span>
+<span class="sd">        :param parentNode:</span>
+<span class="sd">        :type parentNode: RevisionHistoryNode | None</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span> <span class="o">=</span> <span class="n">worldFolder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentNode</span> <span class="o">=</span> <span class="n">parentNode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deadChunks</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deadFiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isPresave</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">differences</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;RevisionHistoryNode(readonly=</span><span class="si">%s</span><span class="s">, isPresave=</span><span class="si">%s</span><span class="s">, worldFolder=</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPresave</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="p">))</span>
+
+<div class="viewcode-block" id="RevisionHistoryNode.getChanges"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.getChanges">[docs]</a>    <span class="k">def</span> <span class="nf">getChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">differences</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">differences</span>
+
+        <span class="n">changes</span> <span class="o">=</span> <span class="n">RevisionChanges</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">dimName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">listDimensions</span><span class="p">():</span>
+            <span class="n">changes</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">(</span><span class="n">dimName</span><span class="p">))</span>
+        <span class="n">changes</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">listAllFiles</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deadChunks</span><span class="p">:</span>
+            <span class="n">changes</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">dimName</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+        <span class="n">changes</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deadFiles</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">changes</span>
+
+    <span class="c"># --- Chunks ---</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.listDimensions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.listDimensions">[docs]</a>    <span class="k">def</span> <span class="nf">listDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List the names of all dimensions in this world.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: Iterator of [str]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">dims</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">dims</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">listDimensions</span><span class="p">())</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.containsChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.containsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">containsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return whether the given chunk is present in the given dimension</span>
+
+<span class="sd">        :type cx: int</span>
+<span class="sd">        :type cz: int</span>
+<span class="sd">        :type dimName: str</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">deadChunks</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.chunkPositions"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.chunkPositions">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">(</span><span class="n">dimName</span><span class="p">))</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+
+        <span class="k">return</span> <span class="n">pos</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.chunkCount"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.chunkCount">[docs]</a>    <span class="k">def</span> <span class="nf">chunkCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">chunkCount</span><span class="p">(</span><span class="n">dimName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+        <span class="k">return</span> <span class="n">count</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.chunkPositionsThisRevision"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.chunkPositionsThisRevision">[docs]</a>    <span class="k">def</span> <span class="nf">chunkPositionsThisRevision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">chunkPositions</span><span class="p">(</span><span class="n">dimName</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_deadChunksFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="s">&quot;##MCEDIT.DEAD.CHUNKS##&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RevisionHistoryNode.deleteChunk"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.deleteChunk">[docs]</a>    <span class="k">def</span> <span class="nf">deleteChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;Storage node is read-only!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">deleteChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deadChunksFile</span><span class="p">(),</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">, </span><span class="si">%d</span><span class="s">, </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deadChunks</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.loadDeletedChunks"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.loadDeletedChunks">[docs]</a>    <span class="k">def</span> <span class="nf">loadDeletedChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A list of chunks deleted in this revision that MAY be present in previous revisions</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deadChunksFile</span><span class="p">())</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_coords</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;, &quot;</span><span class="p">)</span>
+                <span class="k">yield</span> <span class="nb">int</span><span class="p">(</span><span class="n">cx</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">cz</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_coords</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.readChunkBytes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.readChunkBytes">[docs]</a>    <span class="k">def</span> <span class="nf">readChunkBytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="c"># Ask RevisionHistory for most recent node containing this chunk?</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">readChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">data</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+
+        <span class="k">raise</span> <span class="n">ChunkNotPresent</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.writeChunkBytes"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.writeChunkBytes">[docs]</a>    <span class="k">def</span> <span class="nf">writeChunkBytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;Storage node is read-only!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">writeChunkBytes</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">dimName</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="c"># --- Regular files ---</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.containsFile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.containsFile">[docs]</a>    <span class="k">def</span> <span class="nf">containsFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">deadFiles</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="k">def</span> <span class="nf">_deadFilesFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">getFilePath</span><span class="p">(</span><span class="s">&quot;##MCEDIT.DEAD.FILES##&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RevisionHistoryNode.deleteFile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.deleteFile">[docs]</a>    <span class="k">def</span> <span class="nf">deleteFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;Storage node is read-only!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">deleteFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deadFilesFile</span><span class="p">(),</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deadFiles</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.loadDeletedFiles"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.loadDeletedFiles">[docs]</a>    <span class="k">def</span> <span class="nf">loadDeletedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A list of files deleted in this revision that MAY be present in previous revisions</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deadFilesFile</span><span class="p">())</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.readFile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.readFile">[docs]</a>    <span class="k">def</span> <span class="nf">readFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the specified file from the most recent revision containing that file.</span>
+<span class="sd">        :param path:</span>
+<span class="sd">        :type path:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Ask RevisionHistory for most recent node containing this file?</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">data</span>
+                <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;File not found&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.writeFile"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.writeFile">[docs]</a>    <span class="k">def</span> <span class="nf">writeFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;Storage node is read-only!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.listFolder"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.listFolder">[docs]</a>    <span class="k">def</span> <span class="nf">listFolder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List the contents of the given folder, reading all previous revisions. Ignores the REVINFO file.</span>
+
+<span class="sd">        rev1:</span>
+<span class="sd">          level.dat</span>
+<span class="sd">          some.file</span>
+
+<span class="sd">        rev2</span>
+<span class="sd">          level.dat_old</span>
+
+<span class="sd">        rev3</span>
+<span class="sd">          another.file</span>
+<span class="sd">          -some.file</span>
+
+<span class="sd">        rev4</span>
+<span class="sd">          -another.file</span>
+<span class="sd">          some.file</span>
+
+<span class="sd">        @4 +some.file -another_file</span>
+<span class="sd">          newFiles some.file</span>
+<span class="sd">          files some.file</span>
+<span class="sd">          deadFiles anotherFile</span>
+<span class="sd">        @3 -some.file +another.file</span>
+<span class="sd">          newFiles</span>
+<span class="sd">          files some.file</span>
+<span class="sd">          deadFiles anotherFile someFile</span>
+<span class="sd">        @2 +level.dat_old</span>
+<span class="sd">          newFiles level.dat_old</span>
+<span class="sd">          files some.file level.dat_old</span>
+<span class="sd">          deadFiles anotherFile someFile</span>
+<span class="sd">        @1 +level.dat +some.file</span>
+<span class="sd">          newFiles level.dat</span>
+<span class="sd">          files level.dat level.dat_old some.file</span>
+<span class="sd">          deadFiles anotherFile someFile</span>
+
+<span class="sd">        expected:</span>
+<span class="sd">          level.dat</span>
+<span class="sd">          level.dat_old</span>
+<span class="sd">          some.file</span>
+
+<span class="sd">        :param path:</span>
+<span class="sd">        :type path:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">deadFiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">newFiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">listFolder</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="n">newFiles</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">REVINFO_FILENAME</span><span class="p">)</span>
+            <span class="n">newFiles</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span><span class="n">deadFiles</span><span class="p">)</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">newFiles</span><span class="p">)</span>
+            <span class="n">deadFiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">deadFiles</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parentNode</span>
+
+        <span class="k">return</span> <span class="n">files</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">deadFiles</span><span class="p">)</span>
+</div>
+    <span class="n">REVINFO_FILENAME</span> <span class="o">=</span> <span class="s">&quot;##MCEDIT.REVINFO##&quot;</span>
+
+<div class="viewcode-block" id="RevisionHistoryNode.getRevisionInfo"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.getRevisionInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getRevisionInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read revision info from a JSON-formatted file for the client&#39;s internal use.</span>
+<span class="sd">        Returns None if no revision info is assigned.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: list | dict | str | unicode | int | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">REVINFO_FILENAME</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">containsFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">REVINFO_FILENAME</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">REVINFO_FILENAME</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="RevisionHistoryNode.setRevisionInfo"><a class="viewcode-back" href="../../mceditlib.html#mceditlib.revisionhistory.RevisionHistoryNode.setRevisionInfo">[docs]</a>    <span class="k">def</span> <span class="nf">setRevisionInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write revision info to a JSON-formatted file for the client&#39;s internal use</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Accessing invalid node: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+            <span class="c"># Write revision info to extra file in undo folder</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">tempFolder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">REVINFO_FILENAME</span><span class="p">),</span> <span class="s">&quot;wb&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&quot;Revision is read-only. Cannot set revision info.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worldFolder</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">REVINFO_FILENAME</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">info</span><span class="p">))</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering.chunkloader &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.rendering.chunkloader</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ${NAME}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">profiler</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.infopanel</span> <span class="kn">import</span> <span class="n">InfoPanel</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">LevelFormatError</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ChunkLoaderInfo"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoaderInfo">[docs]</a><span class="k">class</span> <span class="nc">ChunkLoaderInfo</span><span class="p">(</span><span class="n">InfoPanel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">InfoPanel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                           <span class="p">[</span><span class="s">&#39;cps&#39;</span><span class="p">,</span> <span class="s">&#39;client&#39;</span><span class="p">],</span>
+                           <span class="p">[</span><span class="s">&#39;chunkCompleted&#39;</span><span class="p">],</span>
+                           <span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ChunkLoaderInfo.client"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoaderInfo.client">[docs]</a>    <span class="k">def</span> <span class="nf">client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">clients</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&quot;Client: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</div></div>
+<div class="viewcode-block" id="IChunkLoaderClient"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.IChunkLoaderClient">[docs]</a><span class="k">class</span> <span class="nc">IChunkLoaderClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="IChunkLoaderClient.requestChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.IChunkLoaderClient.requestChunk">[docs]</a>    <span class="k">def</span> <span class="nf">requestChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the coordinates of the chunk requested by the client. Each</span>
+<span class="sd">        call may return a different set of coordinates. Return None to request no chunks.</span>
+<span class="sd">        :rtype: (cx, cz)</span>
+<span class="sd">        :return: Chunk coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="IChunkLoaderClient.wantsChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.IChunkLoaderClient.wantsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">wantsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optional.</span>
+
+<span class="sd">        Return False to skip loading the chunk at the given position.</span>
+<span class="sd">        If all clients return False, the chunk is not loaded.</span>
+
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IChunkLoaderClient.recieveChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.IChunkLoaderClient.recieveChunk">[docs]</a>    <span class="k">def</span> <span class="nf">recieveChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process the chunk. May be implemented as a generator function or a function that returns an iterable - if</span>
+<span class="sd">        `recieve chunk` returns an iterable, it will be exhausted</span>
+
+<span class="sd">        :param chunk: returned by level.getChunk()</span>
+<span class="sd">        :return: See description</span>
+<span class="sd">        :rtype: None or iterator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IChunkLoaderClient.chunkNotLoaded"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.IChunkLoaderClient.chunkNotLoaded">[docs]</a>    <span class="k">def</span> <span class="nf">chunkNotLoaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">),</span> <span class="n">exc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Notifies the client that a chunk failed to load with an exception.</span>
+<span class="sd">        :param (cx, cz): chunk position</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+</div></div>
+<div class="viewcode-block" id="ChunkLoader"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader">[docs]</a><span class="k">class</span> <span class="nc">ChunkLoader</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="n">chunkCompleted</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
+    <span class="n">allChunksDone</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A ChunkLoader manages a list of clients who want to access chunks from `dimension`.</span>
+<span class="sd">        Each client may request a chunk to load, receive chunks as they are loaded,</span>
+<span class="sd">         be notified of chunks loaded by any client&#39;s request, and be notified when</span>
+<span class="sd">         a chunk is modified. See the IChunkLoaderClient class for details.</span>
+
+<span class="sd">        To use a ChunkLoader, create a ChunkLoader instance, add one or more IChunkLoaderClient-compatible</span>
+<span class="sd">        objects using `addClient`, and then repeatedly call `next` (or simply iterate the ChunkLoader)</span>
+<span class="sd">        to load and process chunks. `StopIteration` will be raised when all clients return None when</span>
+<span class="sd">        requestChunk is called.</span>
+
+<span class="sd">        :param dimension: WorldEditorDimension</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkWorker</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkSamples</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSamples</span><span class="o">.</span><span class="n">maxlen</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkSamples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;ChunkLoader created for </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ChunkLoader.cps"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader.cps">[docs]</a>    <span class="k">def</span> <span class="nf">cps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">chunkSamples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkSamples</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">chunkSamples</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkSamples</span><span class="p">):</span>
+            <span class="n">chunkTime</span> <span class="o">=</span> <span class="n">duration</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkSamples</span><span class="p">)</span>
+            <span class="n">cps</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">chunkTime</span>
+            <span class="k">return</span> <span class="n">cps</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+</div>
+<div class="viewcode-block" id="ChunkLoader.addClient"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader.addClient">[docs]</a>    <span class="k">def</span> <span class="nf">addClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">index</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :type client: IChunkLoaderClient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Added: client </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span>  <span class="n">client</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ChunkLoader.removeClient"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader.removeClient">[docs]</a>    <span class="k">def</span> <span class="nf">removeClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :type client: IChunkLoaderClient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Removed: client </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span>  <span class="n">client</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="ChunkLoader.removeAllClients"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader.removeAllClients">[docs]</a>    <span class="k">def</span> <span class="nf">removeAllClients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="ChunkLoader.next"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkWorker</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkWorker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadChunks</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkWorker</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkWorker</span> <span class="o">=</span> <span class="bp">None</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_loadChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generator function, returns an iterator. On each iteration, requests a chunk position from a client, then loads</span>
+<span class="sd">        that chunk and delivers it to each client. Returns (raises StopIteration) when the client list is empty or when</span>
+<span class="sd">        no client requests a chunk.</span>
+
+<span class="sd">        Used to implement ChunkLoader.next</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Starting chunk loader&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">):</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;ChunkLoader: No clients!&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">invalidChunks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">getRecentDirtyChunks</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">invalidChunks</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+                    <span class="n">client</span><span class="o">.</span><span class="n">chunkInvalid</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">requestChunk</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Client </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadChunk</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+                        <span class="k">yield</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Client </span><span class="si">%s</span><span class="s">: No requests&quot;</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;No requests.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">allChunksDone</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+                <span class="k">return</span>
+            <span class="k">yield</span>
+
+    <span class="k">def</span> <span class="nf">_loadChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cPos</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">containsChunk</span><span class="p">(</span><span class="o">*</span><span class="n">cPos</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Chunk </span><span class="si">%s</span><span class="s"> is missing!&quot;</span><span class="p">,</span> <span class="n">cPos</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">client</span><span class="o">.</span><span class="n">wantsChunk</span><span class="p">(</span><span class="n">cPos</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">]):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Chunk </span><span class="si">%s</span><span class="s"> is unwanted.&quot;</span><span class="p">,</span> <span class="n">cPos</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">chunkStartTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">profiler</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s">&quot;getChunk&quot;</span><span class="p">):</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="o">*</span><span class="n">cPos</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">EnvironmentError</span><span class="p">,</span> <span class="n">LevelFormatError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c">#log.exception(e)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Chunk </span><span class="si">%s</span><span class="s"> had an error: </span><span class="si">%r</span><span class="s">!&quot;</span><span class="p">,</span> <span class="n">cPos</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s">&#39;chunkNotLoaded&#39;</span><span class="p">):</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">chunkNotLoaded</span><span class="p">(</span><span class="n">cPos</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Chunk </span><span class="si">%s</span><span class="s"> -&gt; </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">cPos</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">iterator</span> <span class="o">=</span> <span class="n">profiler</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">recieveChunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">),</span> <span class="s">&quot;Client </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">iterator</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+                        <span class="k">yield</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkSamples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">chunkStartTime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkCompleted</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ChunkLoader.discardChunks"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader.discardChunks">[docs]</a>    <span class="k">def</span> <span class="nf">discardChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discardChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ChunkLoader.discardChunk"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.chunkloader.ChunkLoader.discardChunk">[docs]</a>    <span class="k">def</span> <span class="nf">discardChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">wm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+            <span class="n">wm</span><span class="o">.</span><span class="n">discardChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

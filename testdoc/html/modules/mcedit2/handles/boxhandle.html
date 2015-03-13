@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.handles.boxhandle &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.handles.boxhandle</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    boxhandle</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">scenegraph</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.selection</span> <span class="kn">import</span> <span class="n">SelectionBoxNode</span><span class="p">,</span> <span class="n">SelectionFaceNode</span><span class="p">,</span> <span class="n">boxFaceUnderCursor</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">faces</span>
+<span class="kn">from</span> <span class="nn">mceditlib.selection</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BoxHandle"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle">[docs]</a><span class="k">class</span> <span class="nc">BoxHandle</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="n">dragResizeFace</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">dragResizeDimension</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">dragResizePosition</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">dragStartPoint</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">dragStartFace</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">oldBounds</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">hiliteFace</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A drawable, resizable box that can respond to mouse events. Emits boundsChanged whenever its bounding box</span>
+<span class="sd">        changes, and emits boundsChangedDone when the mouse button is released.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BoxHandle</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boxNode</span> <span class="o">=</span> <span class="n">SelectionBoxNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boxNode</span><span class="o">.</span><span class="n">filled</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span> <span class="o">=</span> <span class="n">SelectionFaceNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">boxNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="p">)</span>
+
+    <span class="n">boundsChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">)</span>
+    <span class="n">boundsChangedDone</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxNode</span><span class="o">.</span><span class="n">selectionBox</span>
+
+    <span class="nd">@bounds.setter</span>
+<div class="viewcode-block" id="BoxHandle.bounds"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">box</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxNode</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boxNode</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">box</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">box</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boundsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoxHandle.dragResizePoint"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle.dragResizePoint">[docs]</a>    <span class="k">def</span> <span class="nf">dragResizePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ray</span><span class="p">):</span>
+        <span class="c"># returns a point representing the intersection between the mouse ray</span>
+        <span class="c"># and an imaginary plane perpendicular to the dragged face</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type ray: Ray</span>
+<span class="sd">        :rtype: Vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nearPoint</span><span class="p">,</span> <span class="n">normal</span> <span class="o">=</span> <span class="n">ray</span>
+
+        <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeDimension</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragResizePosition</span> <span class="o">-</span> <span class="n">nearPoint</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">/</span> <span class="p">(</span><span class="n">normal</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="ow">or</span> <span class="mf">0.0001</span><span class="p">)</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">normal</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">+</span> <span class="n">nearPoint</span>
+        <span class="k">return</span> <span class="n">point</span>
+</div>
+<div class="viewcode-block" id="BoxHandle.boxFromDragResize"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle.boxFromDragResize">[docs]</a>    <span class="k">def</span> <span class="nf">boxFromDragResize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">,</span> <span class="n">ray</span><span class="p">):</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragResizePoint</span><span class="p">(</span><span class="n">ray</span><span class="p">)</span>
+
+        <span class="n">side</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeFace</span> <span class="o">&amp;</span> <span class="mi">1</span>
+        <span class="n">dragdim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeFace</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+
+
+        <span class="n">o</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">origin</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">side</span><span class="p">:</span>
+            <span class="n">o</span><span class="p">[</span><span class="n">dragdim</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span><span class="p">[</span><span class="n">dragdim</span><span class="p">]</span>
+        <span class="n">s</span><span class="p">[</span><span class="n">dragdim</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">otherSide</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+        <span class="n">o</span><span class="p">[</span><span class="n">dragdim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="n">dragdim</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span>
+        <span class="n">thisSide</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">thisSide</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">otherSide</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoxHandle.boxFromDragSelect"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle.boxFromDragSelect">[docs]</a>    <span class="k">def</span> <span class="nf">boxFromDragSelect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a flat selection from dragging the mouse outside the selection.</span>
+
+<span class="sd">        :type ray: mcedit2.util.geometry.Ray</span>
+<span class="sd">        :rtype: BoundingBox</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span>
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartFace</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">face</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+        <span class="n">size</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">face</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">s</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">+</span> <span class="n">s</span>
+
+        <span class="n">startBox</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">endPoint</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">intersectPlane</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">point</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+        <span class="n">endBox</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">endPoint</span><span class="o">.</span><span class="n">intfloor</span><span class="p">(),</span> <span class="n">size</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">startBox</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">endBox</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoxHandle.mousePress"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle.mousePress">[docs]</a>    <span class="k">def</span> <span class="nf">mousePress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+        <span class="c"># Find side of existing selection to drag</span>
+        <span class="c"># xxxx can&#39;t do this with disjoint selections?</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">point</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">boxFaceUnderCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">face</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Beginning drag resize&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeFace</span> <span class="o">=</span> <span class="n">face</span>
+                <span class="c"># Choose a dimension perpendicular to the dragged face</span>
+                <span class="c"># Try not to pick a dimension close to edge-on with the view vector</span>
+                <span class="n">dim</span> <span class="o">=</span> <span class="p">((</span><span class="n">face</span><span class="o">.</span><span class="n">dimension</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">)</span>
+                <span class="n">vector</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">cameraVector</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">vector</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="n">dim</span> <span class="o">=</span> <span class="p">((</span><span class="n">dim</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeDimension</span> <span class="o">=</span> <span class="n">dim</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dragResizePosition</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dragResizeDimension</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">oldBounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Didn&#39;t hit - start new selection</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Get ready to start new selection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragStartFace</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">FaceYIncreasing</span>  <span class="c"># event.blockFace</span>
+            <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="BoxHandle.mouseMove"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle.mouseMove">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span><span class="p">:</span>
+            <span class="c"># Show new box being dragged out</span>
+            <span class="n">newBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxFromDragSelect</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">newBox</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeFace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># Hilite face being dragged</span>
+                <span class="n">newBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxFromDragResize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldBounds</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">newBox</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">True</span>
+
+                <span class="c"># Update selection box to resized size in progress</span>
+                <span class="n">newBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxFromDragResize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldBounds</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">newBox</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hiliteFace</span><span class="p">:</span>
+                <span class="c"># Hilite face cursor is over</span>
+                <span class="n">point</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">boxFaceUnderCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">face</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">face</span> <span class="o">=</span> <span class="n">face</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="BoxHandle.mouseRelease"><a class="viewcode-back" href="../../../mcedit2.handles.html#mcedit2.handles.boxhandle.BoxHandle.mouseRelease">[docs]</a>    <span class="k">def</span> <span class="nf">mouseRelease</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span><span class="p">:</span>
+            <span class="n">newBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxFromDragSelect</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragStartPoint</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">newBox</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boundsChangedDone</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">newBox</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeFace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxFromDragResize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldBounds</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ray</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">oldBounds</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragResizeFace</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">faceDragNode</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boundsChangedDone</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.worldview.minimap &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.worldview.minimap</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    minimap.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">OpenGL</span> <span class="kn">import</span> <span class="n">GL</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">compass</span><span class="p">,</span> <span class="n">scenegraph</span><span class="p">,</span> <span class="n">rendergraph</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">raycast</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.glutils</span> <span class="kn">import</span> <span class="n">gl</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.raycast</span> <span class="kn">import</span> <span class="n">rayCastInBounds</span>
+<span class="kn">from</span> <span class="nn">mcedit2.worldview.worldview</span> <span class="kn">import</span> <span class="n">WorldView</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">Ray</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ViewCornersRenderNode"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.ViewCornersRenderNode">[docs]</a><span class="k">class</span> <span class="nc">ViewCornersRenderNode</span><span class="p">(</span><span class="n">rendergraph</span><span class="o">.</span><span class="n">RenderNode</span><span class="p">):</span>
+    <span class="c"># bottom left, near</span>
+    <span class="c"># bottom left, far</span>
+    <span class="c"># top left, near</span>
+    <span class="c"># top left, far</span>
+    <span class="c"># bottom right, near</span>
+    <span class="c"># bottom right, far</span>
+    <span class="c"># top right, near</span>
+    <span class="c"># top right, far</span>
+
+<div class="viewcode-block" id="ViewCornersRenderNode.drawSelf"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.ViewCornersRenderNode.drawSelf">[docs]</a>    <span class="k">def</span> <span class="nf">drawSelf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">corners</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">dimension</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">corners</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">corners</span>
+        <span class="n">dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sceneNode</span><span class="o">.</span><span class="n">dimension</span>
+        <span class="n">corners</span> <span class="o">=</span> <span class="n">corners</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">corners</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">corners</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="n">corners</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">rayCastCorner</span><span class="p">(</span><span class="n">near</span><span class="p">,</span> <span class="n">far</span><span class="p">):</span>
+            <span class="n">ray</span> <span class="o">=</span> <span class="n">Ray</span><span class="o">.</span><span class="n">fromPoints</span><span class="p">(</span><span class="n">near</span><span class="p">,</span> <span class="n">far</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">ray</span><span class="o">.</span><span class="n">vector</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">far</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c">#point = rayCastInBounds(ray, dimension, 50)[0]</span>
+                <span class="c">#return point or far</span>
+                <span class="k">return</span> <span class="n">near</span> <span class="o">+</span> <span class="p">(</span><span class="n">near</span> <span class="o">-</span> <span class="n">far</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>
+            <span class="k">except</span> <span class="n">raycast</span><span class="o">.</span><span class="n">MaxDistanceError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">atHeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Average nearby height values or something to suppress jitter??</span>
+        <span class="n">corners</span> <span class="o">=</span> <span class="p">[</span><span class="n">rayCastCorner</span><span class="p">(</span><span class="n">near</span><span class="p">,</span> <span class="n">far</span><span class="p">)</span> <span class="k">for</span> <span class="n">near</span><span class="p">,</span> <span class="n">far</span> <span class="ow">in</span> <span class="n">corners</span><span class="p">]</span>
+        <span class="n">corners</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">corners</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">with</span> <span class="n">gl</span><span class="o">.</span><span class="n">glPushAttrib</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_BUFFER_BIT</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_COLOR_BUFFER_BIT</span><span class="p">):</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glDepthMask</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_BLEND</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glVertexPointer</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_FLOAT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+            <span class="n">GL</span><span class="o">.</span><span class="n">glLineWidth</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+
+            <span class="n">GL</span><span class="o">.</span><span class="n">glColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glDisable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_TEST</span><span class="p">)</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glDrawArrays</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_LINE_STRIP</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="ViewCornersNode"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.ViewCornersNode">[docs]</a><span class="k">class</span> <span class="nc">ViewCornersNode</span><span class="p">(</span><span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="n">RenderNodeClass</span> <span class="o">=</span> <span class="n">ViewCornersRenderNode</span>
+
+    <span class="n">_corners</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span>
+
+    <span class="nd">@corners.setter</span>
+<div class="viewcode-block" id="ViewCornersNode.corners"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.ViewCornersNode.corners">[docs]</a>    <span class="k">def</span> <span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="n">_dimension</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimension</span>
+
+    <span class="nd">@dimension.setter</span>
+<div class="viewcode-block" id="ViewCornersNode.dimension"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.ViewCornersNode.dimension">[docs]</a>    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dimension</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+</div></div>
+<div class="viewcode-block" id="MinimapWorldView"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView">[docs]</a><span class="k">class</span> <span class="nc">MinimapWorldView</span><span class="p">(</span><span class="n">WorldView</span><span class="p">):</span>
+    <span class="n">minScale</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">WorldView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">minlod</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewCornersNode</span> <span class="o">=</span> <span class="n">ViewCornersNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewCornersNode</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewCornersNode</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MinimapWorldView.createCompass"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.createCompass">[docs]</a>    <span class="k">def</span> <span class="nf">createCompass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">compassNode</span> <span class="o">=</span> <span class="n">compass</span><span class="o">.</span><span class="n">CompassNode</span><span class="p">(</span><span class="n">small</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">compassNode</span><span class="o">.</span><span class="n">yawPitch</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">compassNode</span>
+</div>
+<div class="viewcode-block" id="MinimapWorldView.updateMatrices"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.updateMatrices">[docs]</a>    <span class="k">def</span> <span class="nf">updateMatrices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">w</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="n">h</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+
+        <span class="n">projection</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMatrix4x4</span><span class="p">()</span>
+        <span class="n">projection</span><span class="o">.</span><span class="n">ortho</span><span class="p">(</span><span class="o">-</span><span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span>
+
+        <span class="n">modelview</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMatrix4x4</span><span class="p">()</span>
+        <span class="n">modelview</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mf">90.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">modelview</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">modelview</span> <span class="o">=</span> <span class="n">modelview</span>
+</div>
+<div class="viewcode-block" id="MinimapWorldView.currentViewMatrixChanged"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.currentViewMatrixChanged">[docs]</a>    <span class="k">def</span> <span class="nf">currentViewMatrixChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentView</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewCornersNode</span><span class="o">.</span><span class="n">corners</span> <span class="o">=</span> <span class="n">currentView</span><span class="o">.</span><span class="n">getViewBounds</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MinimapWorldView.zoom"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.zoom">[docs]</a>    <span class="k">def</span> <span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">)):</span>
+
+        <span class="c"># Get mouse position in world coordinates</span>
+        <span class="n">worldPos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unprojectAtHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scale</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">scale</span>
+
+            <span class="c"># Get the new position under the mouse, find its distance from the old position,</span>
+            <span class="c"># and shift the centerPoint by that amount.</span>
+
+            <span class="n">newWorldPos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unprojectAtHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">newWorldPos</span> <span class="o">-</span> <span class="n">worldPos</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">-</span> <span class="n">delta</span>
+</div>
+<div class="viewcode-block" id="MinimapWorldView.sizeHint"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">192</span><span class="p">,</span> <span class="mi">192</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MinimapWorldView.mousePressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.mousePressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MinimapWorldView.mouseMoveEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.mouseMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MinimapWorldView.mouseReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.minimap.MinimapWorldView.mouseReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

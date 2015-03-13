@@ -1,0 +1,798 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.worldview.worldview &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.worldview.worldview</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    worldview.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">from</span> <span class="nn">OpenGL</span> <span class="kn">import</span> <span class="n">GL</span>
+<span class="kn">from</span> <span class="nn">PySide</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PySide.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">PySide.QtOpenGL</span> <span class="kn">import</span> <span class="n">QGLWidget</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">worldscene</span><span class="p">,</span> <span class="n">loadablechunks</span><span class="p">,</span> <span class="n">sky</span><span class="p">,</span> <span class="n">compass</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.chunknode</span> <span class="kn">import</span> <span class="n">ChunkNode</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.frustum</span> <span class="kn">import</span> <span class="n">Frustum</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.geometrycache</span> <span class="kn">import</span> <span class="n">GeometryCache</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.textureatlas</span> <span class="kn">import</span> <span class="n">TextureAtlas</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.vertexarraybuffer</span> <span class="kn">import</span> <span class="n">VertexArrayBuffer</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering</span> <span class="kn">import</span> <span class="n">scenegraph</span><span class="p">,</span> <span class="n">rendergraph</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">profiler</span><span class="p">,</span> <span class="n">raycast</span>
+<span class="kn">from</span> <span class="nn">mcedit2.widgets.infopanel</span> <span class="kn">import</span> <span class="n">InfoPanel</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">faces</span><span class="p">,</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">mceditlib.geometry</span> <span class="kn">import</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">Ray</span>
+<span class="kn">from</span> <span class="nn">mceditlib.exceptions</span> <span class="kn">import</span> <span class="n">LevelFormatError</span><span class="p">,</span> <span class="n">ChunkNotPresent</span>
+<span class="kn">from</span> <span class="nn">mceditlib.util</span> <span class="kn">import</span> <span class="n">displayName</span>
+
+
+<div class="viewcode-block" id="worldMeshVertexSize"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.worldMeshVertexSize">[docs]</a><span class="k">def</span> <span class="nf">worldMeshVertexSize</span><span class="p">(</span><span class="n">worldMesh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :type worldMesh: WorldScene</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">bufferSizes</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">cm</span> <span class="ow">in</span> <span class="n">worldMesh</span><span class="o">.</span><span class="n">chunkGroupNode</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="n">ChunkNode</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">bm</span> <span class="ow">in</span> <span class="n">cm</span><span class="o">.</span><span class="n">getChunkVertexNodes</span><span class="p">():</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bm</span><span class="p">,</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">VertexNode</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">va</span> <span class="ow">in</span> <span class="n">bm</span><span class="o">.</span><span class="n">vertexArrays</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">va</span><span class="p">,</span> <span class="n">VertexArrayBuffer</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="n">va</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">nbytes</span>
+
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">bufferSizes</span><span class="p">())</span>
+</div>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WorldView"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView">[docs]</a><span class="k">class</span> <span class="nc">WorldView</span><span class="p">(</span><span class="n">QGLWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Superclass for the following views:</span>
+
+<span class="sd">    IsoWorldView: Display the world using an isometric viewing angle, without perspective.</span>
+<span class="sd">    Click and drag to pan the viewing area. Use the mouse wheel or a UI control to zoom.</span>
+
+<span class="sd">    CameraWorldView: Display the world using a first-person viewing angle with perspective.</span>
+<span class="sd">    Click and drag to pan the camera. Use WASD or click and drag to move the camera.</span>
+
+<span class="sd">    CutawayWorldView: Display a single slice of the world. Click and drag to move sideways.</span>
+<span class="sd">    Use the mouse wheel or a UI widget to move forward or backward. Use a UI widget to zoom.</span>
+
+<span class="sd">    FourUpWorldView: Display up to four other world views at once. Default to three cutaways</span>
+<span class="sd">    and one isometric view.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">viewportMoved</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">tuple</span><span class="p">)</span>
+    <span class="n">cursorMoved</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">)</span>
+
+    <span class="n">mouseBlockPos</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">mouseBlockFace</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">FaceYIncreasing</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">textureAtlas</span><span class="p">,</span> <span class="n">geometryCache</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sharedGLWidget</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param dimension:</span>
+<span class="sd">        :type dimension: WorldEditorDimension</span>
+<span class="sd">        :param textureAtlas:</span>
+<span class="sd">        :type textureAtlas: TextureAtlas</span>
+<span class="sd">        :param geometryCache:</span>
+<span class="sd">        :type geometryCache: GeometryCache</span>
+<span class="sd">        :param sharedGLWidget:</span>
+<span class="sd">        :type sharedGLWidget: QGLWidget</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QGLWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shareWidget</span><span class="o">=</span><span class="n">sharedGLWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ClickFocus</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadableChunksNode</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseRay</span> <span class="o">=</span> <span class="n">Ray</span><span class="p">(</span><span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMouseTracking</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastAutoUpdate</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoUpdateInterval</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c"># frequency of screen redraws in response to loaded chunks</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">compassNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createCompass</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compassOrthoNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">OrthoNode</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compassOrthoNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compassNode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pressedKeys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span> <span class="o">=</span> <span class="n">textureAtlas</span>
+
+        <span class="k">if</span> <span class="n">geometryCache</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">sharedGLWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">geometryCache</span> <span class="o">=</span> <span class="n">sharedGLWidget</span><span class="o">.</span><span class="n">geometryCache</span>
+        <span class="k">if</span> <span class="n">geometryCache</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">geometryCache</span> <span class="o">=</span> <span class="n">GeometryCache</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometryCache</span> <span class="o">=</span> <span class="n">geometryCache</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">MatrixNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateMatrices</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sceneGraph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSceneGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderGraph</span> <span class="o">=</span> <span class="n">rendergraph</span><span class="o">.</span><span class="n">createRenderNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sceneGraph</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameSamples</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameSamples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursorNode</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="WorldView.destroy"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">discardAllChunks</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WorldView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">displayName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">worldEditor</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+
+<div class="viewcode-block" id="WorldView.createCompass"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.createCompass">[docs]</a>    <span class="k">def</span> <span class="nf">createCompass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">compass</span><span class="o">.</span><span class="n">CompassNode</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldView.createWorldScene"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.createWorldScene">[docs]</a>    <span class="k">def</span> <span class="nf">createWorldScene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">worldscene</span><span class="o">.</span><span class="n">WorldScene</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textureAtlas</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometryCache</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.createSceneGraph"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.createSceneGraph">[docs]</a>    <span class="k">def</span> <span class="nf">createSceneGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sceneGraph</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">Node</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createWorldScene</span><span class="p">()</span>
+
+        <span class="n">clearNode</span> <span class="o">=</span> <span class="n">scenegraph</span><span class="o">.</span><span class="n">ClearNode</span><span class="p">()</span>
+        <span class="n">skyNode</span> <span class="o">=</span> <span class="n">sky</span><span class="o">.</span><span class="n">SkyNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadableChunksNode</span> <span class="o">=</span> <span class="n">loadablechunks</span><span class="o">.</span><span class="n">LoadableChunksNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loadableChunksNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span><span class="p">)</span>
+
+        <span class="n">sceneGraph</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">clearNode</span><span class="p">)</span>
+        <span class="n">sceneGraph</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">skyNode</span><span class="p">)</span>
+        <span class="n">sceneGraph</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="p">)</span>
+        <span class="n">sceneGraph</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compassOrthoNode</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sceneGraph</span>
+</div>
+<div class="viewcode-block" id="WorldView.initializeGL"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.initializeGL">[docs]</a>    <span class="k">def</span> <span class="nf">initializeGL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glEnableClientState</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_VERTEX_ARRAY</span><span class="p">)</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glAlphaFunc</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_NOTEQUAL</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glBlendFunc</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_SRC_ALPHA</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_ONE_MINUS_SRC_ALPHA</span><span class="p">)</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_TEST</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.setToolCursor"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.setToolCursor">[docs]</a>    <span class="k">def</span> <span class="nf">setToolCursor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursorNode</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursorNode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">removeChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursorNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursorNode</span> <span class="o">=</span> <span class="n">cursorNode</span>
+        <span class="k">if</span> <span class="n">cursorNode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">cursorNode</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.setToolOverlays"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.setToolOverlays">[docs]</a>    <span class="k">def</span> <span class="nf">setToolOverlays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overlayNodes</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">overlayNodes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlayNode</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_updateMatrices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateMatrices</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateFrustum</span><span class="p">()</span>
+        <span class="c">#min = self.unprojectPoint(0, 0)[0]</span>
+        <span class="c">#max = self.unprojectPoint(self.width(), self.height())[0]</span>
+        <span class="c">#self.visibleBox = BoundingBox(min, (0, 0, 0)).union(BoundingBox(max, (0, 0, 0)))</span>
+
+<div class="viewcode-block" id="WorldView.updateMatrices"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.updateMatrices">[docs]</a>    <span class="k">def</span> <span class="nf">updateMatrices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Subclasses must implement updateMatrices to set the projection and modelview matrices.</span>
+
+<span class="sd">        Should set self.matrixNode.projection and self.matrixNode.modelview</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="WorldView.updateFrustum"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.updateFrustum">[docs]</a>    <span class="k">def</span> <span class="nf">updateFrustum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">projection</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">modelview</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frustum</span> <span class="o">=</span> <span class="n">Frustum</span><span class="o">.</span><span class="n">fromViewingMatrix</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">data</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="WorldView.getViewCorners"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.getViewCorners">[docs]</a>    <span class="k">def</span> <span class="nf">getViewCorners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns corners:</span>
+<span class="sd">            bottom left, near</span>
+<span class="sd">            bottom left, far</span>
+<span class="sd">            top left, near</span>
+<span class="sd">            top left, far</span>
+<span class="sd">            bottom right, near</span>
+<span class="sd">            bottom right, far</span>
+<span class="sd">            top right, near</span>
+<span class="sd">            top right, far</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: list[QVector4D]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">corners</span> <span class="o">=</span> <span class="p">[</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVector4D</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">((</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span> <span class="p">))]</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">projection</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">modelview</span>
+        <span class="n">matrix</span><span class="p">,</span> <span class="n">inverted</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span>
+        <span class="n">worldCorners</span> <span class="o">=</span> <span class="p">[</span><span class="n">matrix</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">corner</span><span class="p">)</span> <span class="k">for</span> <span class="n">corner</span> <span class="ow">in</span> <span class="n">corners</span><span class="p">]</span>
+        <span class="n">worldCorners</span> <span class="o">=</span> <span class="p">[(</span><span class="n">corner</span> <span class="o">/</span> <span class="n">corner</span><span class="o">.</span><span class="n">w</span><span class="p">())</span><span class="o">.</span><span class="n">toTuple</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">corner</span> <span class="ow">in</span> <span class="n">worldCorners</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">worldCorners</span>
+</div>
+<div class="viewcode-block" id="WorldView.getViewBounds"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.getViewBounds">[docs]</a>    <span class="k">def</span> <span class="nf">getViewBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the corners of the viewing area, intersected with the world&#39;s bounds.</span>
+<span class="sd">        xxx raycast to intersect with terrain height too</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">corners</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getViewCorners</span><span class="p">()</span>
+        <span class="c"># Convert the 4 corners into rays extending from the near point, then interpolate each ray at the</span>
+        <span class="c"># current dimension&#39;s height limits</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">corners</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">rays</span> <span class="o">=</span> <span class="p">[</span><span class="n">Ray</span><span class="o">.</span><span class="n">fromPoints</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span> <span class="k">for</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">]</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="n">pointPairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">atHeight</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">maxy</span><span class="p">),</span> <span class="n">r</span><span class="o">.</span><span class="n">atHeight</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">miny</span><span class="p">))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rays</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pointPairs</span><span class="p">,</span> <span class="p">())</span>
+</div>
+<div class="viewcode-block" id="WorldView.resizeGL"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.resizeGL">[docs]</a>    <span class="k">def</span> <span class="nf">resizeGL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glViewport</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateMatrices</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldView.resizeEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compassOrthoNode</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WorldView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="c"># log.info(&quot;WorldView: resized. moving to %s&quot;, center)</span>
+        <span class="c"># self.centerOnPoint(center)</span>
+</div>
+    <span class="n">_centerPoint</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centerPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centerPoint</span>
+
+    <span class="nd">@centerPoint.setter</span>
+<div class="viewcode-block" id="WorldView.centerPoint"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.centerPoint">[docs]</a>    <span class="k">def</span> <span class="nf">centerPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centerPoint</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_centerPoint</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updateMatrices</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;update(): centerPoint </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resetLoadOrder</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="n">scaleChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="n">_scale</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="mi">16</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span>
+
+    <span class="nd">@scale.setter</span>
+<div class="viewcode-block" id="WorldView.scale"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.scale">[docs]</a>    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateMatrices</span><span class="p">()</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;update(): scale </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaleChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewportMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.centerOnPoint"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.centerOnPoint">[docs]</a>    <span class="k">def</span> <span class="nf">centerOnPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Center the view on the given position&quot;&quot;&quot;</span>
+        <span class="c"># delta = self.viewCenter() - self.centerPoint</span>
+        <span class="c"># self.centerPoint = pos - delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="WorldView.viewCenter"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.viewCenter">[docs]</a>    <span class="k">def</span> <span class="nf">viewCenter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the world position at the center of the view.&quot;&quot;&quot;</span>
+        <span class="c">#return self.unprojectAtHeight(self.width() / 2, self.height() / 2, 64.)</span>
+        <span class="c"># ray = self.rayAtPosition(self.width() / 2, self.height() / 2)</span>
+        <span class="c"># try:</span>
+        <span class="c">#     point, face = raycast.rayCastInBounds(ray, self.dimension, 600)</span>
+        <span class="c"># except (raycast.MaxDistanceError, ValueError):</span>
+        <span class="c">#     point = ray.atHeight(0)</span>
+        <span class="c"># return point or ray.point</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerPoint</span>
+</div>
+    <span class="k">def</span> <span class="nf">_anglesToVector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">nanzero</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">x</span>
+
+        <span class="n">dx</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">yaw</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">pitch</span><span class="p">))</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">pitch</span><span class="p">))</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">yaw</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">pitch</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">nanzero</span><span class="p">,</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">]))</span>
+
+    <span class="n">dragStart</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="WorldView.keyPressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.keyPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">augmentKeyEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pressedKeys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">matchKeyEvent</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.keyReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.keyReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">augmentKeyEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pressedKeys</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">matchKeyEvent</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">keyReleaseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.mousePressEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.mousePressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">augmentMouseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">button</span> <span class="o">&amp;</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">&amp;</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">==</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">key</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressedKeys</span><span class="p">:</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.mouseMoveEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.mouseMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursorMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">augmentMouseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">button</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="n">event</span><span class="o">.</span><span class="n">buttons</span><span class="p">()</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">button</span> <span class="o">&amp;</span> <span class="n">event</span><span class="o">.</span><span class="n">buttons</span><span class="p">():</span>
+                <span class="c"># Important! mouseMove checks event.buttons(), press and release check event.button()</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">&amp;</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">==</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">key</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressedKeys</span><span class="p">:</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">mouseMoveEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.mouseReleaseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.mouseReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">augmentMouseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">button</span> <span class="o">&amp;</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">&amp;</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">==</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">key</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressedKeys</span><span class="p">:</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</div>
+    <span class="n">wheelPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="WorldView.wheelEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.wheelEvent">[docs]</a>    <span class="k">def</span> <span class="nf">wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">augmentMouseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">acceptsMouseWheel</span> <span class="ow">and</span> <span class="p">((</span><span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">&amp;</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">())</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">==</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wheelPos</span> <span class="o">+=</span> <span class="n">event</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+                <span class="c"># event.delta reports eighths of a degree. a standard wheel tick is 15 degrees, or 120 eighths.</span>
+                <span class="c"># keep count of wheel position and emit an event for each 15 degrees turned.</span>
+                <span class="c"># xxx will we ever need sub-click precision for wheel events?</span>
+                <span class="n">clicks</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheelPos</span> <span class="o">&gt;=</span> <span class="mi">120</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wheelPos</span> <span class="o">-=</span> <span class="mi">120</span>
+                    <span class="n">clicks</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheelPos</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">120</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wheelPos</span> <span class="o">+=</span> <span class="mi">120</span>
+                    <span class="n">clicks</span> <span class="o">-=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="n">action</span><span class="o">.</span><span class="n">WHEEL_UP</span> <span class="ow">and</span> <span class="n">clicks</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">clicks</span><span class="p">)):</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="n">action</span><span class="o">.</span><span class="n">WHEEL_DOWN</span> <span class="ow">and</span> <span class="n">clicks</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">clicks</span><span class="p">):</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="WorldView.augmentMouseEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.augmentMouseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">augmentMouseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">augmentEvent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.augmentKeyEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.augmentKeyEvent">[docs]</a>    <span class="k">def</span> <span class="nf">augmentKeyEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">globalPos</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCursor</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+        <span class="n">mousePos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapFromGlobal</span><span class="p">(</span><span class="n">globalPos</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">mousePos</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">mousePos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+
+        <span class="c"># xxx fake position of mouse event -- need to use mcedit internal event object already</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">x</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">y</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">augmentEvent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+</div>
+    <span class="nd">@profiler.function</span>
+<div class="viewcode-block" id="WorldView.augmentEvent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.augmentEvent">[docs]</a>    <span class="k">def</span> <span class="nf">augmentEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">ray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rayAtPosition</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">event</span><span class="o">.</span><span class="n">ray</span> <span class="o">=</span> <span class="n">ray</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">raycast</span><span class="o">.</span><span class="n">rayCastInBounds</span><span class="p">(</span><span class="n">ray</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
+            <span class="n">position</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">result</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="n">raycast</span><span class="o">.</span><span class="n">MaxDistanceError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glReadBuffer</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_BACK</span><span class="p">)</span>
+            <span class="n">pixel</span> <span class="o">=</span> <span class="n">GL</span><span class="o">.</span><span class="n">glReadPixels</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_DEPTH_COMPONENT</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_FLOAT</span><span class="p">)</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointsAtPositions</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">depth</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">face</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">FaceYIncreasing</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">intfloor</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseBlockPos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">blockPosition</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseBlockFace</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">blockFace</span> <span class="o">=</span> <span class="n">face</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseRay</span> <span class="o">=</span> <span class="n">ray</span>
+</div>
+    <span class="n">maxFPS</span> <span class="o">=</span> <span class="mi">30</span>
+
+    <span class="nd">@profiler.function</span>
+<div class="viewcode-block" id="WorldView.glDraw"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.glDraw">[docs]</a>    <span class="k">def</span> <span class="nf">glDraw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">frameInterval</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxFPS</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameSamples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">frameInterval</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WorldView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">glDraw</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.paintGL"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.paintGL">[docs]</a>    <span class="k">def</span> <span class="nf">paintGL</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">profiler</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s">&quot;paintGL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">frameSamples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+            <span class="k">with</span> <span class="n">profiler</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s">&quot;renderScene&quot;</span><span class="p">):</span>
+                <span class="n">rendergraph</span><span class="o">.</span><span class="n">renderScene</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">renderGraph</span><span class="p">)</span>
+
+
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldView.fps"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.fps">[docs]</a>    <span class="k">def</span> <span class="nf">fps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frameSamples</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">samples</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">samples</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frameSamples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameSamples</span><span class="p">[</span><span class="o">-</span><span class="n">samples</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="WorldView.rayAtPosition"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.rayAtPosition">[docs]</a>    <span class="k">def</span> <span class="nf">rayAtPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given coordinates in screen space, return a ray in 3D space.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            x and y are coordinates local to this QWidget</span>
+
+<span class="sd">        :rtype: Ray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointsAtPositions</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Ray</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="p">(</span><span class="n">p1</span> <span class="o">-</span> <span class="n">p0</span><span class="p">)</span><span class="o">.</span><span class="n">normalize</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="WorldView.rayAtCenter"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.rayAtCenter">[docs]</a>    <span class="k">def</span> <span class="nf">rayAtCenter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rayAtPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.pointsAtPositions"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.pointsAtPositions">[docs]</a>    <span class="k">def</span> <span class="nf">pointsAtPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">screenPoints</span><span class="p">):</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">projection</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixNode</span><span class="o">.</span><span class="n">modelview</span>
+        <span class="n">inverse</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span> <span class="ow">or</span> <span class="mi">0</span> <span class="ow">in</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">screenPoints</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">_unproject</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">screenPoints</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">h</span> <span class="o">-</span> <span class="n">y</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span> <span class="o">/</span> <span class="n">h</span> <span class="o">-</span> <span class="mi">1</span>
+
+                <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">p</span><span class="o">.</span><span class="n">z</span><span class="p">())</span>
+
+                <span class="k">yield</span> <span class="n">v</span><span class="p">(</span><span class="n">inverse</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVector3D</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_unproject</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="WorldView.unprojectAtHeight"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.unprojectAtHeight">[docs]</a>    <span class="k">def</span> <span class="nf">unprojectAtHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given coordinates in screen space, find the corresponding point in 3D space.</span>
+
+<span class="sd">        Like rayAtPosition, but the third parameter is a height value in 3D space.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rayAtPosition</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">atHeight</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+</div>
+    <span class="n">_chunkIter</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="WorldView.resetLoadOrder"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.resetLoadOrder">[docs]</a>    <span class="k">def</span> <span class="nf">resetLoadOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chunkIter</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="WorldView.makeChunkIter"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.makeChunkIter">[docs]</a>    <span class="k">def</span> <span class="nf">makeChunkIter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewCenter</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">iterateChunks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span> <span class="o">//</span> <span class="mi">32</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.requestChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.requestChunk">[docs]</a>    <span class="k">def</span> <span class="nf">requestChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunkIter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunkIter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeChunkIter</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunkIter</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">wantsChunk</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">c</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="WorldView.wantsChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.wantsChunk">[docs]</a>    <span class="k">def</span> <span class="nf">wantsChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">wantsChunk</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;frustum&#39;</span><span class="p">):</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">miny</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
+                <span class="mf">1.0</span>
+            <span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">frustum</span><span class="o">.</span><span class="n">visible1</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="n">point</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="WorldView.recieveChunk"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.recieveChunk">[docs]</a>    <span class="k">def</span> <span class="nf">recieveChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastAutoUpdate</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoUpdateInterval</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastAutoUpdate</span> <span class="o">=</span> <span class="n">t</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;update(): receivedChunk </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="n">profiler</span><span class="o">.</span><span class="n">getProfiler</span><span class="p">()</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s">&quot;preloadCulling&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;frustum&#39;</span><span class="p">):</span>
+                <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">chunkPosition</span>
+                <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">cx</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="n">h</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="n">cz</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">sectionPositions</span><span class="p">()]</span>
+                <span class="n">points</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+                <span class="n">visibleSections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frustum</span><span class="o">.</span><span class="n">visible</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">8</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">visibleSections</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">workOnChunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">visibleSections</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorldView.chunkInvalid"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldView.chunkInvalid">[docs]</a>    <span class="k">def</span> <span class="nf">chunkInvalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">invalidateChunk</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetLoadOrder</span><span class="p">()</span>
+
+
+</div></div>
+<div class="viewcode-block" id="iterateChunks"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.iterateChunks">[docs]</a><span class="k">def</span> <span class="nf">iterateChunks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Yields a list of chunk positions starting from the center and going outward in a square spiral pattern.</span>
+
+<span class="sd">    :param x: center block position</span>
+<span class="sd">    :param z: center block position</span>
+<span class="sd">    :param radius: radius, in chunks</span>
+<span class="sd">    :type radius: int</span>
+<span class="sd">    :return:</span>
+<span class="sd">    :rtype:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+    <span class="n">cz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+
+    <span class="k">yield</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="nb">dir</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">step</span><span class="p">):</span>
+            <span class="n">cx</span> <span class="o">+=</span> <span class="nb">dir</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">step</span><span class="p">):</span>
+            <span class="n">cz</span> <span class="o">+=</span> <span class="nb">dir</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+
+        <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="n">radius</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+        <span class="nb">dir</span> <span class="o">=</span> <span class="o">-</span><span class="nb">dir</span>
+
+</div>
+<div class="viewcode-block" id="WorldViewInfo"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldViewInfo">[docs]</a><span class="k">class</span> <span class="nc">WorldViewInfo</span><span class="p">(</span><span class="n">InfoPanel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">InfoPanel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                           <span class="p">[</span><span class="s">&#39;centerPoint&#39;</span><span class="p">,</span> <span class="s">&#39;mouseBlockPos&#39;</span><span class="p">,</span> <span class="s">&#39;mouseRay&#39;</span><span class="p">,</span> <span class="s">&#39;worldMeshVertexSize&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;worldMeshChunks&#39;</span><span class="p">],</span>
+                           <span class="p">[</span><span class="s">&#39;viewportMoved&#39;</span><span class="p">,</span> <span class="s">&#39;cursorMoved&#39;</span><span class="p">],</span>
+                           <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldViewInfo.worldMeshVertexSize"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldViewInfo.worldMeshVertexSize">[docs]</a>    <span class="k">def</span> <span class="nf">worldMeshVertexSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># size = worldMeshVertexSize(self.object.worldMesh)</span>
+        <span class="c"># return &quot;%0.2f MB&quot; % (size / 1000000)</span>
+        <span class="k">return</span> <span class="s">&quot;-1&quot;</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldViewInfo.worldMeshChunks"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldViewInfo.worldMeshChunks">[docs]</a>    <span class="k">def</span> <span class="nf">worldMeshChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">worldScene</span><span class="o">.</span><span class="n">chunkRenderInfo</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span>
+
+</div></div>
+<div class="viewcode-block" id="WorldCursorInfo"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldCursorInfo">[docs]</a><span class="k">class</span> <span class="nc">WorldCursorInfo</span><span class="p">(</span><span class="n">InfoPanel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WorldCursorInfo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">([</span><span class="s">&#39;blockPos&#39;</span><span class="p">,</span> <span class="s">&#39;mouseBlockFace&#39;</span><span class="p">,</span> <span class="s">&#39;describeBlock&#39;</span><span class="p">,</span> <span class="s">&#39;describeAdjacent&#39;</span><span class="p">],</span>
+                                              <span class="p">[</span><span class="s">&#39;cursorMoved&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c">#InfoPanel.__init__(self,</span>
+        <span class="c">#                   [&#39;mouseBlockPos&#39;, &#39;mouseBlockFace&#39;, &#39;describeBlock&#39;, &#39;describeAdjacent&#39;],</span>
+        <span class="c">#                   [&#39;cursorMoved&#39;], **kwargs)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldCursorInfo.blockPos"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldCursorInfo.blockPos">[docs]</a>    <span class="k">def</span> <span class="nf">blockPos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">mouseBlockPos</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">pos</span>
+            <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+            <span class="n">cy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+            <span class="n">cz</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+            <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> (cx=</span><span class="si">%d</span><span class="s">, cy=</span><span class="si">%d</span><span class="s">, cz=</span><span class="si">%d</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;(None)&quot;</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldCursorInfo.describeBlock"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldCursorInfo.describeBlock">[docs]</a>    <span class="k">def</span> <span class="nf">describeBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">mouseBlockPos</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;(None)&quot;</span>
+</div>
+    <span class="n">dirs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">faces</span><span class="o">.</span><span class="n">faceDirections</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorldCursorInfo.describeAdjacent"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldCursorInfo.describeAdjacent">[docs]</a>    <span class="k">def</span> <span class="nf">describeAdjacent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">mouseBlockPos</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">mouseBlockFace</span>
+            <span class="n">pos</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+            <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;(None)&quot;</span>
+</div>
+<div class="viewcode-block" id="WorldCursorInfo.describe"><a class="viewcode-back" href="../../../mcedit2.worldview.html#mcedit2.worldview.worldview.WorldCursorInfo.describe">[docs]</a>    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :type pos: Vector or tuple</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">dimension</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">getBlocks</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                   <span class="n">return_Data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                   <span class="n">return_BlockLight</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                   <span class="n">return_SkyLight</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">Data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">BlockLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">bl</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">BlockLight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bl</span> <span class="o">=</span> <span class="s">&quot;N/A&quot;</span>
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">SkyLight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">sl</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">SkyLight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sl</span> <span class="o">=</span> <span class="s">&quot;N/A&quot;</span>
+
+            <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">ID: </span><span class="si">%s</span><span class="se">\t</span><span class="s">Data: </span><span class="si">%s</span><span class="se">\t</span><span class="s">Light: </span><span class="si">%s</span><span class="se">\t</span><span class="s">SkyLight: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span> <span class="n">sl</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">cPos</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">chunkPos</span><span class="p">()</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">getChunk</span><span class="p">(</span><span class="n">cPos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cPos</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">HeightMap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">ix</span><span class="p">,</span> <span class="n">iz</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xf</span>
+                <span class="c">#log.info(&quot;HeightMap (%s:%s): \n%s&quot;, cPos, (ix, iz), chunk.HeightMap)</span>
+                <span class="n">desc</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">HeightMap(</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">): </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cPos</span><span class="p">,</span> <span class="p">(</span><span class="n">ix</span><span class="p">,</span> <span class="n">iz</span><span class="p">),</span> <span class="n">chunk</span><span class="o">.</span><span class="n">HeightMap</span><span class="p">[</span><span class="n">iz</span><span class="p">,</span> <span class="n">ix</span><span class="p">])</span>
+
+            <span class="n">desc</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Name: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dim</span><span class="o">.</span><span class="n">blocktypes</span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">Blocks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">displayName</span>
+            <span class="k">return</span> <span class="n">desc</span>
+        <span class="k">except</span> <span class="n">ChunkNotPresent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Chunk not present.&quot;</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">EnvironmentError</span><span class="p">,</span> <span class="n">LevelFormatError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Error describing block: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error describing block: </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s">&quot;Error describing block: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mcedit2.rendering.textureatlas &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mcedit2.rendering.textureatlas</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    textureatlas</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">from</span> <span class="nn">OpenGL</span> <span class="kn">import</span> <span class="n">GL</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">mcedit2.util.load_png</span> <span class="kn">import</span> <span class="n">loadPNGData</span>
+<span class="kn">from</span> <span class="nn">mcedit2.rendering.lightmap</span> <span class="kn">import</span> <span class="n">generateLightmap</span>
+<span class="kn">from</span> <span class="nn">mcedit2.resourceloader</span> <span class="kn">import</span> <span class="n">ResourceLoader</span><span class="p">,</span> <span class="n">ResourceNotFound</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util</span> <span class="kn">import</span> <span class="n">glutils</span>
+<span class="kn">from</span> <span class="nn">mcedit2.util.resources</span> <span class="kn">import</span> <span class="n">resourcePath</span>
+<span class="kn">from</span> <span class="nn">mceditlib</span> <span class="kn">import</span> <span class="n">util</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TextureSlot"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureSlot">[docs]</a><span class="k">class</span> <span class="nc">TextureSlot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">top</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="n">bottom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textures</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="TextureSlot.width"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureSlot.width">[docs]</a>    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="TextureSlot.height"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureSlot.height">[docs]</a>    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">top</span>
+</div>
+<div class="viewcode-block" id="TextureSlot.addTexture"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureSlot.addTexture">[docs]</a>    <span class="k">def</span> <span class="nf">addTexture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">w</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="ow">or</span> <span class="n">h</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">textures</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">+=</span> <span class="n">w</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="o">+=</span> <span class="n">h</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+</div></div>
+<div class="viewcode-block" id="allTextureNames"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.allTextureNames">[docs]</a><span class="k">def</span> <span class="nf">allTextureNames</span><span class="p">(</span><span class="n">blocktypes</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blocktypes</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">b</span><span class="o">.</span><span class="n">internalName</span>
+
+</div>
+<div class="viewcode-block" id="TextureAtlas"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureAtlas">[docs]</a><span class="k">class</span> <span class="nc">TextureAtlas</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="n">resourceLoader</span><span class="p">,</span> <span class="n">blockModels</span><span class="p">,</span> <span class="n">maxLOD</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">overrideMaxSize</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Important members:</span>
+
+<span class="sd">            textureData: RGBA Texture Data as a numpy array.</span>
+
+<span class="sd">            texCoordsByName: Dictionary of texture coordinates. Usable for textures loaded using the extraTextures argument</span>
+<span class="sd">                or from block definitions.</span>
+<span class="sd">                Maps &quot;texture_name&quot; -&gt; (left, top, right, bottom)</span>
+
+
+<span class="sd">        :param world:</span>
+<span class="sd">        :type world: mceditlib.worldeditor.WorldEditor</span>
+<span class="sd">        :param resourceLoader:</span>
+<span class="sd">        :type resourceLoader: mcedit2.resourceloader.ResourceLoader</span>
+<span class="sd">        :param blockModels:</span>
+<span class="sd">        :type blockModels: mcedit2.rendering.blockmodels.BlockModels</span>
+<span class="sd">        :param maxLOD: Adds wrapped borders to each texture to allow mipmapping at this level of detail</span>
+<span class="sd">        :type maxLOD: int</span>
+<span class="sd">        :param overrideMaxSize: Override the maximum texture size - ONLY use for testing TextureAtlas without creating a GL context.</span>
+<span class="sd">        :type overrideMaxSize: int or None</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: TextureAtlas</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overrideMaxSize</span> <span class="o">=</span> <span class="n">overrideMaxSize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockModels</span> <span class="o">=</span> <span class="n">blockModels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_blocktypes</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">blocktypes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resourceLoader</span> <span class="o">=</span> <span class="n">resourceLoader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maxLOD</span> <span class="o">=</span> <span class="n">maxLOD</span>
+
+
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rawTextures</span> <span class="o">=</span> <span class="n">rawTextures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">assert</span> <span class="s">&quot;MCEDIT_UNKNOWN&quot;</span> <span class="ow">in</span> <span class="n">blockModels</span><span class="o">.</span><span class="n">getTextureNames</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">blockModels</span><span class="o">.</span><span class="n">getTextureNames</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_openImageStream</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">rawTextures</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">filename</span><span class="p">,)</span> <span class="o">+</span> <span class="n">loadPNGData</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()))</span>
+                <span class="n">names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Loaded texture </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ResourceNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Could not load texture </span><span class="si">%s</span><span class="s">: </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> while loading texture &#39;</span><span class="si">%s</span><span class="s">&#39;, skipping...&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">rawSize</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">nbytes</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rawTextures</span><span class="p">)</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Preloaded </span><span class="si">%d</span><span class="s"> textures for world </span><span class="si">%s</span><span class="s"> (</span><span class="si">%i</span><span class="s"> kB)&quot;</span><span class="p">,</span>
+                 <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rawTextures</span><span class="p">),</span> <span class="n">util</span><span class="o">.</span><span class="n">displayName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">),</span> <span class="n">rawSize</span><span class="o">/</span><span class="mi">1024</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TextureAtlas.load"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureAtlas.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrideMaxSize</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">maxSize</span> <span class="o">=</span> <span class="n">getGLMaximumTextureSize</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">maxSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrideMaxSize</span>
+
+        <span class="n">maxLOD</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maxLOD</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">glGenerateMipmap</span><span class="p">):</span>
+            <span class="n">maxLOD</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">maxLOD</span><span class="p">:</span>
+            <span class="n">borderSize</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">maxLOD</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">borderSize</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">slots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">atlasWidth</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">atlasHeight</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rawTextures</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">__</span><span class="p">):</span> <span class="nb">max</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rawTextures</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">+=</span> <span class="n">borderSize</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="n">h</span> <span class="o">+=</span> <span class="n">borderSize</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">slot</span><span class="o">.</span><span class="n">addTexture</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Slotting </span><span class="si">%s</span><span class="s"> into an existing slot&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">atlasHeight</span> <span class="o">&lt;</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">atlasWidth</span> <span class="ow">and</span> <span class="n">atlasHeight</span> <span class="o">+</span> <span class="n">h</span> <span class="o">&lt;</span> <span class="n">maxSize</span><span class="p">:</span>
+                    <span class="c"># Prefer to lay out textures vertically, since animations are vertical strips</span>
+                    <span class="n">slots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TextureSlot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">atlasHeight</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">atlasWidth</span><span class="p">,</span> <span class="n">w</span><span class="p">),</span> <span class="n">atlasHeight</span> <span class="o">+</span> <span class="n">h</span><span class="p">))</span>
+                    <span class="n">atlasWidth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">atlasWidth</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+                    <span class="n">atlasHeight</span> <span class="o">=</span> <span class="n">atlasHeight</span> <span class="o">+</span> <span class="n">h</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">slots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TextureSlot</span><span class="p">(</span><span class="n">atlasWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atlasWidth</span> <span class="o">+</span> <span class="n">w</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">atlasHeight</span><span class="p">,</span> <span class="n">h</span><span class="p">)))</span>
+                    <span class="n">atlasWidth</span> <span class="o">=</span> <span class="n">atlasWidth</span> <span class="o">+</span> <span class="n">w</span>
+                    <span class="n">atlasHeight</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">atlasHeight</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">atlasWidth</span> <span class="o">&gt;</span> <span class="n">maxSize</span> <span class="ow">or</span> <span class="n">atlasHeight</span> <span class="o">&gt;</span> <span class="n">maxSize</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Building texture atlas: Textures too large for maximum texture size. (Needed &quot;</span>
+                                     <span class="s">&quot;</span><span class="si">%s</span><span class="s">, only got </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">atlasWidth</span><span class="p">,</span> <span class="n">atlasHeight</span><span class="p">),</span> <span class="p">(</span><span class="n">maxSize</span><span class="p">,</span> <span class="n">maxSize</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">slots</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">addTexture</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Building texture atlas: Internal error.&quot;</span><span class="p">)</span>
+
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Slotting </span><span class="si">%s</span><span class="s"> into a newly created slot&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">textureData</span> <span class="o">=</span> <span class="n">texData</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">atlasHeight</span><span class="p">,</span> <span class="n">atlasWidth</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textureData</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="mh">0xff</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">texCoordsByName</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">borderSize</span>
+        <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">slot</span><span class="o">.</span><span class="n">textures</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Texture </span><span class="si">%s</span><span class="s"> at (</span><span class="si">%d</span><span class="s">,</span><span class="si">%d</span><span class="s">,</span><span class="si">%d</span><span class="s">,</span><span class="si">%d</span><span class="s">)&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+                <span class="n">texDataView</span> <span class="o">=</span> <span class="n">texData</span><span class="p">[</span><span class="n">top</span><span class="p">:</span><span class="n">top</span> <span class="o">+</span> <span class="n">height</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span><span class="n">left</span> <span class="o">+</span> <span class="n">width</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">b</span><span class="p">:</span>
+                    <span class="n">texDataView</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span><span class="o">-</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+                    <span class="c"># Wrap texture edges to avoid antialiasing bugs at edges of blocks</span>
+                    <span class="n">texDataView</span><span class="p">[</span><span class="o">-</span><span class="n">b</span><span class="p">:,</span> <span class="n">b</span><span class="p">:</span><span class="o">-</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">b</span><span class="p">]</span>
+                    <span class="n">texDataView</span><span class="p">[:</span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span><span class="o">-</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="n">b</span><span class="p">:]</span>
+
+                    <span class="n">texDataView</span><span class="p">[:,</span> <span class="o">-</span><span class="n">b</span><span class="p">:]</span> <span class="o">=</span> <span class="n">texDataView</span><span class="p">[:,</span> <span class="n">b</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">b</span><span class="p">]</span>
+                    <span class="n">texDataView</span><span class="p">[:,</span> <span class="p">:</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">texDataView</span><span class="p">[:,</span> <span class="o">-</span><span class="n">b</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="n">b</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">texDataView</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">texCoordsByName</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="n">top</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">b</span><span class="p">,</span> <span class="n">height</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">b</span>
+
+        <span class="k">def</span> <span class="nf">_load</span><span class="p">():</span>
+            <span class="n">GL</span><span class="o">.</span><span class="n">glTexImage2D</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_TEXTURE_2D</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_RGBA</span><span class="p">,</span> <span class="n">atlasWidth</span><span class="p">,</span> <span class="n">atlasHeight</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_RGBA</span><span class="p">,</span>
+                            <span class="n">GL</span><span class="o">.</span><span class="n">GL_UNSIGNED_BYTE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textureData</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrideMaxSize</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">maxLOD</span><span class="p">:</span>
+                <span class="n">minFilter</span> <span class="o">=</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_NEAREST_MIPMAP_LINEAR</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">minFilter</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span> <span class="o">=</span> <span class="n">glutils</span><span class="o">.</span><span class="n">Texture</span><span class="p">(</span><span class="n">_load</span><span class="p">,</span> <span class="n">minFilter</span><span class="o">=</span><span class="n">minFilter</span><span class="p">,</span> <span class="n">maxLOD</span><span class="o">=</span><span class="n">maxLOD</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">atlasWidth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">atlasHeight</span>
+
+        <span class="n">totalSize</span> <span class="o">=</span> <span class="n">atlasWidth</span> <span class="o">*</span> <span class="n">atlasHeight</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">usedSize</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">width</span> <span class="o">*</span> <span class="n">height</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">slot</span><span class="o">.</span><span class="n">textures</span><span class="p">)</span> <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Terrain atlas created for world </span><span class="si">%s</span><span class="s"> (</span><span class="si">%d</span><span class="s">/</span><span class="si">%d</span><span class="s"> kB)&quot;</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">displayName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">),</span> <span class="n">usedSize</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span>
+                 <span class="n">totalSize</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">)</span>
+
+        <span class="c">#file(&quot;terrain-%sw-%sh.raw&quot; % (atlasWidth, atlasHeight), &quot;wb&quot;).write(texData.tostring())</span>
+        <span class="c">#raise SystemExit</span>
+</div>
+    <span class="k">def</span> <span class="nf">_openImageStream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&quot;MCEDIT_UNKNOWN&quot;</span><span class="p">:</span>
+            <span class="n">block_unknown</span> <span class="o">=</span> <span class="n">resourcePath</span><span class="p">(</span><span class="s">&quot;mcedit2/assets/mcedit2/block_unknown.png&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">file</span><span class="p">(</span><span class="n">block_unknown</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resourceLoader</span><span class="o">.</span><span class="n">openStream</span><span class="p">(</span><span class="s">&quot;textures/&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&quot;.png&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TextureAtlas.bindTerrain"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureAtlas.bindTerrain">[docs]</a>    <span class="k">def</span> <span class="nf">bindTerrain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+</div>
+    <span class="n">_dayTime</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dayTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dayTime</span>
+
+    <span class="nd">@dayTime.setter</span>
+<div class="viewcode-block" id="TextureAtlas.dayTime"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureAtlas.dayTime">[docs]</a>    <span class="k">def</span> <span class="nf">dayTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dayTime</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span>
+</div>
+    <span class="n">_minBrightness</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">minBrightness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minBrightness</span>
+
+    <span class="nd">@minBrightness.setter</span>
+<div class="viewcode-block" id="TextureAtlas.minBrightness"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureAtlas.minBrightness">[docs]</a>    <span class="k">def</span> <span class="nf">minBrightness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_minBrightness</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span>
+</div>
+<div class="viewcode-block" id="TextureAtlas.bindLight"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureAtlas.bindLight">[docs]</a>    <span class="k">def</span> <span class="nf">bindLight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span> <span class="o">=</span> <span class="n">_makeLightTexture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dayTime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minBrightness</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="TextureAtlas.dispose"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.TextureAtlas.dispose">[docs]</a>    <span class="k">def</span> <span class="nf">dispose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_terrainTexture</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lightTexture</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+
+</div></div>
+<span class="k">def</span> <span class="nf">_makeLightTexture</span><span class="p">(</span><span class="n">dayTime</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minBrightness</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_loadLightTexture</span><span class="p">():</span>
+        <span class="n">pixels</span> <span class="o">=</span> <span class="n">generateLightmap</span><span class="p">(</span><span class="n">dayTime</span><span class="p">)</span>
+        <span class="n">pixels</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">minBrightness</span> <span class="o">*</span> <span class="mi">255</span><span class="p">),</span> <span class="mi">255</span><span class="p">,</span> <span class="n">pixels</span><span class="p">)</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glTexImage2D</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_TEXTURE_2D</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_RGBA</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_RGBA</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_UNSIGNED_BYTE</span><span class="p">,</span> <span class="n">pixels</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">glutils</span><span class="o">.</span><span class="n">Texture</span><span class="p">(</span><span class="n">_loadLightTexture</span><span class="p">)</span>
+
+<span class="n">_maxSize</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="getGLMaximumTextureSize"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.getGLMaximumTextureSize">[docs]</a><span class="k">def</span> <span class="nf">getGLMaximumTextureSize</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">_maxSize</span>
+    <span class="k">if</span> <span class="n">_maxSize</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">_maxSize</span> <span class="o">=</span> <span class="n">_getMaxSize</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_maxSize</span>
+</div>
+<span class="k">def</span> <span class="nf">_getMaxSize</span><span class="p">():</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">16384</span>
+    <span class="k">while</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">/=</span> <span class="mi">2</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glTexImage2D</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_PROXY_TEXTURE_2D</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_RGBA</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_RGBA</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_UNSIGNED_BYTE</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">maxsize</span> <span class="o">=</span> <span class="n">GL</span><span class="o">.</span><span class="n">glGetTexLevelParameteriv</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_PROXY_TEXTURE_2D</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GL</span><span class="o">.</span><span class="n">GL_TEXTURE_WIDTH</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">maxsize</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">maxsize</span>
+
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+
+<div class="viewcode-block" id="test_TextureAtlas"><a class="viewcode-back" href="../../../mcedit2.rendering.html#mcedit2.rendering.textureatlas.test_TextureAtlas">[docs]</a><span class="k">def</span> <span class="nf">test_TextureAtlas</span><span class="p">():</span>
+    <span class="n">rl</span> <span class="o">=</span> <span class="n">ResourceLoader</span><span class="p">()</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

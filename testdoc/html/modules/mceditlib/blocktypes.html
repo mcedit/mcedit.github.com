@@ -1,0 +1,456 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mceditlib.blocktypes &mdash; mceditlib 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="mceditlib 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mceditlib.blocktypes</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Block definitions for all known level formats</span>
+<span class="sd">    Reader for block definitions stored in .yaml files (based on Minecraft X-Ray)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="n">MCYDecreasing</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">MCYIncreasing</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">MCZDecreasing</span> <span class="o">=</span> <span class="mi">2</span> <span class="c">#south</span>
+<span class="n">MCZIncreasing</span> <span class="o">=</span> <span class="mi">3</span> <span class="c">#north</span>
+<span class="n">MCXDecreasing</span> <span class="o">=</span> <span class="mi">4</span> <span class="c">#west</span>
+<span class="n">MCXIncreasing</span> <span class="o">=</span> <span class="mi">5</span> <span class="c">#east</span>
+
+
+<div class="viewcode-block" id="BlockType"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockType">[docs]</a><span class="k">class</span> <span class="nc">BlockType</span><span class="p">(</span><span class="n">namedtuple</span><span class="p">(</span><span class="s">&quot;_BlockType&quot;</span><span class="p">,</span> <span class="s">&quot;ID, meta, blocktypeSet&quot;</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Value object representing an (id, data, blocktypeSet) tuple.</span>
+<span class="sd">    Accessing its attributes will return the corresponding elements</span>
+<span class="sd">    of its parent material&#39;s json arrays.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="s">&quot; (</span><span class="si">%s</span><span class="s"> (</span><span class="si">%s%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">internalName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockState</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;BlockType (</span><span class="si">%d</span><span class="s">:</span><span class="si">%d</span><span class="s">)</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> (</span><span class="si">%s%s</span><span class="s">) [</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">internalName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockState</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">BlockType</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">internalName</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">blockState</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">key</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">key</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocktypeSet</span><span class="o">.</span><span class="n">getBlockTypeAttr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+
+</div>
+<span class="n">id_limit</span> <span class="o">=</span> <span class="mi">4096</span>
+
+
+<div class="viewcode-block" id="openResource"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.openResource">[docs]</a><span class="k">def</span> <span class="nf">openResource</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># py2exe, .egg</span>
+            <span class="kn">import</span> <span class="nn">pkg_resources</span>
+            <span class="k">return</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_stream</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;pkg_resources not available&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">return</span> <span class="nb">file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BlockTypeSet"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet">[docs]</a><span class="k">class</span> <span class="nc">BlockTypeSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">defaultColor</span> <span class="o">=</span> <span class="p">(</span><span class="mh">0xc9</span><span class="p">,</span> <span class="mh">0x77</span><span class="p">,</span> <span class="mh">0xf0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">defaultName</span><span class="o">=</span><span class="s">&quot;Unused Block&quot;</span><span class="p">,</span> <span class="n">idMapping</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">object</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allBlocks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockJsons</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IDsByState</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># internalName[blockstates] -&gt; (id, meta)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statesByID</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># (id, meta) -&gt; internalName[blockstates]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultBlockstates</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># internalName -&gt; [blockstates]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;displayName&#39;</span><span class="p">:</span> <span class="n">defaultName</span><span class="p">,</span>
+            <span class="s">&#39;opacity&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+            <span class="s">&#39;brightness&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s">&#39;internalName&#39;</span><span class="p">:</span> <span class="s">&#39;UNKNOWN_NAME&#39;</span><span class="p">,</span>
+            <span class="s">&#39;blockState&#39;</span><span class="p">:</span> <span class="s">&#39;[UNKNOWN_STATE]&#39;</span><span class="p">,</span>
+            <span class="s">&#39;unlocalizedName&#39;</span><span class="p">:</span> <span class="s">&#39;name.unknown&#39;</span><span class="p">,</span>
+            <span class="s">&#39;opaqueCube&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;renderType&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c"># Model block - defaults to question mark box</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">aka</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">brightness</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">id_limit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">brightness</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="p">[</span><span class="s">&#39;brightness&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opacity</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">id_limit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opacity</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="p">[</span><span class="s">&#39;opacity&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapColor</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">id_limit</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapColor</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultColor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderColor</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">id_limit</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderColor</span><span class="p">[:]</span> <span class="o">=</span> <span class="mh">0xFF</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapColor</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">id_limit</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapColor</span><span class="p">[:]</span> <span class="o">=</span> <span class="mh">0xFF</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">opaqueCube</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">id_limit</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opaqueCube</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Unnamed Set&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namePrefix</span> <span class="o">=</span> <span class="s">&quot;minecraft:&quot;</span>
+
+<div class="viewcode-block" id="BlockTypeSet.getBlockTypeAttr"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet.getBlockTypeAttr">[docs]</a>    <span class="k">def</span> <span class="nf">getBlockTypeAttr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when accessing an attribute of a BlockType.</span>
+<span class="sd">        :param block:</span>
+<span class="sd">        :type block:</span>
+<span class="sd">        :param attr:</span>
+<span class="sd">        :type attr:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">nameAndState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statesByID</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">block</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">meta</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">nameAndState</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nameAndState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statesByID</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">block</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">nameAndState</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s">&quot;internalName&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_splitInternalName</span><span class="p">(</span><span class="n">nameAndState</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s">&quot;blockState&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_splitInternalName</span><span class="p">(</span><span class="n">nameAndState</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">blockJson</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockJsons</span><span class="p">[</span><span class="n">nameAndState</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s">&quot;json&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">blockJson</span>
+        <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s">&quot;resourcePath&quot;</span><span class="p">:</span>
+            <span class="n">resourcePath</span> <span class="o">=</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">resourcePath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">block</span><span class="o">.</span><span class="n">internalName</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">namePrefix</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="n">retval</span> <span class="o">=</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">retval</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">retval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">retval</span>
+</div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;BlockTypeSet ({0})&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BlockTypeSet.get"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+</div>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allBlocks</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allBlocks</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_splitInternalName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nameAndState</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;[&#39;</span> <span class="ow">in</span> <span class="n">nameAndState</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">nameAndState</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">)</span>
+            <span class="n">internalName</span><span class="p">,</span> <span class="n">blockState</span> <span class="o">=</span> <span class="n">nameAndState</span><span class="p">[:</span><span class="n">idx</span><span class="p">],</span> <span class="n">nameAndState</span><span class="p">[</span><span class="n">idx</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">internalName</span> <span class="o">=</span> <span class="n">nameAndState</span>
+            <span class="n">blockState</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">internalName</span><span class="p">,</span> <span class="n">blockState</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nameAndState</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Possible uses:</span>
+<span class="sd">            # block ID</span>
+<span class="sd">            level.blocktypes[120]</span>
+
+<span class="sd">            # block ID, meta</span>
+<span class="sd">            level.blocktypes[120, 0]</span>
+
+<span class="sd">            # returns Air</span>
+<span class="sd">            level.blocktypes[&quot;air&quot;]</span>
+
+<span class="sd">            # returns default state of Powered Rail</span>
+<span class="sd">            level.blocktypes[&quot;golden_rail&quot;]</span>
+
+<span class="sd">            # returns Powered Rail with given state</span>
+<span class="sd">            level.blocktypes[&quot;golden_rail[powered=false,shape=north_south]&quot;]</span>
+
+<span class="sd">        :type nameAndState: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nameAndState</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">internalName</span><span class="p">,</span> <span class="n">blockState</span> <span class="o">=</span> <span class="n">nameAndState</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">internalName</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s">&quot;:&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">internalName</span><span class="p">:</span>
+                    <span class="n">internalName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">namePrefix</span> <span class="o">+</span> <span class="n">internalName</span>
+                <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IDsByState</span><span class="p">[</span><span class="n">internalName</span> <span class="o">+</span> <span class="n">blockState</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c"># (ID, meta)</span>
+                <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">nameAndState</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nameAndState</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nameAndState</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">namePrefix</span><span class="p">):</span>
+                <span class="n">nameAndState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">namePrefix</span> <span class="o">+</span> <span class="n">nameAndState</span>
+            <span class="k">if</span> <span class="n">nameAndState</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">IDsByState</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nameAndState</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultBlockstates</span><span class="p">:</span>
+                    <span class="n">nameAndState</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultBlockstates</span><span class="p">[</span><span class="n">nameAndState</span><span class="p">]</span>
+            <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IDsByState</span><span class="p">[</span><span class="n">nameAndState</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c"># block ID</span>
+            <span class="n">ID</span> <span class="o">=</span> <span class="n">nameAndState</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">BlockType</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BlockTypeSet.blocksMatching"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet.blocksMatching">[docs]</a>    <span class="k">def</span> <span class="nf">blocksMatching</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allBlocks</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">displayName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">aka</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+</div>
+<div class="viewcode-block" id="BlockTypeSet.addIDMappingFromFile"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet.addIDMappingFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">addIDMappingFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">openResource</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">u&quot;Loading block ID mapping from (</span><span class="si">%s</span><span class="s">) </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+            <span class="n">entries</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">nameAndState</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+                <span class="c">#internalName, blockState = self._splitInternalName(nameAndState)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">IDsByState</span><span class="p">[</span><span class="n">nameAndState</span><span class="p">]</span> <span class="o">=</span> <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statesByID</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">IDsByState</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()}</span>
+        <span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">u&quot;Exception while loading block ID mapping from </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="BlockTypeSet.addJsonBlocksFromFile"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet.addJsonBlocksFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">addJsonBlocksFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">openResource</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">u&quot;Loading block info from (</span><span class="si">%s</span><span class="s">) </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addJsonBlocks</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+        <span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">u&quot;Exception while loading block info from </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BlockTypeSet.addJsonBlocks"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet.addJsonBlocks">[docs]</a>    <span class="k">def</span> <span class="nf">addJsonBlocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blockJson</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blockJson</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addJsonBlock</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">u&quot;Exception while parsing block: </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">u&quot;Block dict: </span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allBlocks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">internalName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultBlockstates</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">defaultBlockstates</span><span class="p">[</span><span class="n">block</span><span class="o">.</span><span class="n">internalName</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">blockState</span>
+</div>
+<div class="viewcode-block" id="BlockTypeSet.addJsonBlock"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.BlockTypeSet.addJsonBlock">[docs]</a>    <span class="k">def</span> <span class="nf">addJsonBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blockJson</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a block to this blockset using the keys and values in `block`.</span>
+
+<span class="sd">        Required keys:</span>
+<span class="sd">            internalName - String used by Minecraft to identify this block</span>
+
+<span class="sd">        :type blockJson: dict</span>
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ID</span> <span class="o">=</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span>
+        <span class="n">internalName</span> <span class="o">=</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;internalName&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ID</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">internalName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Block definition must have either `id` or `internalName` attribute.&quot;</span><span class="p">)</span>
+
+
+        <span class="c">#log.debug(&quot;Adding block: \n%s&quot;, json.dumps(blockJson, indent=2))</span>
+        <span class="n">nameAndState</span> <span class="o">=</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;blockState&quot;</span><span class="p">,</span> <span class="n">internalName</span><span class="p">)</span>
+        <span class="n">internalName</span><span class="p">,</span> <span class="n">blockState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_splitInternalName</span><span class="p">(</span><span class="n">nameAndState</span><span class="p">)</span>
+
+        <span class="n">IDmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IDsByState</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nameAndState</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">IDmeta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;No ID mapping for </span><span class="si">%s</span><span class="s">, skipping...&quot;</span><span class="p">,</span> <span class="n">internalName</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">IDmeta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allBlocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">BlockType</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+        <span class="n">oldJson</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockJsons</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">internalName</span> <span class="o">+</span> <span class="n">blockState</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">oldJson</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">oldJson</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockJsons</span><span class="p">[</span><span class="n">internalName</span> <span class="o">+</span> <span class="n">blockState</span><span class="p">]</span> <span class="o">=</span> <span class="n">blockJson</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">oldJson</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">blockJson</span><span class="p">)</span>
+
+        <span class="n">blockJson</span> <span class="o">=</span> <span class="n">oldJson</span>
+        <span class="k">del</span> <span class="n">oldJson</span>
+
+        <span class="k">if</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;defaultState&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">defaultBlockstates</span><span class="p">[</span><span class="n">internalName</span><span class="p">]</span> <span class="o">=</span> <span class="n">blockState</span>
+
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s">&#39;opaqueCube&#39;</span><span class="p">,</span>
+            <span class="s">&#39;brightness&#39;</span><span class="p">,</span>
+            <span class="s">&#39;opacity&#39;</span><span class="p">,</span>
+        <span class="p">]:</span>  <span class="c"># does not have data axis</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">blockJson</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">array</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">blockJson</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">color</span> <span class="o">=</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;renderColor&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">renderColor</span><span class="p">[</span><span class="n">ID</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">or</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">)]</span> <span class="o">=</span> <span class="p">((</span><span class="n">color</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">,</span>
+                                                              <span class="p">(</span><span class="n">color</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">,</span>
+                                                              <span class="n">color</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">)</span>
+
+        <span class="n">color</span> <span class="o">=</span> <span class="n">blockJson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;materialMapColor&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mapColor</span><span class="p">[</span><span class="n">ID</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">or</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">)]</span> <span class="o">=</span> <span class="p">((</span><span class="n">color</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">,</span>
+                                                           <span class="p">(</span><span class="n">color</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">,</span>
+                                                           <span class="n">color</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="PCBlockTypeSet"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.PCBlockTypeSet">[docs]</a><span class="k">class</span> <span class="nc">PCBlockTypeSet</span><span class="p">(</span><span class="n">BlockTypeSet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PCBlockTypeSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Alpha&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addIDMappingFromFile</span><span class="p">(</span><span class="s">&quot;idmapping_raw.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addIDMappingFromFile</span><span class="p">(</span><span class="s">&quot;idmapping.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addJsonBlocksFromFile</span><span class="p">(</span><span class="s">&quot;minecraft_raw.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addJsonBlocksFromFile</span><span class="p">(</span><span class="s">&quot;minecraft.json&quot;</span><span class="p">)</span>
+</div>
+<span class="n">pc_blocktypes</span> <span class="o">=</span> <span class="n">PCBlockTypeSet</span><span class="p">()</span>
+
+<span class="c"># def printStaticDefs(blocktypes):</span>
+<span class="c">#     varNames = set()</span>
+<span class="c">#     for block in blocktypes.allBlocks:</span>
+<span class="c">#         blockJson = block.json</span>
+<span class="c">#         name = blockJson[&#39;displayName&#39;]</span>
+<span class="c">#         #internalName = blockJson[&#39;internalName&#39;]</span>
+<span class="c">#         nameAndState = blockJson[&#39;blockState&#39;]</span>
+<span class="c">#         internalName, blockState = blocktypes._splitInternalName(nameAndState)</span>
+<span class="c">#         variableName = re.sub(r&quot;[^\w]&quot;, &#39;&#39;, name)</span>
+<span class="c">#         varName = variableName</span>
+<span class="c">#         i=2</span>
+<span class="c">#         while varName in varNames:</span>
+<span class="c">#             varName = &quot;%s%d&quot; % (variableName, i)</span>
+<span class="c">#             i += 1</span>
+<span class="c">#         varNames.add(varName)</span>
+<span class="c">#         print(&quot;self.%s = self[&#39;%s&#39;, &#39;%s&#39;]&quot; % (varName, internalName, blockState))</span>
+<span class="c">#     raise SystemExit</span>
+<span class="c"># printStaticDefs(pc_blocktypes)</span>
+
+<span class="n">blocktypes_named</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;Alpha&quot;</span><span class="p">:</span> <span class="n">pc_blocktypes</span><span class="p">}</span>
+
+<div class="viewcode-block" id="convertBlocks"><a class="viewcode-back" href="../../mceditlib.blocktypes.html#mceditlib.blocktypes.convertBlocks">[docs]</a><span class="k">def</span> <span class="nf">convertBlocks</span><span class="p">(</span><span class="n">destTypes</span><span class="p">,</span> <span class="n">sourceTypes</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ID</span><span class="p">,</span> <span class="n">meta</span>  <span class="c"># xxx fixme</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mceditlib 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Vierra.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
