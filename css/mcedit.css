@@ -2,16 +2,15 @@
     color: #115511;
 }
 
-.navbar-brand, .navbar-nav > li > a {
-    font-size: 120%;
-}
-.navbar-brand {
-    padding-top: 5px;
-    padding-bottom: 5px;
+body {
+  padding-top: 70px;
 }
 
-.navbar-inverse .navbar-brand {
-    color: #DDD;
+.navbar-brand {
+    font-size: 125%;
+    color: rgba(0, 0, 0, 1);
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 #navbar-icon {
