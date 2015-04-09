@@ -56,12 +56,12 @@ a.btn-download {
 }
 
 .download-list .infos td.rev {
-    width: 18%;
+    width: 12%;
     font-weight:bold;
     text-align: center;
 }
 .download-list .infos td.date {
-    width: 18%;
+    width: 15%;
     text-align: center;
 }
 
