@@ -1,0 +1,57 @@
+---
+layout: default
+---
+{% raw %}
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.js"></script>
+<script src="/js/moment.min.js"></script>
+<script src="/js/ng/dl-control.js"></script>
+<div class="page-header">
+<h1>Downloads</h1>
+</div>
+
+<h1>Release Versions
+</h1>
+<div class="alert">
+As MCEdit 2.0 is currently in alpha, no release versions are available.
+</div>
+
+<h1>Development Versions</h1>
+<div class="alert">
+Development Versions are released once per day, if there have been any changes to the source code. These versions are
+not well-tested and are not recommended for serious use.
+</div>
+
+<div ng-app="dlApp">
+    <div ng-controller="DownloadListCtrl">
+        <table class="download-list">
+            <tr class="infos" ng-repeat-start="download in downloads">
+                <td class="rev">{{download.rev}}</td>
+                <td class="date" title="{{download.rev_date | date : 'medium' }}">{{download.rev_date | fromNow}}</td>
+
+                <td class="description">
+                    <a href="https://github.com/mcedit/mcedit2/commits/{{download.rev_hash}}">{{download.rev_desc}}</a>
+                </td>
+            </tr>
+            <tr class="links" ng-repeat-end>
+                <td></td>
+                <td colspan="2">
+                    <a class="btn btn-default always-ltr x64"
+                       href="http://download.nodecdn.net/containers/mcedit/download/dev/mcedit2-win64-{{download.rev}}.exe">
+                        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
+                              style="margin-right:10px"></span>Windows (64-bit)</a>
+                    <a class="btn btn-default always-ltr x32"
+                       href="http://download.nodecdn.net/containers/mcedit/download/dev/mcedit2-win32-{{download.rev}}.exe">
+                        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
+                              style="margin-right:10px"></span>Windows (32-bit)</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div align="center" style="margin-top:8em">Content hosting for development versions provided by:<br>
+    <a href="https://nodecraft.com/">
+        <img src="/images/nodecraft_237_65.png">
+    </a>
+</div>
+{% endraw %}

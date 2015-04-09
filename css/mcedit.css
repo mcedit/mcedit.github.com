@@ -28,7 +28,7 @@ a.btn-download {
     color: white;
 
 }
-/* --- download links --- */
+/* --- sidebar download links --- */
 .latest-version {
     margin: 12px;
 }
@@ -39,6 +39,38 @@ a.btn-download {
 .dl-links li {
     line-height: 26px;
     padding-left: 26px;
+}
+
+/* --- downloads page table --- */
+
+.download-list {
+  width: 100%;
+}
+
+.download-list tr.infos {
+  border-top: 1px solid #CCC;
+}
+
+.download-list .infos td {
+  padding: 0.6em 0.25em 0.5em;
+}
+
+.download-list .infos td.rev {
+    width: 18%;
+    font-weight:bold;
+    text-align: center;
+}
+.download-list .infos td.date {
+    width: 18%;
+    text-align: center;
+}
+
+.download-list .infos .description {
+    font-style:italic;
+}
+.download-list .links td {
+  padding: 0.6em 0.25em 0.5em;
+
 }
 /* --- icons --- */
 
@@ -52,4 +84,14 @@ a.btn-download {
 
 .li-icon-apple {
     background-image: url("/images/icon-apple.png")
+}
+
+/* --- bootstrap.css theming --- */
+
+.alert {
+  border-color: #EEE;
+}
+
+.page-header {
+  margin-top:10px;
 }
