@@ -1,5 +1,5 @@
 var dlApp = angular.module('dlApp', []);
-var MODEL_URL = 'http://download.nodecdn.net/containers/mcedit/downloads.jsonp';
+var MODEL_URL = 'https://download.nodecdn.net/containers/mcedit/downloads.jsonp';
 
 var DL_SCOPE;
 
