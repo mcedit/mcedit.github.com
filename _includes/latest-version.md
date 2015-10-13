@@ -1,4 +1,4 @@
-_Version support:_
+_Minecraft versions supported:_
  
 PC:  **1.7, 1.8, Forge 1.7**
 
