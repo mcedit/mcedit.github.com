@@ -32,8 +32,9 @@ not well-tested and are not recommended for serious use.
                 <td></td>
                 <td colspan="2" >
                     <a ng-repeat="asset in download.assets"
-                       class="btn btn-default always-ltr x64"
-                       href="{{asset.browser_download_url}}">
+                       class="btn btn-default always-ltr"
+                       href="{{asset.browser_download_url}}"
+                       style="margin-right:6px">
                         <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
                               style="margin-right:10px"></span>{{asset.name | platform}}</a>
                 </td>
