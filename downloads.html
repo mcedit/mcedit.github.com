@@ -11,14 +11,7 @@ layout: download_page
 
 <h1>Release Versions
 </h1>
-<div class="alert">
-    As MCEdit 2.0 is currently in alpha, no release versions are available.
-    <br><br>
-    Release versions of MCEdit 1.0 are provided by the MCEdit-Unified team.
-    <a href="http://khroki.github.io/MCEdit-Unified/">Click here to download MCEdit 1.0</a> (If the website is down, <a href="https://github.com/Khroki/MCEdit-Unified/releases">click here for direct downloads</a>)
-</div>
 
-<h1>Development Versions</h1>
 <div class="alert">
 Development Versions are released once per day, if there have been any changes to the source code. These versions are
 not well-tested and are not recommended for serious use.
@@ -28,34 +21,37 @@ not well-tested and are not recommended for serious use.
     <div ng-controller="DownloadListCtrl">
         <table class="download-list">
             <tr class="infos" ng-repeat-start="download in downloads">
-                <td class="rev">{{download.rev}}</td>
-                <td class="date" title="{{download.rev_date | date : 'medium' }}">{{download.rev_date | fromNow}}</td>
+                <td class="tag_name">{{download.tag_name}}</td>
+                <td class="date" title="{{download.published_at | date : 'medium' }}">{{download.published_at | fromNow}}</td>
 
                 <td class="description">
-                    <a href="https://github.com/mcedit/mcedit2/commits/{{download.rev_hash}}">{{download.rev_desc}}</a>
+                    <a href="https://github.com/mcedit/mcedit2/commits/{{download.target_commitish}}">{{download.target_commitish}}</a>
                 </td>
             </tr>
-            <tr class="links" ng-repeat-end>
+            <tr class="links">
                 <td></td>
-                <td colspan="2">
+                <td colspan="2" ng-repeat-start="asset in download.assets">
                     <a class="btn btn-default always-ltr x64"
-                       href="https://download.nodecdn.net/containers/mcedit/download/dev/mcedit2-win64-{{download.rev}}.exe">
+                       href="{{asset.browser_download_url}}">
                         <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
-                              style="margin-right:10px"></span>Windows (64-bit)</a>
-                    <a class="btn btn-default always-ltr x32"
-                       href="https://download.nodecdn.net/containers/mcedit/download/dev/mcedit2-win32-{{download.rev}}.exe">
-                        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
-                              style="margin-right:10px"></span>Windows (32-bit)</a>
+                              style="margin-right:10px"></span>(Platform)</a>
                 </td>
+                <p ng-repeat-end></p>
             </tr>
         </table>
     </div>
 </div>
 
-<div align="center" style="margin-top:8em">Content hosting for development versions provided by:<br>
+<!--<div align="center" style="margin-top:8em">Content hosting for development versions provided by:<br>
     <a href="https://nodecraft.com/">
         <img src="/images/community-partner.png" style="margin-top: 0.5em">
     </a>
+</div>-->
+
+<div class="alert">
+    <br><br>
+    Older versions of MCEdit 1.0 are provided by the MCEdit-Unified team.
+    <a href="http://khroki.github.io/MCEdit-Unified/">Click here to download MCEdit 1.0</a> (If the website is down, <a href="https://github.com/Khroki/MCEdit-Unified/releases">click here for direct downloads</a>)
 </div>
 
 <br><br><br>

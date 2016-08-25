@@ -1,15 +1,11 @@
 var dlApp = angular.module('dlApp', []);
-var MODEL_URL = 'https://download.nodecdn.net/containers/mcedit/downloads.jsonp';
+var MODEL_URL = 'https://api.github.com/repos/mcedit/mcedit2/releases';
 
-var DL_SCOPE;
-
-function MCEDIT2_DOWNLOADS(data) {
-    DL_SCOPE.downloads = data;
-}
 
 dlApp.controller('DownloadListCtrl', function ($scope, $http) {
-    DL_SCOPE=$scope;
-    $http.jsonp(MODEL_URL);
+    $http.get(MODEL_URL).success(function(data) {
+        $scope.downloadData = data
+    })
 
 });
 
