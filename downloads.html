@@ -20,7 +20,7 @@ not well-tested and are not recommended for serious use.
     <div ng-controller="DownloadListCtrl">
         <table class="download-list">
             <tr class="infos" ng-repeat-start="download in downloads">
-                <td class="rev">{{download.tag_name}}</td>
+                <td class="rev"><a href="{{download.html_url}}">{{download.tag_name}}</a></td>
                 <td class="date" title="{{download.published_at | date : 'medium' }}">{{download.published_at | fromNow}}</td>
 
                 <td class="description">
