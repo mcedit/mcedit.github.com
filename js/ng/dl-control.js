@@ -17,9 +17,9 @@ dlApp.filter('fromNow', function() {
 
 dlApp.filter('platform', function() {
     return function(filename) {
-        if(filename.contains("win32")) return "Windows (32-bit)";
-        if(filename.contains("win64")) return "Windows (64-bit)";
-        if(filename.contains("macosx")) return "Mac OS X";
+        if(filename.indexOf("win32") != -1) return "Windows (32-bit)";
+        if(filename.indexOf("win64") != -1) return "Windows (64-bit)";
+        if(filename.indexOf("macosx") != -1) return "Mac OS X";
         return "Other";
         
     }
