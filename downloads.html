@@ -21,7 +21,7 @@ not well-tested and are not recommended for serious use.
     <div ng-controller="DownloadListCtrl">
         <table class="download-list">
             <tr class="infos" ng-repeat-start="download in downloads">
-                <td class="tag_name">{{download.tag_name}}</td>
+                <td class="rev">{{download.tag_name}}</td>
                 <td class="date" title="{{download.published_at | date : 'medium' }}">{{download.published_at | fromNow}}</td>
 
                 <td class="description">
@@ -30,11 +30,12 @@ not well-tested and are not recommended for serious use.
             </tr>
             <tr class="links" ng-repeat-end>
                 <td></td>
-                <td colspan="2" ng-repeat="asset in download.assets">
-                    <a class="btn btn-default always-ltr x64"
+                <td colspan="2" >
+                    <a ng-repeat="asset in download.assets"
+                       class="btn btn-default always-ltr x64"
                        href="{{asset.browser_download_url}}">
                         <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
-                              style="margin-right:10px"></span>(Platform)</a>
+                              style="margin-right:10px"></span>{{asset.name | platform}}</a>
                 </td>
             </tr>
         </table>

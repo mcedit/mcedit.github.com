@@ -14,3 +14,13 @@ dlApp.filter('fromNow', function() {
     return moment(date).fromNow();
   }
 });
+
+dlApp.filter('platform', function() {
+    return function(filename) {
+        if(filename.contains("win32")) return "Windows (32-bit)";
+        if(filename.contains("win64")) return "Windows (64-bit)";
+        if(filename.contains("macosx")) return "Mac OS X";
+        return "Other";
+        
+    }
+})
