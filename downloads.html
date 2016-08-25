@@ -12,10 +12,10 @@ layout: download_page
 <h1>Release Versions
 </h1>
 
-<div class="alert">
+<!--<div class="alert">
 Development Versions are released once per day, if there have been any changes to the source code. These versions are
 not well-tested and are not recommended for serious use.
-</div>
+</div>-->
 
 <div ng-app="dlApp">
     <div ng-controller="DownloadListCtrl">
@@ -28,15 +28,14 @@ not well-tested and are not recommended for serious use.
                     <a href="https://github.com/mcedit/mcedit2/commits/{{download.target_commitish}}">{{download.target_commitish}}</a>
                 </td>
             </tr>
-            <tr class="links">
+            <tr class="links" ng-repeat-end>
                 <td></td>
-                <td colspan="2" ng-repeat-start="asset in download.assets">
+                <td colspan="2" ng-repeat="asset in download.assets">
                     <a class="btn btn-default always-ltr x64"
                        href="{{asset.browser_download_url}}">
                         <span class="glyphicon glyphicon-download-alt" aria-hidden="true"
                               style="margin-right:10px"></span>(Platform)</a>
                 </td>
-                <p ng-repeat-end></p>
             </tr>
         </table>
     </div>
