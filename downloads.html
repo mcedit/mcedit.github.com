@@ -25,7 +25,7 @@ not well-tested and are not recommended for serious use.
                 <td class="date" title="{{download.published_at | date : 'medium' }}">{{download.published_at | fromNow}}</td>
 
                 <td class="description">
-                    <a href="https://github.com/mcedit/mcedit2/commits/{{download.target_commitish}}">{{download.target_commitish}}</a>
+                    <a href="https://github.com/mcedit/mcedit2/commits/{{download.target_commitish}}">{{download.body}}</a>
                 </td>
             </tr>
             <tr class="links" ng-repeat-end>
