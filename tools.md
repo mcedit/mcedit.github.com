@@ -19,7 +19,7 @@ Here is a short list of external programs for Minecraft that I've used and can r
 
 Here are a few mods that can use MCEdit's .schematic files in some way.
 
-* [WorldEdit](http://www.enginehub.org/worldedit) - In-game world editor. Shares many features with MCEdit and has a few unique features of its own, including CraftScripts and mathematical function evaluation.
+* [WorldEdit](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/1272389-worldedit-do-really-big-things-in-game-in-game-map) - In-game world editor. Shares many features with MCEdit and has a few unique features of its own, including CraftScripts and mathematical function evaluation.
 
 * [Schematica](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1285818-schematica) - Imports a .schematic file as a ghost outline for you to build yourself!
 
